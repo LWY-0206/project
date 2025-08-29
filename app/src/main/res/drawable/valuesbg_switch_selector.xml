@@ -1,0 +1,5 @@
+<!--(外层边框)-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="20dp" /> <!-- 圆角 -->
+    <stroke android:width="1dp" android:color="#3F51B5" /> <!-- 边框 -->
+</shape>

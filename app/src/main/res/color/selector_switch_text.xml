@@ -1,0 +1,5 @@
+<!--文字颜色-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true" android:color="@android:color/white" /> <!-- 选中时白色 -->
+    <item android:color="#3F51B5" /> <!-- 未选中时主题色 -->
+</selector>
