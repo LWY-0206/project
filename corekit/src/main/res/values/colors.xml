@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6200EE</color>
+    <color name="colorPrimaryDark">#758DA7</color>
+    <color name="colorAccent">#8FB3C9</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000</color>
+
+    <!--    遮罩层颜色-->
+    <color name="mask_layer_background">#80000000</color>
+    <color name="black_alpha_30">#66000000</color>
+
+    <color name="light_grey">#EAEAEA</color>
+    <color name="white_grey">#F5F5F5</color>
+    <color name="grey">#BEBEBE</color>
+
+    <!--    GuideView-->
+    <color name="transparent">#00000000</color>
+    <color name="shadow">#cc222222</color>
+    <color name="bg_normal">#F5F6FA</color>
+    <color name="wrong_color">#ffcc0000</color>
+    <color name="color_green">#518A48</color>
+    <color name="color_yellow">#ECBB46</color>
+
+    <color name="common_background_color">#F5F6FA</color>
+    <color name="common_text_main_black">#1A1A1A</color>
+    <color name="common_text_sub_black">#534B4B</color>
+    <color name="common_text_hint_light">#bbbec4</color>
+    <color name="common_text_hint_dark">#808080</color>
+    <color name="common_div_color">#E5E5E5</color>
+</resources>

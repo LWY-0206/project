@@ -37,7 +37,7 @@ android {
 }
 
 dependencies {
-
+    implementation(project(":corekit"))
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
