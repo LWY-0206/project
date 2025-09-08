@@ -17,7 +17,7 @@
         android:theme="@style/Theme.Loding" >
         <activity
             android:name=".activity.DynamicdetailsActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".Home.My.EditProfileActivity"
             android:exported="false" />
@@ -78,18 +78,19 @@
             android:name=".Home.ProfileActivity"
             android:exported="false"
             android:parentActivityName=".Login.LoginActivity" />
+
         <activity
             android:name=".chat.ChatActivity"
             android:exported="false" />
         <activity
             android:name=".webtest.UserTest"
-            android:exported="true" />
-        <activity
-            android:name=".mytest.QuestionsAtivity"
             android:exported="false" />
-        <activity
-            android:name=".WebSocketTest.ConnectionActivity"
-            android:exported="false" />
+        <activity android:name=".mytest.QuestionsAtivity"
+            android:exported="false">
+        </activity>
+        <activity android:name=".WebSocketTest.ConnectionActivity"
+            android:exported="false">
+        </activity>
     </application>
 
 </manifest>
