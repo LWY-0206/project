@@ -6,15 +6,12 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.loding.Home.My.My;
 import com.example.loding.R;
+import com.example.loding.plaza.TopFragment;
 
 public class Home extends AppCompatActivity {
 
@@ -80,7 +77,7 @@ public class Home extends AppCompatActivity {
                 tvHome.setTextColor(getResources().getColor(R.color.purple_200));
                 break;
             case 1:
-                fragment = new My();
+                fragment = new TopFragment();
                 ivSquare.setImageResource(R.drawable.ketang);
                 tvSquare.setTextColor(getResources().getColor(R.color.purple_200));
                 break;
