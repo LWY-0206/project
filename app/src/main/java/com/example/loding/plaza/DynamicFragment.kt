@@ -42,7 +42,7 @@ class DynamicFragment : BaseFragment<FragmentDynamicBinding>() {
     }
 
     fun initData() {
-        viewModel.getDynamics(null, 6)
+        viewModel.getDynamics(null, 10)
     }
 
     override fun subscribeUi() {
