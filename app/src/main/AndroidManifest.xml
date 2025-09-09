@@ -63,16 +63,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Login.LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Home.ProfileActivity"
-            android:exported="false"
-            android:parentActivityName=".Login.LoginActivity" />
-        <activity
-            android:name=".Login.RegisterActivity"
-            android:exported="false" />
-        <activity
             android:name=".chat.ChatActivity"
             android:exported="false" />
         <activity

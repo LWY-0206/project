@@ -9,11 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.loding.R
+import com.example.loding.plaza.TopFragment
 import com.example.my.Home.My.My
 
-
 class Home : AppCompatActivity() {
-
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var navHome: LinearLayout
     private lateinit var navSquare: LinearLayout
@@ -81,38 +80,40 @@ class Home : AppCompatActivity() {
         currentTab = position
         resetAllTabs()
 
-        val fragment: Fragment = when (position) {
-            0 -> {
-                ivHome.setImageResource(R.drawable.ketang)
-                tvHome.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
+        val fragment: Fragment =
+            when (position) {
+                0 -> {
+                    ivHome.setImageResource(R.drawable.ketang)
+                    tvHome.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
+                    My()
+                }
+                1 -> {
+                    ivSquare.setImageResource(R.drawable.ketang)
+                    tvSquare.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
+                    TopFragment()
+                }
+                2 -> {
+                    // 设置圆形按钮的选中状态
+                    navClass.setBackgroundResource(R.drawable.bg_circle_primary_selected)
+                    ivClass.setImageResource(R.drawable.ketang)
+                    tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
+                    My()
+                }
+                3 -> {
+                    ivResource.setImageResource(R.drawable.ketang)
+                    tvResource.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
+                    My()
+                }
+                4 -> {
+                    ivProfile.setImageResource(R.drawable.ketang)
+                    tvProfile.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
+                    My()
+                }
+                else -> My()
             }
-            1 -> {
-                ivSquare.setImageResource(R.drawable.ketang)
-                tvSquare.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
-            }
-            2 -> {
-                // 设置圆形按钮的选中状态
-                navClass.setBackgroundResource(R.drawable.bg_circle_primary_selected)
-                ivClass.setImageResource(R.drawable.ketang)
-                tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
-            }
-            3 -> {
-                ivResource.setImageResource(R.drawable.ketang)
-                tvResource.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
-            }
-            4 -> {
-                ivProfile.setImageResource(R.drawable.ketang)
-                tvProfile.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
-            }
-            else -> My()
-        }
 
-        supportFragmentManager.beginTransaction()
+        supportFragmentManager
+            .beginTransaction()
             .replace(R.id.fragment_container, fragment)
             .commit()
     }
