@@ -28,10 +28,6 @@ class CommentViewModel(
          * @param LiveDataCallback 响应结果的回调接口。
          * @param requestLambda 发送请求的 Lambda 表达式。
          */
-        val baseUrl = "http://121.41.176.238:8080/"
-        val apiPath = "square/post/comment"
-        val fullUrl = "$baseUrl$apiPath?postId=$postId&page=$page&size=$size"
-        Log.d("CommentRequest", "请求评论接口: $fullUrl")
         request(
             commentLiveData,
             object : LiveDataCallback<ArrayList<CommentItem>, ArrayList<CommentItem>> {

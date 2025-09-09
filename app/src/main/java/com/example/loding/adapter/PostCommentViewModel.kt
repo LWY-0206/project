@@ -15,11 +15,11 @@ class PostCommentViewModel(
         Log.d("TAG", ":2 ")
         CommentRepository()
     }
-    val commentLiveData: ResLiveData<Unit> by lazy { ResLiveData() }
+    val postCommentLiveData: ResLiveData<Unit> by lazy { ResLiveData() }
 
     fun postComment(commentBody: CommentBody) {
         request(
-            commentLiveData,
+            postCommentLiveData,
             object : LiveDataCallback<Unit, Unit> {
                 override fun success(
                     emit: ResLiveData<Unit>,
