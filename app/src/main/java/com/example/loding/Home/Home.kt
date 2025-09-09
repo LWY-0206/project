@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.loding.R
+import com.example.loding.plaza.TopFragment
 import com.example.my.Home.My.My
 
 
@@ -90,7 +91,7 @@ class Home : AppCompatActivity() {
             1 -> {
                 ivSquare.setImageResource(R.drawable.ketang)
                 tvSquare.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
+                TopFragment()
             }
             2 -> {
                 // 设置圆形按钮的选中状态

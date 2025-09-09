@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 选中状态的背景色：浅蓝色（与未选中的灰色形成对比） -->
+    <solid android:color="@color/blue_light" />
+
+    <!-- 保持与未选中状态相同的圆角，视觉统一 -->
+    <corners android:radius="8dp" />
+
+    <!-- 选中状态的边框：深蓝色（比背景色深，增强轮廓） -->
+    <stroke
+        android:width="1dp"
+        android:color="@color/blue" />
+</shape>

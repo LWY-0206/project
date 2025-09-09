@@ -17,6 +17,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -38,7 +40,15 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+
 }
+
+//tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+//    kotlinOptions {
+//        jvmTarget = "11"
+//    }
+//}
 
 dependencies {
     implementation(project(":corekit"))
@@ -47,6 +57,11 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.core.ktx)
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:\${libs.versions.kotlin.get()}")
+    // 添加SwipeRefreshLayout依赖
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation(libs.androidx.core.ktx)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
