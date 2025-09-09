@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".Login.MainActivity">
+    android:layout_height="match_parent">
 
     <!-- 主内容区域 -->
     <LinearLayout
@@ -42,7 +41,7 @@
         <!-- 个人主页内容区域（使用ScrollView支持滚动） -->
         <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:padding="16dp">
 
             <LinearLayout
@@ -56,17 +55,18 @@
                     android:layout_height="150dp"
                     android:orientation="horizontal"
                     android:padding="16dp"
-                    android:background="@drawable/backgroud"
+                    android:background="@drawable/edit_text_border"
                     android:elevation="2dp">
-
-                    <ImageView
+                    <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/user_avatar"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:src="@drawable/ic_default_avatar"
                         android:scaleType="centerCrop"
                         android:layout_marginEnd="16dp"
-                        android:contentDescription="用户头像"/>
+                        android:contentDescription="用户头像"
+                        app:civ_border_width="2dp"
+                        app:civ_border_color="@android:color/white"/>
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -83,20 +83,35 @@
                             android:textStyle="bold"/>
 
                         <TextView
-                            android:id="@+id/user_class"
+                            android:id="@+id/user_grade"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="所在班级"
                             android:textSize="14sp"
                             android:layout_marginTop="4dp"/>
 
-                        <TextView
-                            android:id="@+id/user_bio"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="个人简介"
-                            android:textSize="14sp"
-                            android:layout_marginTop="8dp"/>
+                            android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/user_bio"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="个人简介"
+                                android:textSize="14sp"
+                                android:layout_marginTop="8dp"/>
+                            <TextView
+                                android:id="@+id/edit_user_bio"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="修改"
+                                android:textSize="14sp"
+                                android:textColor="@color/red_600"/>
+                        </LinearLayout>
+
 
                     </LinearLayout>
                 </LinearLayout>
@@ -116,7 +131,7 @@
                     android:layout_height="150dp"
                     android:orientation="vertical"
                     android:padding="16dp"
-                    android:background="@drawable/backgroud"
+                    android:background="@drawable/edit_text_border"
                     android:elevation="2dp">
 
                     <!-- 这里可以添加折线图和其他成就信息 -->
@@ -161,6 +176,9 @@
                     </LinearLayout>
                 </LinearLayout>
 
+
+
+
                 <!-- 学习动态区域 -->
                 <TextView
                     android:layout_width="match_parent"
@@ -176,7 +194,7 @@
                     android:layout_height="150dp"
                     android:orientation="vertical"
                     android:padding="16dp"
-                    android:background="@drawable/backgroud"
+                    android:background="@drawable/edit_text_border"
                     android:elevation="2dp">
 
                     <TextView
@@ -208,6 +226,35 @@
 
                 </LinearLayout>
 
+
+
+                <!-- 添加柱状图区域 -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="学习时间分布（小时/周）"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="8dp"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="330dp"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:background="@drawable/backgroud"
+                    android:elevation="2dp">
+
+                    <WebView
+                        android:id="@+id/barChartWebView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+
+                </LinearLayout>
+
+
+
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
@@ -229,6 +276,7 @@
             android:paddingVertical="16dp">
 
             <ImageView
+                android:id="@+id/nav_avatar"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:src="@drawable/ic_default_avatar"
@@ -236,6 +284,7 @@
                 android:contentDescription="用户头像"/>
 
             <TextView
+                android:id="@+id/nav_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="张三"
