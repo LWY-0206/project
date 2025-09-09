@@ -21,7 +21,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
     private lateinit var wsManager: WebChatSocketManager
 
     // 配置参数
-    private val saToken = "00dd58f9-07de-4809-afc8-419b934a8c7d" // 用户的Sa-Token
+    private val saToken = "eb811e0a-8289-4be1-9f99-41e7f8990775" // 用户的Sa-Token
     private val targetUserId = 1 // 聊天对象的用户ID
     private val wsBaseUrl = "ws://121.41.176.238:8080/single/chat/" // 基础WebSocket地址
 

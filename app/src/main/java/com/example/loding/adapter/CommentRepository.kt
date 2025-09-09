@@ -13,5 +13,8 @@ class CommentRepository {
         postId: Int,
         page: Int,
         size: Int,
-    ): BaseResp<ArrayList<CommentItem>> = service.getComments(postId, page, size)
+    ): BaseResp<ArrayList<CommentItem>> = service.getComments("eb811e0a-8289-4be1-9f99-41e7f8990775", postId, page, size)
+
+    suspend fun postComment(commentBody: CommentBody): BaseResp<Unit> =
+        service.postComment("eb811e0a-8289-4be1-9f99-41e7f8990775", commentBody)
 }
