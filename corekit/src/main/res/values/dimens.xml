@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="num_text_size">26sp</dimen>
+    <dimen name="Big_text_size">18sp</dimen>
+    <dimen name="title_text_size">16sp</dimen>
+    <dimen name="mid_text_size">15sp</dimen>
+    <dimen name="normal_text_size">14sp</dimen>
+    <dimen name="small_text_size">13sp</dimen>
+    <!--    常用字间距-->
+    <dimen name="mid_letter_space">0.2</dimen>
+    <dimen name="normal_letter_space">0.1</dimen>
+    <dimen name="num_letter_space">0.05</dimen>
+    <!--    顶部状态栏的margin-->
+    <dimen name="status_bar_height">24dp</dimen>
+    <!--    常用图标尺寸-->
+    <dimen name="big_icon_size">40dp</dimen>
+    <dimen name="mid_icon_size">25dp</dimen>
+    <dimen name="small_icon_size">20dp</dimen>
+    <!--    顶部栏高度-->
+    <dimen name="toolbar_height">35dp</dimen>
+
+    <dimen name="dialog_width">300dp</dimen>
+</resources>
