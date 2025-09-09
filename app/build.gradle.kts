@@ -25,7 +25,6 @@ android {
                 "proguard-rules.pro",
             )
         }
-
     }
     buildFeatures {
         dataBinding = true
@@ -47,6 +46,10 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.core.ktx)
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:\${libs.versions.kotlin.get()}")
+    // 添加SwipeRefreshLayout依赖
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
     implementation(libs.core.ktx)
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}")
 

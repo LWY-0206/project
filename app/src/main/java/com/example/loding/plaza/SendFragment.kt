@@ -2,23 +2,27 @@ package com.example.loding.plaza
 
 import android.text.TextUtils
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import com.example.corekit.common.BaseFragment
+import com.example.loding.adapter.DynamicBody
+import com.example.loding.adapter.PostDynamicViewModel
 import com.example.loding.databinding.FragmentSendBinding
-import com.example.loding.entity.Dynamic
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class SendFragment : BaseFragment<FragmentSendBinding>() {
     // 发布动态回调接口
     interface OnPublishListener {
-        fun onPublish(item: Dynamic)
+        fun onPublishSuccess()
     }
 
     private var publishListener: OnPublishListener? = null
 
     fun setOnPublishListener(listener: OnPublishListener) {
         this.publishListener = listener
+    }
+
+    // 初始化PostDynamicViewModel
+    private val viewModel: PostDynamicViewModel by lazy {
+        ViewModelProvider(requireActivity())[PostDynamicViewModel::class.java]
     }
 
     companion object {
@@ -32,7 +36,21 @@ class SendFragment : BaseFragment<FragmentSendBinding>() {
     }
 
     override fun subscribeUi() {
-        // 可以在这里处理UI订阅逻辑
+        // 观察postDynamicLiveData，处理发布动态的结果
+        viewModel.postDynamicLiveData.observe(this) {
+            it.onSuccess { data ->
+                // 即使data为null，也能正常处理成功情况
+                Toast.makeText(context, "发布成功", Toast.LENGTH_SHORT).show()
+                // 回调发布成功事件
+                publishListener?.onPublishSuccess()
+                // 返回上一页
+                activity?.supportFragmentManager?.popBackStack()
+            }
+
+            it.onError { error, _ ->
+                Toast.makeText(context, "发布失败", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setListeners() {
@@ -54,39 +72,23 @@ class SendFragment : BaseFragment<FragmentSendBinding>() {
 
     private fun publishDynamic() {
         // 获取用户输入的内容
-        val content =
-            find.etContent.text
-                .toString()
-                .trim()
+        val dynamicBody =
+            DynamicBody(
+                title = "写死的标题",
+                content =
+                    find.etContent.text
+                        .toString()
+                        .trim(),
+                contentImageUrls = null,
+            )
 
         // 检查内容是否为空
-        if (TextUtils.isEmpty(content)) {
+        if (TextUtils.isEmpty(dynamicBody.content)) {
             Toast.makeText(context, "请输入内容", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 获取当前时间
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-        val currentTime = dateFormat.format(Date())
-
-//        // 创建新的动态项（使用模拟数据）
-//        val newItem = Dynamic(
-//            avatar = R.drawable.ic_avatar, // 默认头像
-//            username = "我", // 用户名
-//            publishTime = currentTime, // 发布时间
-//            content = content, // 内容
-//            images = arrayListOf(), // 图片列表（暂时为空）
-//            likeCount = 0, // 点赞数
-//            rewardCount = 0, // 打赏数
-//            commentCount = 0, // 评论数
-//            firstComment = null, // 第一条评论
-//            comments = arrayListOf() // 完整评论列表
-//        )
-
-        // 调用回调方法，通知有新动态发布
-//        publishListener?.onPublish(newItem)
-
-        // 返回上一页
-        activity?.supportFragmentManager?.popBackStack()
+        // 使用ViewModel发送网络请求发布动态
+        viewModel.postDynamic(dynamicBody)
     }
 }
