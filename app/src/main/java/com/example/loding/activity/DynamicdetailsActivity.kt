@@ -7,8 +7,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.corekit.common.BaseActivity
 import com.example.loding.R
+import com.example.loding.adapter.CommentBody
 import com.example.loding.adapter.CommentViewModel
 import com.example.loding.adapter.Comment_Adapter
+import com.example.loding.adapter.PostCommentViewModel
 import com.example.loding.adapter.PostDetailsViewModel
 import com.example.loding.databinding.ActivityDynamicdetailsMainBinding
 import com.example.loding.entity.CommentItem
@@ -21,10 +23,16 @@ class DynamicdetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>()
     val viewModel2: CommentViewModel by lazy {
         ViewModelProvider(this)[CommentViewModel::class.java]
     }
+    val viewModel3: PostCommentViewModel by lazy {
+        ViewModelProvider(this)[PostCommentViewModel::class.java]
+    }
 
     private lateinit var commentAdapter: Comment_Adapter
 
     override fun bindLayout(): ActivityDynamicdetailsMainBinding = ActivityDynamicdetailsMainBinding.inflate(layoutInflater)
+
+    // 保存当前动态ID
+    private var currentDynamicId: Int = -1
 
     override fun initView() {
         // 初始化返回按钮点击事件
@@ -32,20 +40,61 @@ class DynamicdetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>()
 
         // 接收传递的参数
         val intent: Intent = intent
-        val id = intent.getIntExtra("Id", -1)
+        currentDynamicId = intent.getIntExtra("Id", -1)
         val commentCount = intent.getIntExtra("commentCount", -1)
 
         // 打印用户ID日志
-        Log.d("DynamicDetails", "接收到的动态ID: $id")
+        Log.d("DynamicDetails", "接收到的动态ID: $currentDynamicId")
 
         // 获取动态详情数据和评论
-        if (id != -1) {
-            viewModel1.getPostDetails(id)
-            viewModel2.getComments(id, page = 1, size = commentCount)
+        if (currentDynamicId != -1) {
+            viewModel1.getPostDetails(currentDynamicId)
+            viewModel2.getComments(currentDynamicId, page = 1, size = commentCount)
         }
 
         // 初始化评论列表
         initCommentList()
+
+        // 添加发送评论按钮点击事件
+        initCommentSendButton()
+    }
+
+    /**
+     * 初始化评论发送按钮的点击事件
+     */
+    private fun initCommentSendButton() {
+        view.tvSendComment.setOnClickListener {
+            val commentContent =
+                view.etComment.text
+                    .toString()
+                    .trim()
+            if (commentContent.isEmpty()) {
+                // 评论内容为空，提示用户
+                android.widget.Toast
+                    .makeText(this, "评论内容不能为空", android.widget.Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            if (currentDynamicId == -1) {
+                // 没有有效的动态ID，无法发布评论
+                android.widget.Toast
+                    .makeText(this, "获取动态信息失败，无法发布评论", android.widget.Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            // 创建评论请求体
+            val commentBody =
+                CommentBody(
+                    postId = currentDynamicId,
+                    content = commentContent,
+                )
+
+            // 调用ViewModel发布评论
+            viewModel3.postComment(commentBody)
+            view.etComment.text.clear()
+        }
     }
 
     private fun initCommentList() {
@@ -99,6 +148,34 @@ class DynamicdetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>()
                 val mockList = ArrayList<CommentItem>()
                 commentAdapter.clear()
                 commentAdapter.clearAndAdd(mockList)
+            }
+        }
+
+        // 观察评论发布结果，发布后快速刷新
+        viewModel3.postCommentLiveData.observe(this) {
+            it.onSuccess {
+                // 评论发布成功，重新获取评论列表以实时刷新
+                if (currentDynamicId != -1) {
+                    viewModel2.getComments(currentDynamicId, page = 1, size = 100) // 使用较大的size以获取所有评论
+                }
+                // 显示发布成功的提示
+                android.widget.Toast
+                    .makeText(
+                        this,
+                        "评论发布成功",
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
+            }
+
+            it.onError { error, _ ->
+                Log.e("DynamicDetails", "发布评论失败: ${error?.message ?: "未知错误"}")
+                // 显示发布失败的提示
+                android.widget.Toast
+                    .makeText(
+                        this,
+                        "评论发布失败，请重试",
+                        android.widget.Toast.LENGTH_SHORT,
+                    ).show()
             }
         }
     }
