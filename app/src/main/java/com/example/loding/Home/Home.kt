@@ -82,7 +82,8 @@ class Home : AppCompatActivity() {
         currentTab = position
         resetAllTabs()
 
-        val fragment: Fragment = when (position) {
+        val fragment: Fragment =
+            when (position) {
                 0 -> {
                     ivHome.setImageResource(R.drawable.ketang)
                     tvHome.setTextColor(ContextCompat.getColor(this, R.color.purple_200))

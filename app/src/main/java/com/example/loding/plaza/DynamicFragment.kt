@@ -6,8 +6,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.corekit.common.BaseFragment
 import com.example.corekit.recyclerview.CommonItemDecoration
 import com.example.loding.R
+import com.example.loding.adapter.DynamicAdapter
 import com.example.loding.adapter.DynamicViewModel
-import com.example.loding.adapter.Dynamic_Adapter
 import com.example.loding.databinding.FragmentDynamicBinding
 
 class DynamicFragment :
@@ -16,7 +16,7 @@ class DynamicFragment :
     val viewModel: DynamicViewModel by lazy {
         ViewModelProvider(this)[DynamicViewModel::class.java]
     }
-    lateinit var dynamicAdapter: Dynamic_Adapter
+    lateinit var dynamicAdapter: DynamicAdapter
 
     // 分页相关变量
     private var currentPage = 1 // 当前页码，从1开始
@@ -27,7 +27,7 @@ class DynamicFragment :
     override fun bindLayout(): FragmentDynamicBinding = FragmentDynamicBinding.inflate(layoutInflater)
 
     override fun initView() {
-        dynamicAdapter = Dynamic_Adapter()
+        dynamicAdapter = DynamicAdapter()
 
         // 配置RecyclerView（布局管理器 + 绑定适配器）
         val layoutManager = LinearLayoutManager(requireContext()) // 纵向列表

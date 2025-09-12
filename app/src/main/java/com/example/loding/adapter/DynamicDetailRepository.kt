@@ -10,5 +10,5 @@ class DynamicDetailRepository {
     }
 
     suspend fun getDPostDetails(postId: Int): BaseResp<DynamicDetail> =
-        service.getPostDetail("eb811e0a-8289-4be1-9f99-41e7f8990775", postId)
+        service.getPostDetail("e3c55f2f-023d-41ed-876b-d144db691e14", postId)
 }

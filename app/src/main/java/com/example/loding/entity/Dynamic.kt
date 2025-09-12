@@ -46,6 +46,8 @@ data class Dynamic(
     val updateTime: String?,
 //    // 完整评论列表（默认为空列表）
 //    val comments: List<CommentItem> = emptyList(),
+    // 是否点赞
+    val isLiked: Boolean,
 ) : MultipleType {
     // 固定返回图文混排的类型标识（与Adapter中定义的TYPE_IMAGE_TEXT对应）
     override fun viewType(): Int = 3
