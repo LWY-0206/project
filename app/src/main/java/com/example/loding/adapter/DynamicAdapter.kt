@@ -1,8 +1,11 @@
 package com.example.loding.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.example.corekit.recyclerview.MultipleTypeAdapter
 import com.example.corekit.recyclerview.ViewHolderTag
@@ -12,8 +15,7 @@ import com.example.loding.activity.DynamicdetailsActivity
 import com.example.loding.entity.Dynamic
 import kotlin.math.min
 
-@Suppress("ktlint:standard:class-naming")
-class Dynamic_Adapter : MultipleTypeAdapter() {
+class DynamicAdapter : MultipleTypeAdapter() {
     // 定义类型标识（与DongtaiItem的viewType()返回值对应）
     companion object {
         const val TYPE_DYNAMIC = 3 // 动态内容类型（必须和DongtaiItem的viewType一致）
@@ -49,12 +51,16 @@ class Dynamic_Adapter : MultipleTypeAdapter() {
                 // 获取当前绑定的数据
                 val dynamicData = currentDynamic
                 if (dynamicData != null) {
+                    // 添加日志，确认传递的isLike值
+                    Log.d("DynamicAdapter", "传递的点赞状态: ${dynamicData.isLiked}")
+                    Log.d("DynamicAdapter", "传递的动态ID: ${dynamicData.id}")
                     // 从上下文启动动态详情页Activity
                     val intent = android.content.Intent(view.context, DynamicdetailsActivity::class.java)
                     // 传递动态ID
                     intent.putExtra("Id", dynamicData.id)
                     // 传递评论数量
                     intent.putExtra("commentCount", dynamicData.commentCount)
+                    intent.putExtra("isLike", dynamicData.isLiked)
 //                    intent.putExtra("username", dynamicData.userName)
                     // 启动Activity
                     view.context.startActivity(intent)
@@ -64,7 +70,8 @@ class Dynamic_Adapter : MultipleTypeAdapter() {
 
         override fun setHolder(entity: Dynamic) {
             // 更新当前绑定的数据
-            currentDynamic = entity
+            this.currentDynamic = entity
+            Log.d("DynamicAdapter", "绑定数据时的isLike: ${entity.isLiked}")
             // 绑定DongtaiItem的数据到布局
             // 用户头像
             view.findViewById<View>(R.id.civ_user_avatar)?.let {
@@ -121,22 +128,19 @@ class Dynamic_Adapter : MultipleTypeAdapter() {
             if (imagesContainer is ViewGroup && !entity.contentImageUrls.isNullOrEmpty()) {
                 imagesContainer.visibility = View.VISIBLE
 
-                // 处理图片列表（最多3张）
-                for (i in 0 until min(entity.contentImageUrls.size, 3)) {
-                    val imageViewId =
-                        when (i) {
-                            0 -> R.id.iv_image_1
-                            1 -> R.id.iv_image_2
-                            2 -> R.id.iv_image_3
-                            else -> -1
-                        }
+                // 首先隐藏所有图片视图
+                val imageViewIds = listOf(R.id.iv_image_1, R.id.iv_image_2, R.id.iv_image_3)
+                for (id in imageViewIds) {
+                    view.findViewById<View>(id)?.visibility = View.GONE
+                }
 
-                    if (imageViewId != -1) {
-                        view.findViewById<View>(imageViewId)?.let {
-                            if (it is androidx.appcompat.widget.AppCompatImageView) {
-                                it.visibility = View.VISIBLE
-                                it.load(entity.contentImageUrls[i], false)
-                            }
+                // 然后处理需要显示的图片列表（最多3张）
+                for (i in 0 until min(entity.contentImageUrls.size, 3)) {
+                    val imageViewId = imageViewIds[i]
+                    view.findViewById<View>(imageViewId)?.let {
+                        if (it is androidx.appcompat.widget.AppCompatImageView) {
+                            it.visibility = View.VISIBLE
+                            it.load(entity.contentImageUrls[i], false)
                         }
                     }
                 }
@@ -163,6 +167,16 @@ class Dynamic_Adapter : MultipleTypeAdapter() {
             view.findViewById<View>(R.id.tv_comment_count)?.let {
                 if (it is androidx.appcompat.widget.AppCompatTextView) {
                     it.text = "${entity.commentCount}"
+                }
+            }
+            // 是否点赞
+            // 单独更新点赞图标状态（与当前绑定的entity同步）
+            view.findViewById<AppCompatImageView>(R.id.iv_like)?.let { ivLike ->
+                if (entity.isLiked) {
+                    ivLike.setColorFilter(ContextCompat.getColor(view.context, R.color.red))
+                } else {
+                    ivLike.clearColorFilter()
+                    ivLike.setImageResource(R.drawable.ic_like)
                 }
             }
 

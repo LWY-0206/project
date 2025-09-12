@@ -2,6 +2,9 @@ package com.example.loding.activity
 
 import android.content.Intent
 import android.util.Log
+import android.widget.ImageView
+import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -10,6 +13,7 @@ import com.example.loding.R
 import com.example.loding.adapter.CommentBody
 import com.example.loding.adapter.CommentViewModel
 import com.example.loding.adapter.Comment_Adapter
+import com.example.loding.adapter.LikeDynamicViewModel
 import com.example.loding.adapter.PostCommentViewModel
 import com.example.loding.adapter.PostDetailsViewModel
 import com.example.loding.databinding.ActivityDynamicdetailsMainBinding
@@ -27,7 +31,24 @@ class DynamicdetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>()
         ViewModelProvider(this)[PostCommentViewModel::class.java]
     }
 
+    // 添加点赞ViewModel
+    val viewModel4: LikeDynamicViewModel by lazy {
+        ViewModelProvider(this)[LikeDynamicViewModel::class.java]
+    }
+
     private lateinit var commentAdapter: Comment_Adapter
+
+    // 追踪用户是否已经点赞
+    private var isLiked: Boolean = false
+
+    // 存储当前动态的点赞数
+    private var currentLikeCount: Int = 0
+
+    // 点赞按钮的布局
+    private lateinit var likeLayout: LinearLayout
+
+    // 点赞的心形图标
+    private lateinit var likeHeartIcon: ImageView
 
     override fun bindLayout(): ActivityDynamicdetailsMainBinding = ActivityDynamicdetailsMainBinding.inflate(layoutInflater)
 
@@ -38,13 +59,20 @@ class DynamicdetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>()
         // 初始化返回按钮点击事件
         view.ivBack.setOnClickListener { finish() }
 
+        // 获取点赞区域布局和心形图标
+        likeLayout = view.llLike
+        likeHeartIcon = likeLayout.findViewById(R.id.iv_like)
+
         // 接收传递的参数
         val intent: Intent = intent
         currentDynamicId = intent.getIntExtra("Id", -1)
         val commentCount = intent.getIntExtra("commentCount", -1)
+        // 获取并初始化点赞状态
+        isLiked = intent.getBooleanExtra("isLike", false)
 
         // 打印用户ID日志
         Log.d("DynamicDetails", "接收到的动态ID: $currentDynamicId")
+        Log.d("DynamicDetails", "接收到的点赞状态: $isLiked")
 
         // 获取动态详情数据和评论
         if (currentDynamicId != -1) {
@@ -57,6 +85,25 @@ class DynamicdetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>()
 
         // 添加发送评论按钮点击事件
         initCommentSendButton()
+
+        // 添加点赞按钮点击事件
+        initLikeButton()
+    }
+
+    // 初始化点赞按钮
+    private fun initLikeButton() {
+        // 点击整个LinearLayout作为点赞操作
+        likeLayout.setOnClickListener {
+            if (currentDynamicId == -1) {
+                android.widget.Toast
+                    .makeText(this, "无法点赞，动态信息获取失败", android.widget.Toast.LENGTH_SHORT)
+                    .show()
+                return@setOnClickListener
+            }
+
+            // 调用点赞接口（同一个接口实现点赞和取消点赞）
+            viewModel4.likeDynamic(currentDynamicId)
+        }
     }
 
     /**
@@ -123,6 +170,41 @@ class DynamicdetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>()
 
             it.onError { error, _ ->
                 Log.e("DynamicDetails", "获取动态详情失败:  ${error?.message ?: "未知错误"}")
+            }
+        }
+
+        // 观察点赞结果
+        viewModel4.likeDynamicLiveData.observe(this) {
+            it.onSuccess {
+                // 点赞/取消点赞成功，更新点赞状态和UI
+                if (isLiked) {
+                    // 当前是已点赞状态，点击后取消点赞
+                    isLiked = false
+                    currentLikeCount -= 1
+                    view.tvLikeCount.text = currentLikeCount.toString()
+                    // 重置点赞心形图标颜色
+                    likeHeartIcon.clearColorFilter()
+                    android.widget.Toast
+                        .makeText(this, "取消点赞", android.widget.Toast.LENGTH_SHORT)
+                        .show()
+                } else {
+                    // 当前是未点赞状态，点击后点赞
+                    isLiked = true
+                    currentLikeCount += 1
+                    view.tvLikeCount.text = currentLikeCount.toString()
+                    // 更新点赞心形图标为红色
+                    likeHeartIcon.setColorFilter(ContextCompat.getColor(this, R.color.red))
+                    android.widget.Toast
+                        .makeText(this, "点赞成功", android.widget.Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+
+            it.onError { error, _ ->
+                Log.e("DynamicDetails", "点赞操作失败: ${error?.message ?: "未知错误"}")
+                android.widget.Toast
+                    .makeText(this, "操作失败，请重试", android.widget.Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
@@ -199,15 +281,24 @@ class DynamicdetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>()
             view.tvContent.text = dynamicDetail.content ?: ""
 
             // 更新互动数据
-            view.tvLikeCount.text = dynamicDetail.likeCount.toString()
+            currentLikeCount = dynamicDetail.likeCount
+            view.tvLikeCount.text = currentLikeCount.toString()
             view.tvRewardCount.text = dynamicDetail.rewardCount.toString()
             view.tvCommentTitleCount.text = "(${dynamicDetail.commentCount})"
+
+            // 根据更新后的点赞状态设置图标
+            if (isLiked) {
+                likeHeartIcon.setColorFilter(ContextCompat.getColor(this, R.color.red))
+            } else {
+                // 重置为默认颜色
+                likeHeartIcon.clearColorFilter()
+            }
 
             // 处理图片展示 - 确保contentImageUrls不为空
             val imageUrls = dynamicDetail.contentImageUrls ?: emptyList()
             handleImagesDisplay(imageUrls)
         } catch (e: Exception) {
-            Log.e("DynamicDetails", "更新UI时发生异常: ${e.message}", e)
+            Log.e("DynamicDetails", "更新动态详情UI时发生异常: ${e.message}", e)
         }
     }
 

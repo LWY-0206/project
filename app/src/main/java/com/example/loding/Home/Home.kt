@@ -111,36 +111,6 @@ class Home : AppCompatActivity() {
                 }
                 else -> My()
             }
-        val fragment: Fragment = when (position) {
-            0 -> {
-                ivHome.setImageResource(R.drawable.ketang)
-                tvHome.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
-            }
-            1 -> {
-                ivSquare.setImageResource(R.drawable.ketang)
-                tvSquare.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                TopFragment()
-            }
-            2 -> {
-                // 设置圆形按钮的选中状态
-                navClass.setBackgroundResource(R.drawable.bg_circle_primary_selected)
-                ivClass.setImageResource(R.drawable.ketang)
-                tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
-            }
-            3 -> {
-                ivResource.setImageResource(R.drawable.ketang)
-                tvResource.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
-            }
-            4 -> {
-                ivProfile.setImageResource(R.drawable.ketang)
-                tvProfile.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                My()
-            }
-            else -> My()
-        }
 
         supportFragmentManager
             .beginTransaction()

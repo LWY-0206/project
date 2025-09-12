@@ -7,12 +7,14 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface DynamicApi {
     @GET("/square/page/post")
     suspend fun getDynamics(
+        @Header("satoken") source: String,
         @Query("page") start: Int? = null,
         @Query("size") size: Int,
     ): BaseResp<List<Dynamic>>
@@ -28,5 +30,12 @@ interface DynamicApi {
     suspend fun postDynamic(
         @Header("satoken") source: String,
         @Body dynamicBody: DynamicBody,
+    ): BaseResp<Unit>
+
+    // 点赞动态
+    @PUT("/square/post/like/{postId}")
+    suspend fun likeDynamic(
+        @Header("satoken") source: String,
+        @Path("postId") postId: Int,
     ): BaseResp<Unit>
 }
