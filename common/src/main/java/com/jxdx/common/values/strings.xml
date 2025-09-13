@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">common</string>
+    <string name="category_scan">&#x904;</string>
+    <string name="category_like">&#x905;</string>
+    <string name="read">&#xe63b;</string>
+    <string name="icon_read">&#xe63b;</string>
+    <string name="icon_read_new">&#xe63b;</string>
+    <string name="comment">&#xe603;</string>
+    <string name="comment_fill">&#xe63a;</string>
+    <string name="like_fill">&#xe793;</string>
+    <string name="like_icon">&#xec7f;</string>
+    <string name="unlike">&#xe6f1;</string>
+    <string name="mark">&#xe8c6;</string>
+    <string name="icon_mark_Hollow">&#xe656;</string>
+    <string name="share">&#xe68f;</string>
+    <string name="icon_share">&#xe68f;</string>
+    <string name="icon_rotate">&#xe610;</string>
+    <string name="icon_share_new">&#xe625;</string>
+    <string name="ck">&#xe626;</string>
+    <string name="point">&#xe61a;</string>
+<!--    评论或者笔记的弹出框-->
+    <string name="note_round_hollow">&#xe72f;</string>
+    <string name="note_enjoy">&#xe7bb;</string>
+    <string name="note_aite">&#xe613;</string>
+    <string name="note_photo">&#xe64f;</string>
+    <string name="note_more">&#xe8a6;</string>
+    <string name="note_full_screen">&#xe73b;</string>
+    <string name="note_not_full_screen">&#xe73a;</string>
+
+    <!--    文本选中框-->
+    <string name="icon_text_select_copy">&#xe607;</string>
+    <string name="icon_text_think_map">&#xe61e;</string>
+    <string name="icon_text_select_all">&#xe60c;</string>
+    <string name="icon_text_select_note">&#xe878;</string>
+    <string name="icon_text_select_mark">&#x10035;</string>
+    <string name="icon_text_select_canal">&#xe677;</string>
+    <string name="icon_text_select_search">&#xe752;</string>
+
+
+</resources>

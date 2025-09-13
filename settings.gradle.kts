@@ -31,3 +31,10 @@ dependencyResolutionManagement {
 rootProject.name = "Loding"
 include(":app")
 include(":corekit")
+include(":mine")
+include(":home")
+include(":classroom")
+include(":square")
+include(":resource")
+include(":common")
+include(":login")

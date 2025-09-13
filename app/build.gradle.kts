@@ -51,7 +51,14 @@ android {
 //}
 
 dependencies {
-    implementation(project(":corekit"))
+
+    implementation(project(":common"))
+    implementation(project(":classroom"))
+    implementation(project(":home"))
+    implementation(project(":mine"))
+    implementation(project(":resource"))
+    implementation(project(":square"))
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
