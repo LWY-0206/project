@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" >
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- 对于Android 10及以上版本，如果需要访问所有文件，可以添加 -->
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- 如果需要访问相机和存储的特殊权限 -->
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.camera.autofocus"
-        android:required="false" />
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -50,11 +39,16 @@
             android:name=".Login.LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".Home.Home"
-            android:exported="true" />
-
+            android:name=".Famous.FamousDetailActivity"
+            android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".Famous.FamousListActivity"
+            android:exported="true" />
+        <activity
+            android:name=".Schools.SchoolDetailActivity"
+            android:exported="true" />
+        <activity
+            android:name=".Schools.SchoolListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -63,15 +57,51 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".Questions.QuestionTypeSelectionActivity"
+            android:exported="true" />
+        <activity
+            android:name=".Questions.ErrorQuizActivity"
+            android:exported="true" />
+        <activity
+            android:name=".activity.DynamicdetailsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Home.Home"
+            android:exported="true" />
+        <activity
+            android:name=".Login.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".Login.LoginActivity"
+            android:exported="false" />
+        <activity
             android:name=".Home.ProfileActivity"
             android:exported="false"
             android:parentActivityName=".Login.LoginActivity" />
-
         <activity
             android:name=".chat.ChatActivity"
             android:exported="false" />
         <activity
             android:name=".webtest.UserTest"
+            android:name=".Login.RegisterActivity"
+            android:exported="false" />
+        <activity
+            android:name=".chat.ChatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".webtest.UserTest"
+            android:exported="true" />
+        <activity
+            android:name=".mytest.QuestionsAtivity"
+            android:exported="false" />
+        <activity
+            android:name=".WebSocketTest.ConnectionActivity"
             android:exported="false" />
         <activity android:name=".mytest.QuestionsAtivity"
             android:exported="false">
@@ -80,4 +110,5 @@
             android:exported="false">
         </activity>
     </application>
+
 </manifest>
