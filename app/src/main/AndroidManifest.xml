@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" >
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -12,8 +14,6 @@
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false" />
-
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".webtest.TestApplication"
@@ -27,17 +27,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Loding" >
         <activity
+            android:name=".homework.Homework"
+            android:exported="true" />
+        <activity
             android:name=".activity.DynamicdetailsActivity"
             android:exported="true" />
         <activity
             android:name=".Home.My.EditProfileActivity"
-            android:exported="false" />
-        <!-- 添加FileProvider -->
+            android:exported="false" /> <!-- 添加FileProvider -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
             android:exported="false"
-            android:grantUriPermissions="true">
+            android:grantUriPermissions="true" >
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
@@ -48,14 +50,13 @@
             android:exported="false" />
         <activity
             android:name=".Login.LoginActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Home.Home"
             android:exported="true" />
-
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -66,18 +67,20 @@
             android:name=".Home.ProfileActivity"
             android:exported="false"
             android:parentActivityName=".Login.LoginActivity" />
-
         <activity
             android:name=".chat.ChatActivity"
             android:exported="false" />
         <activity
             android:name=".webtest.UserTest"
             android:exported="false" />
-        <activity android:name=".mytest.QuestionsAtivity"
-            android:exported="false">
+        <activity
+            android:name=".mytest.QuestionsAtivity"
+            android:exported="false" >
         </activity>
-        <activity android:name=".WebSocketTest.ConnectionActivity"
-            android:exported="false">
+        <activity
+            android:name=".WebSocketTest.ConnectionActivity"
+            android:exported="false" >
         </activity>
     </application>
+
 </manifest>

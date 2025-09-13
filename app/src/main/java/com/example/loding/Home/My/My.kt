@@ -344,9 +344,9 @@ class My : Fragment() {
     private fun loadSavedDate() {
         //用户信息 我的 中   有  用户名/班级/个人简介/头像（uri/path）
         val preferences = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val userName=preferences.getString("username","用户名")
-        val grade=preferences.getString("${userName}_grade","大一")
-        val bio=preferences.getString("${userName}_bio","个人简介")
+        val userName=preferences.getString("user_name","用户名")
+        val grade=preferences.getString("user_grade","大一")
+        val bio=preferences.getString("user_bio","个人简介")
 
 
         val uriString = preferences.getString("${userName}_uri", null)
@@ -407,6 +407,5 @@ class My : Fragment() {
             }
         }
     }
-
 
 }
