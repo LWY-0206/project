@@ -63,13 +63,10 @@
             android:name=".Questions.ErrorQuizActivity"
             android:exported="true" />
         <activity
-            android:name=".activity.DynamicdetailsActivity"
-            android:exported="false" />
-        <activity
             android:name=".Home.Home"
             android:exported="true" />
         <activity
-            android:name=".Login.MainActivity"
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -78,19 +75,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Login.LoginActivity"
-            android:exported="false" />
-        <activity
             android:name=".Home.ProfileActivity"
             android:exported="false"
             android:parentActivityName=".Login.LoginActivity" />
-        <activity
-            android:name=".chat.ChatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".webtest.UserTest"
-            android:name=".Login.RegisterActivity"
-            android:exported="false" />
         <activity
             android:name=".chat.ChatActivity"
             android:exported="false" />
@@ -103,12 +90,6 @@
         <activity
             android:name=".WebSocketTest.ConnectionActivity"
             android:exported="false" />
-        <activity android:name=".mytest.QuestionsAtivity"
-            android:exported="false">
-        </activity>
-        <activity android:name=".WebSocketTest.ConnectionActivity"
-            android:exported="false">
-        </activity>
     </application>
 
 </manifest>
