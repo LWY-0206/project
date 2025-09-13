@@ -90,14 +90,14 @@ class Comment_Adapter : MultipleTypeAdapter() {
             view.findViewById<View>(R.id.tv_like_comment)?.setOnClickListener {
                 // 切换点赞状态
                 entity.isLiked = !entity.isLiked
-                
+
                 // 更新点赞数
                 if (entity.isLiked) {
                     entity.likeCount += 1
                 } else {
                     entity.likeCount = Math.max(0, entity.likeCount - 1)
                 }
-                
+
                 // 立即更新UI，实现伪造的点赞效果
                 if (tvLikeComment is androidx.appcompat.widget.AppCompatTextView) {
                     if (entity.isLiked) {

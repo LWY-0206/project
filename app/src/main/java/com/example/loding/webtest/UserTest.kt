@@ -18,14 +18,14 @@ class UserTest : BaseActivity<ActivityUserBinding>() {
     private lateinit var viewModel: UserViewModel
     private var currentTokenIndex = 0
     private val tokenList = listOf("token1", "token2", "token3")
-    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var sharedPreferences: SharedPreferences// 用于保存当前 token 索引
 
     override fun bindLayout(): ActivityUserBinding = ActivityUserBinding.inflate(layoutInflater)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 初始化 SharedPreferences
-        sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        sharedPreferences = getSharedPreferences("app_prefs", MODE_PRIVATE)//
         // 获取上次保存的 token 索引
         currentTokenIndex = sharedPreferences.getInt("current_token_index", 0)
         // 设置按钮点击事件

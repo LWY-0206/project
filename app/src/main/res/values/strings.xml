@@ -4,12 +4,12 @@
     <string name="app_name">Loding</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    
+
     <!-- 通用字符串 -->
     <string name="back">返回</string>
     <string name="cancel">取消</string>
     <string name="confirm">确认</string>
-    
+
     <!-- 聊天界面字符串 -->
     <string name="more">更多</string>
     <string name="ai_assistant">AI助手</string>
@@ -22,4 +22,6 @@
     <string name="open_emoji_panel">打开表情面板</string>
     <string name="open_ai_assistant">打开AI助手</string>
     <string name="send_message_prefix">发送消息: </string>
+    <string name="school_logo">校徽</string>
+    <string name="arrow">箭头</string>
 </resources>
