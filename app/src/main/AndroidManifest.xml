@@ -43,28 +43,28 @@
             android:exported="false" />
         <activity
             android:name=".Famous.FamousListActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".Schools.SchoolDetailActivity"
-            android:exported="true" />
-        <activity
-            android:name=".Schools.SchoolListActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".Schools.SchoolListActivity"-->
+<!--            android:exported="true">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
         <activity
             android:name=".Questions.QuestionTypeSelectionActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".Questions.ErrorQuizActivity"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".Home.Home"
-            android:exported="true" />
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
