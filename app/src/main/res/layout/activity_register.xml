@@ -13,13 +13,13 @@
         android:gravity="center_vertical"
         android:background="@color/white">
 
-        <ImageView
-            android:id="@+id/logo"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="40dp"
-            android:src="@drawable/ic_app_logo" />
+<!--        <ImageView-->
+<!--            android:id="@+id/logo"-->
+<!--            android:layout_width="120dp"-->
+<!--            android:layout_height="120dp"-->
+<!--            android:layout_gravity="center_horizontal"-->
+<!--            android:layout_marginBottom="40dp"-->
+<!--            android:src="@drawable/ic_app_logo" />-->
 
         <!-- 选择身份的区域 - 使用RadioGroup模拟切换开关 -->
         <LinearLayout
@@ -59,6 +59,37 @@
             </RadioGroup>
         </LinearLayout>
 
+        <!-- 头像上传区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="start"
+            android:layout_marginBottom="24dp">
+
+            <RelativeLayout
+                android:layout_width="120dp"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_default_avatar"
+                    android:background="@drawable/ic_default_avatar"
+                    android:contentDescription="用户头像" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="点击上传头像"
+                android:textSize="12sp"
+                android:textColor="@color/gray_600"
+                android:layout_marginTop="8dp" />
+        </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/til_username"

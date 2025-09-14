@@ -13,8 +13,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import androidx.core.content.edit
+import com.example.corekit.http.bean.BaseResp
 import com.example.loding.Home.Home
 import com.example.loding.R
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var etUsername: TextInputEditText
@@ -41,7 +45,7 @@ class LoginActivity : AppCompatActivity() {
         tvRegister = findViewById(R.id.tv_register)
     }
 
-    // 立即注册监听事件
+    // 立即登录注册监听事件
     private fun setupListeners() {
         btnLogin.setOnClickListener {
             if (validateInput()) {
@@ -85,7 +89,7 @@ class LoginActivity : AppCompatActivity() {
 
     // 登录逻辑
     private fun performLogin() {
-        val username = etUsername.text.toString().trim()
+        val phone = etUsername.text.toString().trim()
         val password = etPassword.text.toString().trim()
 
         // 显示加载对话框
@@ -94,49 +98,78 @@ class LoginActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
         progressDialog.show()
 
-        // 模拟网络请求
-        Handler(Looper.getMainLooper()).postDelayed({
-            progressDialog.dismiss()
+        val loginRequest = LoginRequest(phone, password)
 
-            // 模拟登录成功
-            if (isValidUser(username, password)) {
-                // 保存登录状态
-                val preferences: SharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-                preferences.edit {
-                    putBoolean("is_logged_in", true)
-                    putString("username", username)//确定用户的username
-                }
+        // 调用API接口
+        RetrofitClient.apiService.login(loginRequest).enqueue(object : Callback<BaseResp<UserInfo>> {
+            override fun onResponse(call: Call<BaseResp<UserInfo>>, response: Response<BaseResp<UserInfo>>) {
+                progressDialog.dismiss()
 
-                // 跳转到主页
-                if (preferences.getString("${username}_identity", "") == "教师") {
-                    // 如果识别用户名身份为教师，跳转到教师端
-                    val intent = Intent(this@LoginActivity, Home::class.java)
-                    startActivity(intent)
-                    Toast.makeText(this@LoginActivity, "已登录教师端", Toast.LENGTH_SHORT).show()
-                    finish()
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        if (it.code == 0) {
+                            // 保存登录状态和用户信息
+                            val preferences: SharedPreferences =
+                                getSharedPreferences("user_prefs", MODE_PRIVATE)
+                            preferences.edit {
+                                putBoolean("is_logged_in", true)
+                                putString("user_id", it.data?.userId)
+                                putString("user_name", it.data?.userName)
+                                putString("avatar_url", it.data?.avatarUrl ?: "")
+                                putString("user_phone", it.data?.phone)
+                                putString("user_identity", it.data?.identity.toString())
+                                putString("user_className", it.data?.className)
+                                putString("user_bio", it.data?.bio)
+                            }
+
+                            // 根据用户角色跳转到相应界面
+                            val intent = Intent(this@LoginActivity, Home::class.java)
+                            startActivity(intent)
+
+                            val roleText = if (it.data?.identity == 1) "教师端" else "学生端"
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "已登录$roleText",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            finish()
+                        } else {
+                            Toast.makeText(this@LoginActivity, it.message, Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
                 } else {
-                    // 学生端
-                    val intent = Intent(this@LoginActivity, Home::class.java)
-                    startActivity(intent)
-                    Toast.makeText(this@LoginActivity, "已登录学生端", Toast.LENGTH_SHORT).show()
-                    finish()
+                    // 处理HTTP错误
+                    when (response.code()) {
+                        401 -> Toast.makeText(
+                            this@LoginActivity,
+                            "用户名或密码错误",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        500 -> Toast.makeText(
+                            this@LoginActivity,
+                            "服务器内部错误，请稍后再试",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        else -> Toast.makeText(
+                            this@LoginActivity,
+                            "登录失败，错误代码: ${response.code()}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
-            } else {
-                Toast.makeText(this@LoginActivity, "用户名或密码错误", Toast.LENGTH_SHORT).show()
             }
-        }, 1500)
-    }
 
-    private fun isValidUser(username: String, password: String): Boolean {
-        val preferences: SharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-
-        // 检查用户是否存在
-        val savedPassword = preferences.getString("${username}_password", null)
-        if (savedPassword == null) {
-            return false // 用户不存在
-        }
-
-        // 检查密码是否正确
-        return savedPassword == password
+            override fun onFailure(call: Call<BaseResp<UserInfo>>, t: Throwable) {
+                progressDialog.dismiss()
+                Toast.makeText(
+                    this@LoginActivity,
+                    "网络连接失败，请检查网络设置",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        })
     }
 }

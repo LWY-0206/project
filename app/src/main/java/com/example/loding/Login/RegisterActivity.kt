@@ -3,25 +3,30 @@ package com.example.loding.Login
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.RadioGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
-import java.util.prefs.Preferences
-import java.util.regex.Pattern
 import androidx.core.content.edit
+import com.example.corekit.common.BaseDialog
+import com.example.corekit.http.bean.BaseResp
+import com.example.corekit.http.process
 import com.example.loding.Home.Home
 import com.example.loding.R
 import com.example.loding.databinding.ActivityRegisterBinding
+import com.github.dhaval2404.imagepicker.ImagePicker
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 
 // 注册页
 class RegisterActivity : AppCompatActivity() {
@@ -32,6 +37,11 @@ class RegisterActivity : AppCompatActivity() {
         "计科111", "计科112", "计科113", "计科114", "计科115", "计科116"
     )
     private var isTeacher: Boolean = false
+    private var avatarUri: Uri? = null
+
+    companion object {
+        private const val REQUEST_IMAGE_PICK = 1001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,60 +52,76 @@ class RegisterActivity : AppCompatActivity() {
         setupListeners()
     }
 
-
+    //选择年级选项
     private fun setupGradeDropdown() {
-        // 创建适配器
         val adapter = ArrayAdapter(
             this,
             android.R.layout.simple_dropdown_item_1line,
             gradeList
         )
-
-        // 设置适配器到AutoCompleteTextView
         binding.etGrade.setAdapter(adapter)
-
-        // 设置项目点击监听
         binding.etGrade.setOnItemClickListener { parent, view, position, id ->
             val selectedGrade = parent.getItemAtPosition(position) as String
-            // 处理选中的年级
-            binding.etGrade.setText(selectedGrade,false)
+            binding.etGrade.setText(selectedGrade, false)
         }
-        // 设置默认值（可选）
-        binding.etGrade.setText("软件111", false) // false表示不触发过滤
+        binding.etGrade.setText("软件111", false)
     }
 
-
-
-
     private fun setupListeners() {
+        binding.ivAvatar.setOnClickListener {
+            openImagePicker()
+        }
+
         binding.btnRegister.setOnClickListener {
             if (validateInput()) {
-                performRegistration()
+                if (avatarUri != null) {
+                    uploadAvatarAndRegister()
+                } else {
+                    performRegistration(null)
+                }
             }
         }
 
         binding.tvLogin.setOnClickListener {
-            // 跳转到登录页面
             val intent = Intent(this@RegisterActivity, LoginActivity::class.java)
             startActivity(intent)
             finish()
         }
     }
 
+    private fun openImagePicker() {
+        ImagePicker.with(this)
+            .crop()
+            .compress(1024)
+            .maxResultSize(1080, 1080)
+            .start(REQUEST_IMAGE_PICK)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (resultCode == RESULT_OK && requestCode == REQUEST_IMAGE_PICK) {
+            avatarUri = data?.data
+            avatarUri?.let {
+                binding.ivAvatar.setImageURI(it)
+            }
+        } else if (resultCode == ImagePicker.RESULT_ERROR) {
+            Toast.makeText(this, "uri错误"+ImagePicker.getError(data), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    //检查注册信息
     private fun validateInput(): Boolean {
-        // 获取选中的身份
         val selectedId = binding.rgIdentity.checkedRadioButtonId
         isTeacher = (selectedId == R.id.rb_teacher)
 
         val username = binding.etUsername.text.toString().trim()
-        val grade = binding.etGrade.text.toString().trim()
         val phone = binding.etPhone.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
         val confirmPassword = binding.etConfirmPassword.text.toString().trim()
 
         var isValid = true
 
-        // 验证用户名
         if (username.isEmpty()) {
             binding.tilUsername.error = "用户名不能为空"
             isValid = false
@@ -106,18 +132,16 @@ class RegisterActivity : AppCompatActivity() {
             binding.tilUsername.error = null
         }
 
-        // 验证手机号
         if (phone.isEmpty()) {
             binding.tilPhone.error = "手机号不能为空"
             isValid = false
-        } else if (!isValidPhone(phone)) {
+        } else if (phone.length != 11) {
             binding.tilPhone.error = "请输入有效的手机号码"
             isValid = false
         } else {
             binding.tilPhone.error = null
         }
 
-        // 验证密码
         if (password.isEmpty()) {
             binding.tilPassword.error = "密码不能为空"
             isValid = false
@@ -128,7 +152,6 @@ class RegisterActivity : AppCompatActivity() {
             binding.tilPassword.error = null
         }
 
-        // 验证确认密码
         if (confirmPassword.isEmpty()) {
             binding.tilConfirmPassword.error = "请确认密码"
             isValid = false
@@ -141,75 +164,142 @@ class RegisterActivity : AppCompatActivity() {
         return isValid
     }
 
+    private fun uploadAvatarAndRegister() {
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("上传头像中...")
+            setCancelable(false)
+            show()
+        }
+
+        try {
+            avatarUri?.let { uri ->
+                val fileList = createTempFileFromUri(uri)
+                val requestFile = RequestBody.create("image/*".toMediaTypeOrNull(), fileList)
+                val avatarPart = MultipartBody.Part.createFormData("fileList", fileList.name, requestFile)
+
+                Log.d("---头像文件地址:", requestFile.toString())
+                Log.d("---上传头像地址:", avatarPart.toString())
 
 
+                RetrofitClient.apiService.uploadAvatar(avatarPart)
+                    .enqueue(object : Callback<BaseResp<List<String>>> {
+                        override fun onResponse(
+                            call: Call<BaseResp<List<String>>>,
+                            response: Response<BaseResp<List<String>>>
+                        ) {
+                            progressDialog.dismiss()
 
-    private fun isValidPhone(phone: String): Boolean {
-        return phone.length == 11
+
+                            if (response.isSuccessful) {
+                                response.body()?.let { uploadResponse ->
+                                    if (uploadResponse.code == 0) {
+                                        val imageUrls = uploadResponse.data
+                                        imageUrls?.let {
+                                            if (it.isNotEmpty()) {
+                                                Log.d("---上传成功", "URL: ${it[0]}")
+                                                performRegistration(it[0])
+                                            } else {
+                                                Log.d("---上传成功但无URL", uploadResponse.message.toString())
+                                                performRegistration(null)
+                                            }
+                                        }
+                                    } else {
+                                        Log.d("---Response.code == ", uploadResponse.code.toString())
+                                        Log.d("---业务失败", uploadResponse.message.toString())
+                                        performRegistration(null)
+                                    }
+                                } ?: run {
+                                    performRegistration(null)
+                                }
+                            } else {
+                                performRegistration(null)
+                            }
+                        }
+
+                        override fun onFailure(
+                            call: Call<BaseResp<List<String>>>,
+                            t: Throwable)
+                        {
+                            progressDialog.dismiss()
+                            Log.e("---网络错误", t.message ?: "未知错误")
+                            performRegistration(null)
+                        }
+                    })
+
+            } ?: run {
+                progressDialog.dismiss()
+                // 用户没有选择头像，直接注册
+                performRegistration(null)
+            }
+        } catch (e: Exception) {
+            progressDialog.dismiss()
+            Log.e("---文件处理错误", e.message ?: "未知错误")
+            performRegistration(null)
+        }
     }
 
+    // 更可靠的文件创建方法
+    private fun createTempFileFromUri(uri: Uri): File {
+        val inputStream: InputStream? = contentResolver.openInputStream(uri)
+        val file = File.createTempFile("avatar_${System.currentTimeMillis()}", ".jpg", cacheDir)
+
+        inputStream?.use { input ->
+            FileOutputStream(file).use { output ->
+                input.copyTo(output)
+            }
+        }
+        return file
+    }
 
     //保存注册信息
-    private fun performRegistration() {
-        val username = binding.etUsername.text.toString().trim()
-        val grade=binding.etGrade.text.toString().trim()
+    private fun performRegistration(avatarUrl: String?) {
+        val userName = binding.etUsername.text.toString().trim()
+        val className = binding.etGrade.text.toString().trim()
         val phone = binding.etPhone.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
+        val identity = if (isTeacher) 1 else 0     //身份：1-老师，0-学生
 
-        // 显示加载对话框
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("注册中...")
-        progressDialog.setCancelable(false)
-        progressDialog.show()
+        val progressDialog = ProgressDialog(this).apply {
+            setMessage("注册中...")
+            setCancelable(false)
+            show()
+        }
 
-        // 模拟网络请求
-        Handler(Looper.getMainLooper()).postDelayed({
-            progressDialog.dismiss()
+        val registerRequest = RegisterRequest(userName=userName,avatarUrl=avatarUrl, phone = phone,identity=identity, password = password,className=className)
 
-            // 模拟注册成功
-            // 在实际应用中，这里应该发送注册请求到服务器
-            // 并处理服务器的响应
+        RetrofitClient.apiService.register(registerRequest).enqueue(object : Callback<BaseResp<UserInfo>> {
+            override fun onResponse(call: Call<BaseResp<UserInfo>>, response: Response<BaseResp<UserInfo>>) {
+                progressDialog.dismiss()
 
-            // 保存用户信息（模拟注册成功）
-            val preferences: SharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE) //MODE_PRIVATE私有模式
-            // 写入数据
-            preferences.edit {
-
-                // 使用用户名作为key的前缀来存储用户信息
-                if (isTeacher)
-                    putString("${username}_identity", "教师")
-                else
-                    putString("${username}_identity", "学生")
-
-                putString("${username}_grade", grade)
-                putString("${username}_phone", phone)
-                putString("${username}_password", password)
-
-                putBoolean("is_logged_in", true)
-                // 登录状态个人主页可能会需要的个人信息
-                putString("username", username)
-
-                // 提交更改apply(): 异步写入磁盘，不会阻塞UI线程，没有返回值。
-                // commit(): 同步写入磁盘，会阻塞UI线程直到写入完成，并返回一个 boolean 值表示成功与否。
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        if (it.code==0) {
+                            Toast.makeText(this@RegisterActivity, "注册成功", Toast.LENGTH_SHORT).show()
+                            val intent = Intent(this@RegisterActivity, LoginActivity::class.java)//注册成功跳转
+                            startActivity(intent)
+                            finish()
+                        } else {
+                            Log.d("---注册响应：", it.message.toString())
+                            Log.d("---registerResponse.code==", it.code.toString())
+                            Toast.makeText(this@RegisterActivity, it.code.toString()+it.message, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else {
+                    when (response.code()) {
+                        409 -> Toast.makeText(this@RegisterActivity, "用户名已存在", Toast.LENGTH_SHORT).show()
+                        500 -> Toast.makeText(this@RegisterActivity, "服务器内部错误，请稍后再试", Toast.LENGTH_SHORT).show()
+                        else -> Toast.makeText(this@RegisterActivity, "注册失败，错误代码: ${response.code()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
 
-            Toast.makeText(this@RegisterActivity, "注册成功", Toast.LENGTH_SHORT).show()
-
-            // 后续应该是直接跳转到进入应用的首页
-            // 这里跳转到主页
-            if (isTeacher) {
-                // 跳转到教师端
-                val intent = Intent(this@RegisterActivity, Home::class.java)
-                startActivity(intent)
-                Toast.makeText(this@RegisterActivity, "已登录教师端", Toast.LENGTH_SHORT).show()
-                finish()
-            } else {
-                // 跳转到学生端
-                val intent = Intent(this@RegisterActivity, Home::class.java)
-                startActivity(intent)
-                Toast.makeText(this@RegisterActivity, "已登录学生端", Toast.LENGTH_SHORT).show()
-                finish()
+            override fun onFailure(call: Call<BaseResp<UserInfo>>, t: Throwable) {
+                progressDialog.dismiss()
+                Log.d("---Register_onFailure",t.message.toString())
+                Toast.makeText(this@RegisterActivity, "网络连接失败，请检查网络设置", Toast.LENGTH_SHORT).show()
             }
-        }, 1500)
+        })
     }
+
+
 }
