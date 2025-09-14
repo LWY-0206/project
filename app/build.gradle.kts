@@ -46,12 +46,6 @@ android {
 
 }
 
-//tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-//    kotlinOptions {
-//        jvmTarget = "11"
-//    }
-//}
-
 dependencies {
 
     implementation(project(":common"))
@@ -66,22 +60,17 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.core.ktx)
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:\${libs.versions.kotlin.get()}")
-    // 添加SwipeRefreshLayout依赖
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    implementation("de.hdodenhof:circleimageview:3.1.0")
-
-    implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("androidx.fragment:fragment:1.3.6")
-
-    implementation ("com.github.bumptech.glide:glide:4.14.2")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.14.2")
-    implementation("com.github.dhaval2404:imagepicker:2.1")
-
+    implementation(libs.kotlin.stdlib)
+    implementation(libs.swiperefreshlayout)
+    implementation(libs.circleimageview)
+    implementation(libs.fragment.ktx)
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
+    implementation(libs.imagepicker)
 
 }
