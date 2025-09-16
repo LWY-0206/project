@@ -8,13 +8,16 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.loding.R
-import com.example.loding.plaza.TopFragment
+import com.example.loding.adapter.DynamicViewModel
 import com.example.my.Home.My.My
+import plaza.SendFragment
+import plaza.TopFragment
 
-
-class Home : AppCompatActivity() {
-
+class Home :
+    AppCompatActivity(),
+    SendFragment.OnPublishListener {
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var navHome: LinearLayout
     private lateinit var navSquare: LinearLayout
@@ -35,6 +38,10 @@ class Home : AppCompatActivity() {
     private lateinit var tvProfile: TextView
 
     private var currentTab = 0
+
+    val viewModel: DynamicViewModel by lazy {
+        ViewModelProvider(this)[DynamicViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +99,16 @@ class Home : AppCompatActivity() {
                 1 -> {
                     ivSquare.setImageResource(R.drawable.ketang)
                     tvSquare.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                    TopFragment()
+                    TopFragment {
+                        // 跳转到发布动态页面
+                        val sendFragment = SendFragment.newInstance()
+                        // 设置发布监听器
+                        sendFragment.setOnPublishListener(this)
+                        val transaction = this.supportFragmentManager.beginTransaction()
+                        transaction.replace(R.id.fragment_container, sendFragment)
+                        transaction.addToBackStack(null) // 添加到返回栈，以便可以返回到当前页面
+                        transaction.commit()
+                    }
                 }
                 2 -> {
                     // 设置圆形按钮的选中状态
@@ -113,7 +129,6 @@ class Home : AppCompatActivity() {
                 }
                 else -> My()
             }
-
 
         supportFragmentManager
             .beginTransaction()
@@ -138,5 +153,21 @@ class Home : AppCompatActivity() {
         ivClass.setImageResource(R.drawable.ketang)
 
         tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.white))
+    }
+
+    override fun onPublishSuccess() {
+        refreshData()
+    }
+
+    /**
+     * 刷新数据
+     */
+    private fun refreshData() {
+//        // 重置分页状态
+//        currentPage = 1
+//        hasMoreData = true
+//
+//        // 重新加载数据
+//        viewModel.getDynamics(null, pageSize)
     }
 }

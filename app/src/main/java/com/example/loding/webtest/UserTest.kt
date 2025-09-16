@@ -1,7 +1,6 @@
 package com.example.loding.webtest
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -10,7 +9,6 @@ import com.example.corekit.common.BaseActivity
 import com.example.corekit.util.load
 import com.example.loding.R
 import com.example.loding.databinding.ActivityUserBinding
-import com.example.loding.webtest.UserData
 import com.example.loding.webtest.UserViewModel
 
 // 确保 BaseActivity 正确处理数据绑定
@@ -20,6 +18,7 @@ class UserTest : BaseActivity<ActivityUserBinding>() {
     private var currentTokenIndex = 0
     private val tokenList = listOf("token1", "token2", "token3")
     private val sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE)
+
     override fun bindLayout(): ActivityUserBinding = ActivityUserBinding.inflate(layoutInflater)
 
     override fun onCreate(savedInstanceState: Bundle?) {

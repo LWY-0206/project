@@ -17,7 +17,7 @@
         android:theme="@style/Theme.Loding" >
         <activity
             android:name=".activity.DynamicdetailsActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Home.My.EditProfileActivity"
             android:exported="false" />
@@ -43,10 +43,10 @@
             android:exported="false" />
         <activity
             android:name=".Famous.FamousListActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Schools.SchoolDetailActivity"
-            android:exported="false" />
+            android:exported="true" />
 <!--        <activity-->
 <!--            android:name=".Schools.SchoolListActivity"-->
 <!--            android:exported="true">-->
@@ -58,13 +58,13 @@
 <!--        </activity>-->
         <activity
             android:name=".Questions.QuestionTypeSelectionActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Questions.ErrorQuizActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".Home.Home"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -78,19 +78,18 @@
             android:name=".Home.ProfileActivity"
             android:exported="false"
             android:parentActivityName=".Login.LoginActivity" />
-
         <activity
             android:name=".chat.ChatActivity"
             android:exported="false" />
         <activity
             android:name=".webtest.UserTest"
             android:exported="false" />
-        <activity android:name=".mytest.QuestionsAtivity"
-            android:exported="false">
-        </activity>
-        <activity android:name=".WebSocketTest.ConnectionActivity"
-            android:exported="false">
-        </activity>
+        <activity
+            android:name=".mytest.QuestionsAtivity"
+            android:exported="false" />
+
+        <activity android:name=".friend.AddFriendActivity"
+            android:exported="false"/>
     </application>
 
 </manifest>
