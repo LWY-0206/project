@@ -48,6 +48,7 @@ android {
 
 dependencies {
 
+    implementation(project(":login"))
     implementation(project(":common"))
     implementation(project(":classroom"))
     implementation(project(":home"))

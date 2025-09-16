@@ -20,13 +20,11 @@ smartrefreshlayout = "1.1.3"
 coreKtxVersion = "1.17.0"
 pictureselector = "v3.11.1"
 autoService = "1.0-rc6"
-
-# 新增版本定义
-kotlinStdlib = "1.9.22"  # 新增：Kotlin标准库版本
-swiperefreshlayout = "1.1.0"  # 新增
-circleimageview = "3.1.0"  # 新增
-fragment = "1.6.2"  # 新增：更新到较新版本
-imagepicker = "2.1"  # 新增
+kotlinStdlib = "1.9.22"
+swiperefreshlayout = "1.1.0"
+circleimageview = "3.1.0"
+fragment = "1.6.2"
+imagepicker = "2.1"
 
 [libraries]
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
@@ -52,12 +50,12 @@ pictureselector = { group = "io.github.lucksiege", name = "pictureselector", ver
 auto-service = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoService" }
 auto-service-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoService" }
 # 新增库 - 您需要的依赖
-kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }  # 新增
-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }  # 新增
-circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }  # 新增
-fragment = { group = "androidx.fragment", name = "fragment", version.ref = "fragment" }  # 新增
-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment" }  # 新增
-imagepicker = { module = "com.github.dhaval2404:imagepicker", version.ref = "imagepicker" }  # 新增
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlinStdlib" }
+swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
+
+fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment" }
+imagepicker = { module = "com.github.dhaval2404:imagepicker", version.ref = "imagepicker" }
 [bundles]
 retrofit = ["retrofit", "converter-gson", "logging-interceptor"]
 ui = ["appcompat", "material", "activity", "constraintlayout", "core-ktx", "swiperefreshlayout", "circleimageview", "fragment-ktx"]
