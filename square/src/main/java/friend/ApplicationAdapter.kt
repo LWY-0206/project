@@ -1,56 +1,39 @@
 package friend
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import com.example.corekit.recyclerview.SingleTypeAdapter
-import com.example.corekit.recyclerview.ViewHolderTag
-import com.jxdx.square.R
+import com.example.corekit.recyclerview.SingleViewHolder
+import com.example.corekit.util.load
+import com.jxdx.square.databinding.FriendRequestItemBinding
 import entity.ApplicationMessage
 
 class ApplicationAdapter(
-    private val applicationList: List<ApplicationMessage>,
+    val list: ArrayList<ApplicationMessage>,
 ) : SingleTypeAdapter<ApplicationMessage>() {
     init {
-        add(applicationList)
-    }
-
-    companion object {
-        const val TYPE = 1
+        add(list)
     }
 
     override fun createViewHolder(
         viewType: Int,
         inflater: LayoutInflater,
         parent: ViewGroup,
-    ): RecyclerView.ViewHolder? =
-        when (viewType) {
-            TYPE -> {
-                val view = inflater.inflate(R.layout.friend_request_item, parent, false)
-                ApplicationViewHolder(view)
-            }
-            else -> null
-        }
+    ): SingleViewHolder<ViewBinding, Any>? {
+        val binding = FriendRequestItemBinding.inflate(inflater, parent, false)
+        return ApplicationViewHolder(binding) as SingleViewHolder<ViewBinding, Any>
+    }
 
     class ApplicationViewHolder(
-        private val view: View,
-    ) : RecyclerView.ViewHolder(view),
-        ViewHolderTag<ApplicationMessage> {
+        // 泛型1：指定具体Binding类（非ViewBinding），避免强转
+        private val binding: FriendRequestItemBinding,
+    ) : SingleViewHolder<FriendRequestItemBinding, ApplicationMessage>(binding) {
         override fun setHolder(entity: ApplicationMessage) {
-            view.findViewById<View>(R.id.searchView)
-        }
-//        view.findViewById<View>(R.id.civ_comment_avatar)?.let {
-//            if (it is androidx.appcompat.widget.AppCompatImageView) {
-//                it.load(entity.avatarUrl, 1)
-//            }
-//        }
-
-        override fun setHolder(
-            entity: ApplicationMessage,
-            payload: Any,
-        ) {
-            setHolder(entity)
+            binding.usernameText.text = entity.applicantName
+            binding.messageText.text = entity.remark
+            binding.timeText.text = entity.createTime
+            binding.avatarView.load(entity.applicantAvatar)
         }
     }
 }

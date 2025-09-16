@@ -63,7 +63,12 @@ class ContactFragment : BaseFragment<FragmentContactBinding>() {
     }
 
     private fun navigateToFriendDetails(friend: Friend) {
-        val fragment = FriendDetailsFragment.newInstance(friend.friendName, friend.friendAvatar, friend.friendId)
+        // 安全处理friendAvatar参数，即使为null也能正常运行
+        val fragment = FriendDetailsFragment.newInstance(
+            friend.friendName,
+            friend.friendAvatar, // 已经修改为可空类型
+            friend.friendId
+        )
         val transaction = parentFragmentManager.beginTransaction()
         transaction.replace(android.R.id.content, fragment)
         transaction.addToBackStack(null)

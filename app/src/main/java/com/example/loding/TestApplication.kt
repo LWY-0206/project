@@ -1,4 +1,4 @@
-package com.example.loding.webtest
+package com.example.loding
 
 import com.example.corekit.common.BaseApplication
 

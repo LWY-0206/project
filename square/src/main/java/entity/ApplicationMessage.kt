@@ -10,7 +10,7 @@ data class ApplicationMessage(
     // 时间
     var createTime: String,
     // 说明
-    var remark: Int,
+    var remark: String,
 ) : MultipleType {
     override fun viewType(): Int = 1
 }

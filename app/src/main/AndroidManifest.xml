@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name=".webtest.TestApplication"
+        android:name=".TestApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -38,15 +38,15 @@
         <activity
             android:name=".Login.LoginActivity"
             android:exported="false" />
-        <activity
-            android:name=".Famous.FamousDetailActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Famous.FamousListActivity"
-            android:exported="true" />
-        <activity
-            android:name=".Schools.SchoolDetailActivity"
-            android:exported="true" />
+<!--        <activity-->
+<!--            android:name=".Famous.FamousDetailActivity"-->
+<!--            android:exported="false" />-->
+<!--        <activity-->
+<!--            android:name=".Famous.FamousListActivity"-->
+<!--            android:exported="true" />-->
+<!--        <activity-->
+<!--            android:name=".Schools.SchoolDetailActivity"-->
+<!--            android:exported="true" />-->
 <!--        <activity-->
 <!--            android:name=".Schools.SchoolListActivity"-->
 <!--            android:exported="true">-->
@@ -56,12 +56,12 @@
 <!--                <category android:name="android.intent.category.LAUNCHER" />-->
 <!--            </intent-filter>-->
 <!--        </activity>-->
-        <activity
-            android:name=".Questions.QuestionTypeSelectionActivity"
-            android:exported="true" />
-        <activity
-            android:name=".Questions.ErrorQuizActivity"
-            android:exported="true" />
+<!--        <activity-->
+<!--            android:name=".Questions.QuestionTypeSelectionActivity"-->
+<!--            android:exported="true" />-->
+<!--        <activity-->
+<!--            android:name=".Questions.ErrorQuizActivity"-->
+<!--            android:exported="true" />-->
         <activity
             android:name=".Home.Home"
             android:exported="true" />
@@ -84,9 +84,9 @@
         <activity
             android:name=".webtest.UserTest"
             android:exported="false" />
-        <activity
-            android:name=".mytest.QuestionsAtivity"
-            android:exported="false" />
+<!--        <activity-->
+<!--            android:name=".mytest.QuestionsAtivity"-->
+<!--            android:exported="false" />-->
 
         <activity android:name=".friend.AddFriendActivity"
             android:exported="false"/>

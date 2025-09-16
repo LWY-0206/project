@@ -3,6 +3,7 @@ package com.example.loding.friend
 import com.example.corekit.http.bean.BaseResp
 import com.example.loding.entity.Friend
 import com.jxdx.square.entity.UserInfo
+import entity.ApplicationMessage
 import friend.ApplicationBody
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -27,4 +28,9 @@ interface FriendApi {
         @Header("satoken") source: String,
         @Body applicationBody: ApplicationBody,
     ): BaseResp<String>
+
+    @GET("/friend/applications")
+    suspend fun getApplications(
+        @Header("satoken") source: String,
+    ): BaseResp<List<ApplicationMessage>>
 }

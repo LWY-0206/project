@@ -26,7 +26,7 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
         // 创建Fragment实例并传递参数
         fun newInstance(
             friendName: String,
-            friendAvatar: String,
+            friendAvatar: String?,
             friendId: String = "",
         ): FriendDetailsFragment {
             val fragment = FriendDetailsFragment()
