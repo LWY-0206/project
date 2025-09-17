@@ -68,18 +68,4 @@ dependencies {
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
     implementation(libs.imagepicker)
-
-    implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("androidx.fragment:fragment:1.3.6")
-
-    implementation("com.github.bumptech.glide:glide:4.14.2")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.14.2")
-
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:\${libs.versions.kotlin.get()}")
-    // 添加SwipeRefreshLayout依赖
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
-    implementation(libs.androidx.core.ktx)
-
-    implementation(libs.core.ktx)
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}")
 }

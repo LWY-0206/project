@@ -1,8 +1,7 @@
 package com.jxdx.resource.Schools
 
+import android.graphics.pdf.PdfDocument
 import com.example.corekit.recyclerview.MultipleType
-import com.jxdx.resource.entity.PageInfo
-
 data class SchoolsResponse(
     val code: Int,
     val message: String,
@@ -14,7 +13,7 @@ data class SchoolData(
     val total: Int,
     val size: Int,
     val current: Int,
-    val page: PageInfo
+    val page: PdfDocument.PageInfo
 )
 
 data class SchoolRecord(
