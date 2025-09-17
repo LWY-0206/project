@@ -15,12 +15,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Loding" >
-        <activity
-            android:name=".activity.DynamicdetailsActivity"
-            android:exported="true" />
-        <activity
-            android:name=".Home.My.EditProfileActivity"
-            android:exported="false" />
         <!-- 添加FileProvider -->
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -32,38 +26,9 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity
-            android:name=".Login.RegisterActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Login.LoginActivity"
-            android:exported="false" />
-<!--        <activity-->
-<!--            android:name=".Famous.FamousDetailActivity"-->
-<!--            android:exported="false" />-->
-<!--        <activity-->
-<!--            android:name=".Famous.FamousListActivity"-->
-<!--            android:exported="true" />-->
-<!--        <activity-->
-<!--            android:name=".Schools.SchoolDetailActivity"-->
-<!--            android:exported="true" />-->
-<!--        <activity-->
-<!--            android:name=".Schools.SchoolListActivity"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
-<!--        <activity-->
-<!--            android:name=".Questions.QuestionTypeSelectionActivity"-->
-<!--            android:exported="true" />-->
-<!--        <activity-->
-<!--            android:name=".Questions.ErrorQuizActivity"-->
-<!--            android:exported="true" />-->
         <activity
-            android:name=".Home.Home"
+            android:name=".Home"
             android:exported="true" />
         <activity
             android:name=".MainActivity"
@@ -74,22 +39,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Home.ProfileActivity"
-            android:exported="false"
-            android:parentActivityName=".Login.LoginActivity" />
-        <activity
-            android:name=".chat.ChatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".webtest.UserTest"
-            android:exported="false" />
-<!--        <activity-->
-<!--            android:name=".mytest.QuestionsAtivity"-->
-<!--            android:exported="false" />-->
-
-        <activity android:name=".friend.AddFriendActivity"
-            android:exported="false"/>
     </application>
 
 </manifest>
