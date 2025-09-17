@@ -8,15 +8,6 @@ xmlns:tools="http://schemas.android.com/tools">
     tools:ignore="MissingClass">
 
     <activity
-        android:name=".TestLoginService"
-        android:exported="true">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
-
-    <activity
         android:name=".Home"
         android:exported="true" />
 

@@ -1,7 +1,7 @@
 package com.jxdx.login.Login
 
 data class UserInfo(
-    val userId: String,             //用户ID
+    val userId: Int,             //用户ID
     val userName: String,           //用户名
     val avatarUrl: String? = null,  //头像
     val phone: String,              //手机号

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".plaza.MessageFragment">
+
+    <!-- 搜索框 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:padding="8dp"
+        android:background="@color/white">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/search_box_bg"
+            android:paddingHorizontal="12dp">
+
+            <ImageView
+                    android:id="@+id/iv_search_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_image_placeholder"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="8dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="请输入搜索关键字"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_400"
+                    android:gravity="center_vertical"
+                    android:layout_toRightOf="@id/iv_search_icon" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <!-- 主内容区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="@color/gray_100">
+
+        <!-- 功能模块消息标题 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:text="功能模块消息："
+            android:textSize="14sp"
+            android:textColor="@color/gray_600"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="@color/white" />
+
+        <!-- 功能模块消息列表 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/white"
+            android:layout_marginBottom="8dp">
+
+            <!-- 我的动态消息 -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:padding="12dp">
+
+                <ImageView
+                    android:id="@+id/iv_dynamic_avatar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_default_avatar"
+                    android:layout_centerVertical="true" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/iv_dynamic_avatar"
+                    android:layout_marginLeft="12dp"
+                    android:orientation="vertical"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="我的动态消息"
+                            android:textSize="15sp"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="点击前往"
+                            android:textSize="12sp"
+                            android:textColor="@color/blue" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="最近一条消息展示（谁点赞了我的动态）"
+                        android:textSize="13sp"
+                        android:textColor="@color/gray_500"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+            <!-- 分割线 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/gray_200"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp" />
+
+            <!-- 益智PK消息 -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:padding="12dp">
+
+                <ImageView
+                    android:id="@+id/iv_pk_avatar"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_default_avatar"
+                    android:layout_centerVertical="true" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/iv_pk_avatar"
+                    android:layout_marginLeft="12dp"
+                    android:orientation="vertical"
+                    android:gravity="center_vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="益智pk内消息"
+                            android:textSize="15sp"
+                            android:textColor="@color/black" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="点击前往"
+                            android:textSize="12sp"
+                            android:textColor="@color/blue" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="有人向你发起pk"
+                        android:textSize="13sp"
+                        android:textColor="@color/gray_500"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+        <!-- 好友消息标题 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:text="好友消息："
+            android:textSize="14sp"
+            android:textColor="@color/gray_600"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="@color/white" />
+
+        <!-- 好友消息列表 - 使用RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_friend_messages"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white" />
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -5,6 +5,7 @@ import android.util.Log
 import com.jxdx.home.HomeModuleInitializer
 import com.jxdx.login.LoginModuleInitializer
 import com.jxdx.mine.service.MineModuleInitializer
+import com.jxdx.resource.ResourceModuleInitializer
 
 class MyApp : Application() {
     override fun onCreate() {
@@ -14,5 +15,6 @@ class MyApp : Application() {
         LoginModuleInitializer.init()
         MineModuleInitializer.init()
         HomeModuleInitializer.init()
+        ResourceModuleInitializer.init()
     }
 }

@@ -23,6 +23,10 @@ android {
             )
         }
     }
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -33,12 +37,29 @@ android {
 }
 
 dependencies {
-    implementation(project(":common"))
+    dependencies {
+        implementation(project(":common"))
 
-    implementation(libs.core.ktx)
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+        implementation(libs.core.ktx)
+        implementation(libs.appcompat)
+        implementation(libs.material)
+        implementation(libs.activity)
+        implementation(libs.constraintlayout)
+        implementation(libs.androidx.core.ktx)
+        implementation(libs.kotlin.stdlib)
+        implementation(libs.swiperefreshlayout)
+        implementation(libs.circleimageview)
+        implementation(libs.fragment.ktx)
+        implementation(libs.glide)
+        implementation(libs.imagepicker)
+
+        annotationProcessor(libs.glide.compiler)
+
+        testImplementation(libs.junit)
+        androidTestImplementation(libs.ext.junit)
+        androidTestImplementation(libs.espresso.core)
+
+        implementation(libs.banner)
+        implementation(libs.bannerviewpager)
+    }
 }

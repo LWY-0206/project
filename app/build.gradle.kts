@@ -65,7 +65,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
     implementation(libs.kotlin.stdlib)
     implementation(libs.swiperefreshlayout)
     implementation(libs.circleimageview)

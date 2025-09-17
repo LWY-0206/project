@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.jxdx.common.http.service.FragmentService
+import com.jxdx.common.http.service.ResourceService
 import com.jxdx.common.http.service.ServiceRegistry
 
 
@@ -81,7 +82,7 @@ class Home : AppCompatActivity() {
         currentTab = position
         resetAllTabs()
         val fragmentService = ServiceRegistry.get(FragmentService::class.java)
-
+        val resourceService= ServiceRegistry.get(ResourceService::class.java)
         if (fragmentService == null) {
             Log.d("--Home", "FragmentService未注册")
         }else{
@@ -114,7 +115,7 @@ class Home : AppCompatActivity() {
             3 -> {
                 ivResource.setImageResource(R.drawable.ketang)
                 tvResource.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                fragmentService?.getFragment("my")
+                resourceService?.getFragment("Resource")
 
             }
 
@@ -131,7 +132,7 @@ class Home : AppCompatActivity() {
 
         fragment?.let {
             supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, it)
+                .replace(R.id.fragment_container, fragment)
         }
             ?.commit()
 

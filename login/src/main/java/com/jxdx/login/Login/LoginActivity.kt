@@ -112,7 +112,7 @@ class LoginActivity : AppCompatActivity() {
                                 getSharedPreferences("user_prefs", MODE_PRIVATE)
                             preferences.edit {
                                 putBoolean("is_logged_in", true)
-                                putString("user_id", it.data?.userId)
+                                putInt("user_id", it.data?.userId?:1)
                                 putString("user_name", it.data?.userName)
                                 putString("avatar_url", it.data?.avatarUrl ?: "")
                                 putString("user_phone", it.data?.phone)

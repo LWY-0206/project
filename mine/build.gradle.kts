@@ -23,7 +23,6 @@ android {
             )
         }
     }
-
     buildFeatures {
         dataBinding = true
         viewBinding = true
@@ -48,4 +47,7 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     implementation(libs.circleimageview)
+
+    implementation(libs.bundles.retrofit)
+    implementation(libs.gson)
 }
