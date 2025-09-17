@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import com.jxdx.common.http.service.FragmentService
 import com.jxdx.common.http.service.ResourceService
 import com.jxdx.common.http.service.ServiceRegistry
+import com.jxdx.common.http.service.SquareService
 
 
 class Home : AppCompatActivity() {
@@ -83,6 +84,7 @@ class Home : AppCompatActivity() {
         resetAllTabs()
         val fragmentService = ServiceRegistry.get(FragmentService::class.java)
         val resourceService= ServiceRegistry.get(ResourceService::class.java)
+        val squareService= ServiceRegistry.get(SquareService::class.java)
         if (fragmentService == null) {
             Log.d("--Home", "FragmentService未注册")
         }else{
@@ -99,7 +101,12 @@ class Home : AppCompatActivity() {
             1 -> {
                 ivSquare.setImageResource(R.drawable.ketang)
                 tvSquare.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                fragmentService?.getFragment("my")
+                squareService?.getSquareTopFragment {
+                    squareService.navigateToSendFragment(
+                        this,
+                        R.id.fragment_container // 传入容器ID
+                    )
+                }
 
             }
 

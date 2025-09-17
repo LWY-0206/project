@@ -6,6 +6,7 @@ import com.jxdx.home.HomeModuleInitializer
 import com.jxdx.login.LoginModuleInitializer
 import com.jxdx.mine.service.MineModuleInitializer
 import com.jxdx.resource.ResourceModuleInitializer
+import com.jxdx.square.SquareModuleInitializer
 
 class MyApp : BaseApplication() {
     override fun onCreate() {
@@ -16,6 +17,7 @@ class MyApp : BaseApplication() {
         MineModuleInitializer.init()
         HomeModuleInitializer.init()
         ResourceModuleInitializer.init()
+        SquareModuleInitializer.init()
     }
     companion object {
         private const val BASE_URL = "http://121.41.176.238:8080/"
