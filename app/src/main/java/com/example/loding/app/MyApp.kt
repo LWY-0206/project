@@ -27,4 +27,5 @@ class MyApp : BaseApplication() {
     override fun httpBaseUrl(): String = BASE_URL
 
     override fun iconFontPath(): String = ICON_FONT
+
 }
