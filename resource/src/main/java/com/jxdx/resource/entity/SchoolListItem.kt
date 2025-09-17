@@ -1,4 +1,5 @@
 package com.jxdx.resource.entity
+
 import com.example.corekit.recyclerview.MultipleType
 
 // 学校列表项

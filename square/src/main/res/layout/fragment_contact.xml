@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".plaza.ContactFragment">
+
+    <!-- 主内容区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" 
+        android:background="@color/gray_100">
+
+        <!-- 添加好友 -->
+        <LinearLayout
+            android:id="@+id/add_friend_layout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/white"
+            android:paddingHorizontal="16dp"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_add" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="添加好友"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_marginLeft="12dp" />
+        </LinearLayout>
+
+        <!-- 分割线 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/gray_200" />
+
+        <!-- 新的朋友 -->
+        <LinearLayout
+            android:id="@+id/new_friend_layout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/white"
+            android:paddingHorizontal="16dp"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/friend"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="新的朋友"
+                android:textSize="16sp"
+                android:textColor="@color/black"
+                android:layout_marginLeft="12dp" />
+        </LinearLayout>
+
+        <!-- 分割线 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:background="@color/gray_100" />
+
+        <!-- 好友列表标题 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:text="好友列表"
+            android:textSize="14sp"
+            android:textColor="@color/gray_600"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="@color/white" />
+
+        <!-- 好友列表 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/friend_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/white" />
+
+        <!-- 底部空间，确保内容不被遮挡 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="16dp" />
+
+        <!-- 底部空间，确保内容不被遮挡 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="16dp" />
+    </LinearLayout>
+</LinearLayout>

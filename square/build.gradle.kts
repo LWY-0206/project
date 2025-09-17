@@ -19,7 +19,7 @@ android {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
         }
     }
@@ -30,11 +30,21 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
     implementation(project(":common"))
 
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:\${libs.versions.kotlin.get()}")
+    // 添加SwipeRefreshLayout依赖
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation(libs.androidx.core.ktx)
+
+    implementation(libs.core.ktx)
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:${libs.versions.kotlin.get()}")
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)

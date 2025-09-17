@@ -1,3 +1,4 @@
+
 package com.jxdx.resource.entity
 
 data class PageInfo(

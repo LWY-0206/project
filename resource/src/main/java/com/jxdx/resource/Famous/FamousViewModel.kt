@@ -44,8 +44,8 @@ class FamousViewModel(application: Application): BaseViewModel(application) {
                 override fun error(
                     emit: ResLiveData<FamousData>,
                     e: ErrorResponse){
-                        Log.d("FamousViewModel", "getFamous error with e: $e")
-                        emit.error(e)
+                    Log.d("FamousViewModel", "getFamous error with e: $e")
+                    emit.error(e)
                 }
 
             }

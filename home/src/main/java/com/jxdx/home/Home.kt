@@ -1,3 +1,4 @@
+
 package com.jxdx.home
 
 import android.os.Bundle
@@ -21,7 +22,6 @@ class Home : AppCompatActivity() {
     private lateinit var navClass: LinearLayout
     private lateinit var navResource: LinearLayout
     private lateinit var navProfile: LinearLayout
-
     private lateinit var ivHome: ImageView
     private lateinit var ivSquare: ImageView
     private lateinit var ivClass: ImageView

@@ -1,0 +1,7 @@
+package com.jxdx.square.adapter
+
+data class DynamicBody(
+    val title: String,
+    val content: String,
+    val contentImageUrls: List<String>? = null,
+)

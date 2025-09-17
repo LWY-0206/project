@@ -1,4 +1,4 @@
-package com.jxdx.resource.entity
+package com.jxdx.square.entity
 
 import com.example.corekit.recyclerview.MultipleType
 

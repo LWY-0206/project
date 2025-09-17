@@ -18,8 +18,8 @@ data class FamousData (
     val page: Int
 )
 data class FamousRecord (
-   val celebrityId: Int,
-   val celebrityName: String,
+    val celebrityId: Int,
+    val celebrityName: String,
     val profession: String,
     val era: String,
     val avatarUrl: String,
