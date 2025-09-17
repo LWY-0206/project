@@ -26,10 +26,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Loding"
         tools:replace="android:theme">
-        <activity
-            android:name=".activity.MainActivity"
-            android:exported="true" />
-
         <!-- 添加FileProvider -->
         <provider
             android:name="androidx.core.content.FileProvider"
