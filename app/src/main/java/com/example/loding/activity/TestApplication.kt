@@ -1,4 +1,4 @@
-package com.example.loding
+package com.example.loding.activity
 
 import com.example.corekit.common.BaseApplication
 

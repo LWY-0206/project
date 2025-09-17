@@ -1,4 +1,4 @@
-package com.example.loding
+package com.example.loding.activity
 
 import android.os.Bundle
 import android.widget.FrameLayout
@@ -8,6 +8,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.loding.R
+import com.jxdx.mine.service.My
+import com.jxdx.resource.resource.Resource
 import com.jxdx.square.plaza.SendFragment
 import com.jxdx.square.plaza.TopFragment
 
@@ -86,16 +89,7 @@ class Home : AppCompatActivity(), SendFragment.OnPublishListener {
                     ivHome.setImageResource(R.drawable.ketang)
                     tvHome.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
 
-                    TopFragment {
-                        // 跳转到发布动态页面
-                        val sendFragment = SendFragment.Companion.newInstance()
-                        // 设置发布监听器
-                        sendFragment.setOnPublishListener(this)
-                        val transaction = this.supportFragmentManager.beginTransaction()
-                        transaction.replace(R.id.fragment_container, sendFragment)
-                        transaction.addToBackStack(null) // 添加到返回栈，以便可以返回到当前页面
-                        transaction.commit()
-                    }
+                    My()
                 }
                 1 -> {
                     ivSquare.setImageResource(R.drawable.ketang)
@@ -118,31 +112,13 @@ class Home : AppCompatActivity(), SendFragment.OnPublishListener {
                     ivClass.setImageResource(R.drawable.ketang)
                     tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
 
-                    TopFragment {
-                        // 跳转到发布动态页面
-                        val sendFragment = SendFragment.Companion.newInstance()
-                        // 设置发布监听器
-                        sendFragment.setOnPublishListener(this)
-                        val transaction = this.supportFragmentManager.beginTransaction()
-                        transaction.replace(R.id.fragment_container, sendFragment)
-                        transaction.addToBackStack(null) // 添加到返回栈，以便可以返回到当前页面
-                        transaction.commit()
-                    }
+                    My()
                 }
                 3 -> {
                     ivResource.setImageResource(R.drawable.ketang)
                     tvResource.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
+                    Resource()
 
-                    TopFragment {
-                        // 跳转到发布动态页面
-                        val sendFragment = SendFragment.Companion.newInstance()
-                        // 设置发布监听器
-                        sendFragment.setOnPublishListener(this)
-                        val transaction = this.supportFragmentManager.beginTransaction()
-                        transaction.replace(R.id.fragment_container, sendFragment)
-                        transaction.addToBackStack(null) // 添加到返回栈，以便可以返回到当前页面
-                        transaction.commit()
-                    }
                 }
                 4 -> {
                     ivProfile.setImageResource(R.drawable.ketang)
