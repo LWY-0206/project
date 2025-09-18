@@ -1,19 +1,14 @@
 package com.jxdx.resource.Questions
-
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.appcompat.app.AlertDialog
-import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import com.example.corekit.common.BaseActivity
-import com.example.corekit.http.bean.Resource
-import com.jxdx.resource.R
-import com.jxdx.resource.databinding.ActivityErrorQuizBinding
+import com.jxdx.resource.databinding.ActivityQuizBinding
 
-class ErrorQuizActivity : BaseActivity<ActivityErrorQuizBinding>() {
+class QuizActivity : BaseActivity<ActivityQuizBinding>() {
 
     private lateinit var viewModel: ErrorQuizViewModel
     private var currentQuestionIndex = 0
@@ -25,8 +20,8 @@ class ErrorQuizActivity : BaseActivity<ActivityErrorQuizBinding>() {
     private var subjectId = 1 // 默认科目ID
     private var selectedQuestionType: QuestionType? = null
 
-    override fun bindLayout(): ActivityErrorQuizBinding {
-        return ActivityErrorQuizBinding.inflate(layoutInflater)
+    override fun bindLayout(): ActivityQuizBinding {
+        return ActivityQuizBinding.inflate(layoutInflater)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,7 +142,7 @@ class ErrorQuizActivity : BaseActivity<ActivityErrorQuizBinding>() {
 
         view.btnBackToSelection.setOnClickListener {
             // 返回题型选择页面
-            startActivity(Intent(this, QuestionTypeSelectionActivity::class.java))
+            startActivity(Intent(this, QuestionSelectionActivity::class.java))
             finish()
         }
     }

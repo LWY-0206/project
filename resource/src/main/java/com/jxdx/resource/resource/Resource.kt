@@ -5,7 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.corekit.common.BaseFragment
 import com.jxdx.resource.Famous.FamousListActivity
-import com.jxdx.resource.Questions.QuestionTypeSelectionActivity
+import com.jxdx.resource.Questions.QuestionSelectionActivity
 import com.jxdx.resource.Schools.SchoolListActivity
 import com.jxdx.resource.databinding.FragmentResourceBinding
 import com.youth.banner.Banner
@@ -46,7 +46,7 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
             startActivity(intent)
         }
         val quiz = find.tvQuiz.setOnClickListener {
-            val intent = Intent(requireContext(), QuestionTypeSelectionActivity::class.java)
+            val intent = Intent(requireContext(), QuestionSelectionActivity::class.java)
             startActivity(intent)
         }
         val test = find.tvSchools.setOnClickListener {
@@ -60,23 +60,20 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
 
     private fun prepareTestData() {
         dataList.add(
-            StaggeredItem(
-                "https://example.com/image1.jpg",
+            StaggeredItem("https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/6eb67003-bf57-476a-95d4-164185bbe585.png?Expires=1758180374&OSSAccessKeyId=TMP.3KmTD5G3H5bUGu1uheE2QxEByUn4sK9srcCa4gGvZsy3zn8vKZzeY86JMyzhQtx8sDPut5U1FcQT2TArF7p7vZHnPP1k8U&Signature=niV7AjFEVWuVDJ9h5kbctBC%2Bbu0%3D&x-oss-request-payer=requester",
                 "高中优质数学资源",
                 "100讲基础必看"
             )
         )
         dataList.add(
             StaggeredItem(
-                "https://example.com/image2.jpg",
+                "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/6eb67003-bf57-476a-95d4-164185bbe585.png?Expires=1758180374&OSSAccessKeyId=TMP.3KmTD5G3H5bUGu1uheE2QxEByUn4sK9srcCa4gGvZsy3zn8vKZzeY86JMyzhQtx8sDPut5U1FcQT2TArF7p7vZHnPP1k8U&Signature=niV7AjFEVWuVDJ9h5kbctBC%2Bbu0%3D&x-oss-request-payer=requester",
                 "联考试卷",
                 "2025优质模拟"
             )
         )
         dataList.add(
-            StaggeredItem(
-                "https://example.com/image3.jpg",
-                "数栋优质题库",
+            StaggeredItem("https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/6eb67003-bf57-476a-95d4-164185bbe585.png?Expires=1758180374&OSSAccessKeyId=TMP.3KmTD5G3H5bUGu1uheE2QxEByUn4sK9srcCa4gGvZsy3zn8vKZzeY86JMyzhQtx8sDPut5U1FcQT2TArF7p7vZHnPP1k8U&Signature=niV7AjFEVWuVDJ9h5kbctBC%2Bbu0%3D&x-oss-request-payer=requester","数栋优质题库",
                 "分类汇编"
             )
         )

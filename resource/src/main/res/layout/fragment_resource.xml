@@ -9,6 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
+
         <com.youth.banner.Banner
             android:id="@+id/top_banner"
             android:layout_width="match_parent"
@@ -21,15 +22,38 @@
         android:padding="16dp"
         android:background="@drawable/rounded_corner_bg"
         android:layout_margin="8dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left">
         <TextView
             android:id="@+id/tv_rank_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="工具箱"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
-
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="更多"
+                android:textColor="@color/gray_600"
+                android:layout_alignRight="@+id/iv_go_more"
+                android:layout_centerVertical="true"
+                android:layout_marginBottom="12dp"
+                android:layout_margin="30dp"/>
+         <ImageView
+             android:layout_width="30dp"
+             android:layout_height="30dp"
+             android:src="@drawable/ic_arraw_go"
+             android:layout_alignParentRight="true"
+             android:layout_centerVertical="true"
+             android:id="@+id/iv_go_more"/>
+        </RelativeLayout>
         <!-- 内容网格：3列2行承载6个条目 -->
         <GridLayout
             android:layout_width="match_parent"
@@ -103,7 +127,7 @@
             </LinearLayout>
 
             <!-- 条目3：大学排行榜 -->
-            <LinearLayout
+            <GridLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -131,7 +155,7 @@
                         android:textColor="@color/gray_400"
                         android:id="@+id/tv_schools"/>
                 </LinearLayout>
-            </LinearLayout>
+            </GridLayout>
 
             <!-- 条目4：专业排行榜 -->
             <LinearLayout

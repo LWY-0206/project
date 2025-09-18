@@ -132,7 +132,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
-                android:text="查看答案" />
+                android:text="提交" />
 
             <Button
                 android:id="@+id/btn_next"

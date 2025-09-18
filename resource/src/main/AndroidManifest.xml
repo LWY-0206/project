@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <application
         android:allowBackup="true"
         android:label="@string/app_name">
+        <activity
+            android:name=".Questions.QuizActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Questions.QuestionSelectionActivity"
+            android:exported="false" />
         <activity
             android:name=".Famous.FamousDetailActivity"
             android:exported="false" />
@@ -25,4 +32,5 @@
             android:name=".Schools.SchoolListActivity"
             android:exported="false" />
     </application>
+
 </manifest>
