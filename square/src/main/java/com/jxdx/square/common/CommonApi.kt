@@ -9,7 +9,7 @@ import retrofit2.http.Part
 
 interface CommonApi {
     @Multipart
-    @POST("/com/jxdx/square/common/upload")
+    @POST("/common/upload")
     suspend fun uploadFile(
         @Header("satoken") source: String,
         @Part file: MultipartBody.Part,
