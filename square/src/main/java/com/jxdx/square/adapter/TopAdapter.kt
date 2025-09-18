@@ -8,10 +8,7 @@ import com.jxdx.square.plaza.DynamicFragment
 import com.jxdx.square.plaza.GameFragement
 import com.jxdx.square.plaza.MessageFragment
 
-class TopAdapter(
-    fragmentActivity: FragmentActivity,
-    private val callback: () -> Unit,
-) : FragmentStateAdapter(fragmentActivity) {
+class TopAdapter(fragmentActivity: FragmentActivity, private val callback: () -> Unit, ) : FragmentStateAdapter(fragmentActivity) {
     // 存储所有子页面Fragment的列表，用于ViewPager2的顶部跳转
     private val mFragmentList =
         listOf(

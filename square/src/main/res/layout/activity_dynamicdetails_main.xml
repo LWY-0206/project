@@ -271,8 +271,8 @@
                 android:id="@+id/ll_actions"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingHorizontal="16dp">
 
                 <LinearLayout
@@ -280,16 +280,16 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:orientation="horizontal"
                     android:gravity="center"
+                    android:orientation="horizontal"
                     android:paddingVertical="8dp">
 
                     <ImageView
                         android:id="@+id/iv_like"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_like"
-                        android:contentDescription="点赞" />
+                        android:contentDescription="点赞"
+                        android:src="@drawable/ic_like" />
 
                     <TextView
                         android:id="@+id/tv_like_count"
@@ -297,8 +297,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:text="128"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/darker_gray" />
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -306,15 +306,15 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:orientation="horizontal"
                     android:gravity="center"
+                    android:orientation="horizontal"
                     android:paddingVertical="8dp">
 
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:src="@drawable/ic_reward"
-                        android:contentDescription="打赏" />
+                        android:contentDescription="打赏"
+                        android:src="@drawable/ic_reward" />
 
                     <TextView
                         android:id="@+id/tv_reward_count"
@@ -322,8 +322,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:text="32"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/darker_gray" />
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="14sp" />
                 </LinearLayout>
             </LinearLayout>
 

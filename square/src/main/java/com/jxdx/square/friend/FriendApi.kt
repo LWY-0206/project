@@ -12,7 +12,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 
 interface FriendApi {
-    @GET("/com/jxdx/square/friend/list")
+    @GET("/friend/list")
     suspend fun getFriends(
         @Header("satoken") source: String,
     ): BaseResp<List<Friend>>
@@ -23,13 +23,13 @@ interface FriendApi {
         @Path("userId") userId: String,
     ): BaseResp<UserInfo>
 
-    @POST("/com/jxdx/square/friend/add")
+    @POST("/friend/add")
     suspend fun addFriend(
         @Header("satoken") source: String,
         @Body applicationBody: ApplicationBody,
     ): BaseResp<String>
 
-    @GET("/com/jxdx/square/friend/applications")
+    @GET("/friend/applications")
     suspend fun getApplications(
         @Header("satoken") source: String,
     ): BaseResp<List<ApplicationMessage>>
