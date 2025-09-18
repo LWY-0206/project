@@ -11,9 +11,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.jxdx.square.R
 import com.jxdx.square.adapter.TopAdapter
 
-class TopFragment(
-    private val callback: () -> Unit,
-) : Fragment() {
+class TopFragment(private val callback: () -> Unit, ) : Fragment() {
     private var mTabLayout: TabLayout? = null
     private var mViewPager: ViewPager2? = null
     private var mTopAdapter: TopAdapter? = null
