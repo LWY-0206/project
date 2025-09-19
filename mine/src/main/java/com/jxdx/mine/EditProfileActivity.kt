@@ -121,4 +121,9 @@ class EditProfileActivity : AppCompatActivity() {
     companion object {
         const val MAX_BIO_LENGTH = 150
     }
+    // 添加返回按钮点击事件
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
+    }
 }

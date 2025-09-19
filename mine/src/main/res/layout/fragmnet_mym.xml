@@ -11,34 +11,41 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#F9FAFB">
 
-        <!-- 工具栏 -->
+        <!-- 顶部工具栏 -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:theme="?attr/actionBarTheme">
+            android:theme="?attr/actionBarTheme"
+            android:paddingHorizontal="16dp">
 
-            <ImageView
+            <!-- 左侧头像按钮 -->
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/menu_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/ic_default_avatar"
-                android:layout_marginStart="16dp"/>
+                android:scaleType="centerCrop"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="头像按钮"
+                android:padding="4dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="我的"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textColor="@android:color/white"
-                android:layout_marginStart="16dp"/>
+                android:layout_marginStart="16dp"
+                android:layout_gravity="center_vertical"/>
 
         </androidx.appcompat.widget.Toolbar>
 
-        <!-- 个人主页内容区域（使用ScrollView支持滚动） -->
+        <!-- 个人主页内容区域 -->
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,30 +54,33 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:divider="@android:color/transparent"
+                android:showDividers="middle">
 
-                <!-- 用户基本信息区域 -->
+                <!-- 用户信息 -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:padding="16dp"
                     android:background="@drawable/edit_text_border"
-                    android:elevation="2dp">
+                    android:elevation="3dp"
+                    android:gravity="center_vertical">
+
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/user_avatar"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:src="@drawable/ic_default_avatar"
-                        android:scaleType="centerCrop"
-                        android:layout_marginEnd="16dp"
                         android:contentDescription="用户头像"
                         app:civ_border_width="2dp"
-                        app:civ_border_color="@android:color/white"/>
+                        app:civ_border_color="@color/black_alpha_30"/>
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
@@ -78,183 +88,185 @@
                             android:id="@+id/user_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="用户名"
-                            android:textSize="18sp"
-                            android:textStyle="bold"/>
+                            android:text="学生姓名"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#333333"/>
 
                         <TextView
                             android:id="@+id/user_grade"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="所在班级"
+                            android:text="高一（2）班"
                             android:textSize="14sp"
+                            android:textColor="#666666"
                             android:layout_marginTop="4dp"/>
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            android:layout_marginTop="8dp">
+
                             <TextView
                                 android:id="@+id/user_bio"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="个人简介"
+                                android:text="努力成为更好的自己"
                                 android:textSize="14sp"
-                                android:layout_marginTop="8dp"/>
+                                android:textColor="#666666"/>
+
                             <TextView
                                 android:id="@+id/edit_user_bio"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="修改"
+                                android:text="编辑"
                                 android:textSize="14sp"
-                                android:textColor="@color/red_600"/>
+                                android:textColor="@color/red_dark"/>
                         </LinearLayout>
-
-
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- 学习成就区域 -->
+                <!-- 学习成就 -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="学习成就"
                     android:textSize="16sp"
                     android:textStyle="bold"
+                    android:textColor="#333333"
                     android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp"
-                    android:background="@drawable/edit_text_border"
+                    android:background="@drawable/bg_card"
                     android:elevation="2dp">
 
-                    <!-- 这里可以添加折线图和其他成就信息 -->
+                    <!-- 学习进度条 -->
                     <TextView
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="已完成课程: 必修12门/选修8门"/>
+                        android:text="课程完成进度"
+                        android:textSize="14sp"
+                        android:textColor="#666666"/>
 
-                    <TextView
+                    <ProgressBar
+                        style="@android:style/Widget.ProgressBar.Horizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="总学习时长: 120小时"
-                        android:layout_marginTop="8dp"/>
+                        android:layout_height="8dp"
+                        android:progress="60"
+                        android:max="100"
+                        android:progressDrawable="@drawable/progress_bar_style"
+                        android:layout_marginVertical="8dp"/>
 
-                    <!-- 勋章展示区域 -->
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginTop="16dp">
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="总学习时长:"
+                            android:textSize="14sp"
+                            android:textColor="#666666"
+                            android:layout_marginTop="12dp"/>
 
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/shezhi"
-                            android:contentDescription="勋章"/>
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/shezhi"
-                            android:contentDescription="勋章"
-                            android:layout_marginStart="8dp"/>
-
-                        <ImageView
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:src="@drawable/shezhi"
-                            android:contentDescription="勋章"
-                            android:layout_marginStart="8dp"/>
-
+                        <TextView
+                            android:id="@+id/time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="   120h "
+                            android:textStyle="italic"
+                            android:textColor="@color/red_dark"
+                            android:textSize="18sp" />
                     </LinearLayout>
+
+
                 </LinearLayout>
 
-
-
-
-                <!-- 学习动态区域 -->
+                <!-- 学习动态 -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="学习动态"
                     android:textSize="16sp"
                     android:textStyle="bold"
+                    android:textColor="#333333"
                     android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
+                    android:layout_height="wrap_content"
                     android:orientation="vertical"
+                    android:background="@drawable/bg_card"
                     android:padding="16dp"
-                    android:background="@drawable/edit_text_border"
                     android:elevation="2dp">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="2小时前 评论了《Android开发入门》课件"/>
+                        android:text="2小时前 完成了数学作业"
+                        android:textSize="14sp"
+                        android:textColor="#444444"/>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@android:color/darker_gray"
+                        android:background="#EEEEEE"
                         android:layout_marginVertical="8dp"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="昨天 分享了Java学习笔记"/>
+                        android:text="昨天 参加了英语小测"
+                        android:textSize="14sp"
+                        android:textColor="#444444"/>
 
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@android:color/darker_gray"
+                        android:background="#EEEEEE"
                         android:layout_marginVertical="8dp"/>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="3天前 完成了《数据结构》期末考试"/>
-
+                        android:text="3天前 完成了物理实验报告"
+                        android:textSize="14sp"
+                        android:textColor="#444444"/>
                 </LinearLayout>
 
-
-
-                <!-- 添加柱状图区域 -->
+                <!-- 学习时间分布柱状图 -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="学习时间分布（小时/周）"
                     android:textSize="16sp"
                     android:textStyle="bold"
+                    android:textColor="#333333"
                     android:layout_marginTop="24dp"
                     android:layout_marginBottom="8dp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="330dp"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:background="@drawable/edit_text_border"
+                    android:layout_height="300dp"
+                    android:background="@drawable/bg_card"
+                    android:padding="12dp"
                     android:elevation="2dp">
 
                     <WebView
                         android:id="@+id/barChartWebView"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
-
                 </LinearLayout>
-
-
-
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
@@ -269,19 +281,31 @@
         android:background="@android:color/white"
         android:padding="16dp">
 
+        <!-- 顶部用户信息 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingVertical="16dp">
+            android:paddingVertical="16dp"
+            android:gravity="center_vertical">
 
-            <ImageView
+<!--            <ImageView-->
+<!--                android:id="@+id/nav_avatar"-->
+<!--                android:layout_width="30dp"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:src="@drawable/ic_default_avatar"-->
+<!--                android:background="@drawable/bg_circle"-->
+<!--                android:scaleType="centerCrop"-->
+<!--                android:contentDescription="用户头像"/>-->
+
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/nav_avatar"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:src="@drawable/ic_default_avatar"
                 android:scaleType="centerCrop"
-                android:contentDescription="用户头像"/>
+                android:layout_gravity="center_vertical"
+                android:contentDescription="头像" />
 
             <TextView
                 android:id="@+id/nav_name"
@@ -290,131 +314,55 @@
                 android:text="张三"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginStart="16dp"
-                android:gravity="center_vertical"/>
-
+                android:layout_marginStart="12dp"/>
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
+            android:background="#EEEEEE"
+            android:layout_marginBottom="12dp"/>
 
+        <!-- 菜单选项 -->
         <LinearLayout
             android:id="@+id/nav_profile"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16dp">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/gerenziliao"
-                android:contentDescription="个人主页"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="个人主页"
-                android:textSize="16sp"
-                android:layout_marginStart="16dp"/>
-
+            style="@style/NavItemStyle">
+            <ImageView android:src="@drawable/ic_profile" style="@style/NavItemIcon"/>
+            <TextView android:text="个人主页" style="@style/NavItemText"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/nav_points"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16px">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/shezhi"
-                android:contentDescription="积分系统"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="积分系统"
-                android:textSize="16sp"
-                android:layout_marginStart="16dp"/>
-
+            style="@style/NavItemStyle">
+            <ImageView android:src="@drawable/ic_points" style="@style/NavItemIcon"/>
+            <TextView android:text="积分系统" style="@style/NavItemText"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/nav_courses"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16px">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/shezhi"
-                android:contentDescription="课程"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="课程"
-                android:textSize="16sp"
-                android:layout_marginStart="16dp"/>
-
+            style="@style/NavItemStyle">
+            <ImageView android:src="@drawable/ic_courses" style="@style/NavItemIcon"/>
+            <TextView android:text="课程" style="@style/NavItemText"/>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/nav_settings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16px">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/shezhi"
-                android:contentDescription="设置"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="设置"
-                android:textSize="16sp"
-                android:layout_marginStart="16dp"/>
-
+            style="@style/NavItemStyle">
+            <ImageView android:src="@drawable/ic_settings" style="@style/NavItemIcon"/>
+            <TextView android:text="作业" style="@style/NavItemText"/>
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="@android:color/darker_gray"
-            android:layout_marginTop="8dp"/>
+            android:background="#EEEEEE"
+            android:layout_marginTop="12dp"/>
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="16px">
-
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/shezhi"
-                android:contentDescription="退出登录"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="退出登录"
-                android:textSize="16sp"
-                android:layout_marginStart="16dp"/>
-
+            android:id="@+id/nav_class"
+            style="@style/NavItemStyle">
+            <ImageView android:src="@drawable/ic_class" style="@style/NavItemIcon"/>
+            <TextView android:text="我的班级" style="@style/NavItemText"/>
         </LinearLayout>
-
     </LinearLayout>
-
 </androidx.drawerlayout.widget.DrawerLayout>

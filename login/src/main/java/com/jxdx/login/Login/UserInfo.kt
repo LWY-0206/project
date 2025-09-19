@@ -8,5 +8,6 @@ data class UserInfo(
     val password: String,           //密码
     val identity: Int,              //身份：0-学生，1-老师
     val className: String,          //班级名称
-    val bio: String                 //个人简介
+    val bio: String,                 //个人简介
+    val satoken:String
 )
