@@ -1,11 +1,19 @@
 package com.jxdx.resource.Questions
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.lifecycle.ViewModelProvider
 import com.example.corekit.common.BaseActivity
+import com.jxdx.resource.R
 import com.jxdx.resource.databinding.ActivityQuizBinding
 
 class QuizActivity : BaseActivity<ActivityQuizBinding>() {
@@ -16,9 +24,16 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
     private var filteredQuestions: List<ErrorQuizItem> = emptyList()
     private var currentPage = 1
     private var totalPages = 1
-    private val pageSize = 8
-    private var subjectId = 1 // 默认科目ID
+    private val pageSize = 10
+    private var subjectId = 1
     private var selectedQuestionType: QuestionType? = null
+    private val userAnswers = mutableMapOf<Int, String>()
+    private val answerResults = mutableListOf<Boolean>()
+
+    // 添加请求码常量
+    private companion object {
+        const val REQUEST_ANSWER_SHEET = 1001
+    }
 
     override fun bindLayout(): ActivityQuizBinding {
         return ActivityQuizBinding.inflate(layoutInflater)
@@ -52,10 +67,8 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
 
     override fun subscribeUi() {
         viewModel.errorQuizLiveData.observe(this) { resource ->
-            // 使用 Resource 类提供的 onSuccess 和 onError 方法
             resource
                 .onSuccess { data ->
-                    // 成功状态处理
                     view.progressBar.visibility = View.GONE
                     data?.let { quizData ->
                         currentQuestions = quizData.records
@@ -68,42 +81,129 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
                         updatePageInfo()
                         if (filteredQuestions.isNotEmpty()) {
                             displayQuestion(0)
+                            initAnswerResults()
+                            view.noQuestionsView.visibility = View.GONE
                         } else {
                             showNoQuestionsMessage()
                         }
-                        Log.d("ErrorQuizActivity", "数据加载成功，共${currentQuestions.size}道题目，筛选后${filteredQuestions.size}道")
-                    } ?: run {
-                        Log.w("ErrorQuizActivity", "数据加载成功但data为null")
-                        Toast.makeText(this, "未获取到题目数据", Toast.LENGTH_SHORT).show()
                     }
                 }
                 .onError { error, data ->
-                    // 错误状态处理
                     view.progressBar.visibility = View.GONE
-
-                    // 检查是否有数据在错误响应中
                     if (data != null) {
-                        // 即使请求状态是错误，但如果有数据，仍然显示
                         currentQuestions = data.records
                         totalPages = data.pages
                         currentPage = data.current
 
-                        // 应用筛选
                         applyQuestionFilter()
-
                         updatePageInfo()
                         if (filteredQuestions.isNotEmpty()) {
                             displayQuestion(0)
+                            initAnswerResults()
+                            view.noQuestionsView.visibility = View.GONE
                         } else {
                             showNoQuestionsMessage()
                         }
                         Toast.makeText(this, "注意: ${error?.message}", Toast.LENGTH_SHORT).show()
-                        Log.w("ErrorQuizActivity", "数据加载异常但仍有数据: ${error?.message}")
                     } else {
+                        showNoQuestionsMessage()
                         Toast.makeText(this, "加载失败: ${error?.message}", Toast.LENGTH_SHORT).show()
-                        Log.e("ErrorQuizActivity", "数据加载失败: $error")
                     }
                 }
+        }
+    }
+
+    private fun initAnswerResults() {
+        answerResults.clear()
+        userAnswers.clear()
+        filteredQuestions.forEach { _ ->
+            answerResults.add(false)
+        }
+    }
+
+    private fun setupButtonListeners() {
+        // 返回按钮
+        view.btnBack.setOnClickListener {
+            onBackPressed()
+        }
+
+        // 上一题按钮
+        view.btnPrevious.setOnClickListener {
+            if (currentQuestionIndex > 0) {
+                displayQuestion(currentQuestionIndex - 1)
+            } else if (currentPage > 1) {
+                loadPreviousPage()
+            }
+        }
+
+        // 下一题按钮
+        view.btnNext.setOnClickListener {
+            if (currentQuestionIndex < filteredQuestions.size - 1) {
+                displayQuestion(currentQuestionIndex + 1)
+            } else if (currentPage < totalPages) {
+                loadNextPage()
+            } else {
+                Toast.makeText(this, "已经是最后一题了", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // 提交按钮 - 修改为跳转到答题结果界面
+        view.btnSubmit.setOnClickListener {
+            view.btnSubmit.text="返回答题卡"
+            view.btnSubmit.textSize=12f
+            // 提交答案并跳转到答题结果界面
+            submitAnswersAndNavigate()
+        }
+
+        // 返回选择按钮
+        view.btnBackToSelection.setOnClickListener {
+            startActivity(Intent(this, QuestionSelectionActivity::class.java))
+            finish()
+        }
+    }
+
+    private fun submitAnswersAndNavigate() {
+        // 计算答题结果
+        var answeredCount = 0
+        var correctCount = 0
+
+        filteredQuestions.forEachIndexed { index, question ->
+            val userAnswer = userAnswers[index] ?: ""
+            val isCorrect = userAnswer == question.correctOption
+            answerResults[index] = isCorrect
+
+            if (userAnswer.isNotEmpty()) {
+                answeredCount++
+                if (isCorrect) correctCount++
+            }
+        }
+
+        // 启动答题结果界面
+        val intent = Intent(this, AnswerSheetActivity::class.java).apply {
+            putParcelableArrayListExtra("questions", ArrayList(filteredQuestions))
+            putExtra("user_answers", HashMap(userAnswers))
+            putExtra("answer_results", answerResults.toBooleanArray())
+            putExtra("current_index", currentQuestionIndex)
+        }
+        startActivityForResult(intent, REQUEST_ANSWER_SHEET)
+    }
+
+    // 处理从答题结果界面返回的结果
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_ANSWER_SHEET) {
+            if (resultCode == RESULT_OK) {
+                // 从答题结果界面返回，跳转到指定题目
+                val questionIndex = data?.getIntExtra("question_index", currentQuestionIndex) ?: currentQuestionIndex
+                displayQuestion(questionIndex)
+                // 显示正确答案
+                showCorrectAnswer()
+            } else if (resultCode == RESULT_CANCELED) {
+                // 用户选择完成，返回题型选择页面
+                startActivity(Intent(this, QuestionSelectionActivity::class.java))
+                finish()
+            }
         }
     }
 
@@ -117,40 +217,8 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         }
     }
 
-    private fun setupButtonListeners() {
-        view.btnPrevious.setOnClickListener {
-            if (currentQuestionIndex > 0) {
-                displayQuestion(currentQuestionIndex - 1)
-            } else if (currentPage > 1) {
-                // 加载上一页
-                loadPreviousPage()
-            }
-        }
-
-        view.btnNext.setOnClickListener {
-            if (currentQuestionIndex < filteredQuestions.size - 1) {
-                displayQuestion(currentQuestionIndex + 1)
-            } else {
-                // 加载下一页
-                loadNextPage()
-            }
-        }
-
-        view.btnShowAnswer.setOnClickListener {
-            showCorrectAnswer()
-        }
-
-        view.btnBackToSelection.setOnClickListener {
-            // 返回题型选择页面
-            startActivity(Intent(this, QuestionSelectionActivity::class.java))
-            finish()
-        }
-    }
-
     private fun loadErrorQuestions() {
-        // 显示加载进度条
         view.progressBar.visibility = View.VISIBLE
-
         viewModel.getErrorQuestions(subjectId, currentPage, pageSize)
     }
 
@@ -158,8 +226,6 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         if (currentPage < totalPages) {
             currentPage++
             loadErrorQuestions()
-        } else {
-            Toast.makeText(this, "已经是最后一页了", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -167,8 +233,6 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         if (currentPage > 1) {
             currentPage--
             loadErrorQuestions()
-        } else {
-            Toast.makeText(this, "已经是第一页了", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -182,7 +246,7 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
 
     private fun showNoQuestionsMessage() {
         view.noQuestionsView.visibility = View.VISIBLE
-        view.noQuestionsText.text = if (selectedQuestionType == null) {
+        view.tvNoQuestions.text = if (selectedQuestionType == null) {
             "暂无错题"
         } else {
             "暂无${getQuestionTypeName(selectedQuestionType)}错题"
@@ -200,20 +264,17 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
     }
 
     private fun displayQuestion(index: Int) {
-        if (filteredQuestions.isEmpty()) {
-            Log.w("ErrorQuizActivity", "filteredQuestions为空，无法显示题目")
-            return
-        }
+        if (filteredQuestions.isEmpty()) return
 
         currentQuestionIndex = index
         val question = filteredQuestions[index]
 
-        // 显示题目容器，隐藏无题目提示
+        // 隐藏无题目提示
         view.noQuestionsView.visibility = View.GONE
 
         // 更新进度显示
         view.tvProgress.text = "${index + 1}/${filteredQuestions.size}"
-        view.tvPageInfo.text = "第${currentPage}页/共${totalPages}页"
+        updatePageInfo()
 
         // 设置题目内容
         view.tvQuestionContent.text = question.questionText
@@ -229,33 +290,40 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
             QuestionType.FILL_BLANK -> createFillBlankOptions(question)
             else -> createUnknownTypeOptions(question)
         }
-        // 隐藏正确答案
+
+        // 隐藏正确答案（如果需要显示，可以调用showCorrectAnswer()）
         view.tvCorrectAnswer.visibility = View.GONE
 
         // 更新按钮状态
         updateButtonStates()
-
-        Log.d("ErrorQuizActivity", "显示第${index + 1}题: ${question.questionText}")
     }
 
     private fun createSingleChoiceOptions(question: ErrorQuizItem) {
         val radioGroup = RadioGroup(this)
-
-        val options = listOf(
-            question.optionA,
-            question.optionB,
-            question.optionC,
-            question.optionD
-        ).filter { it.isNotBlank() }
+        val options = listOf(question.optionA, question.optionB, question.optionC, question.optionD)
+            .filter { it.isNotBlank() }
 
         options.forEachIndexed { index, optionText ->
-            val radioButton = RadioButton(this)
-            radioButton.id = View.generateViewId()
-            radioButton.tag = index
-            radioButton.text = optionText
-            radioButton.textSize = 16f
-            radioButton.setPadding(16, 16, 16, 16)
-            radioButton.setLineSpacing(1.2f, 1.2f)
+            val radioButton = RadioButton(this).apply {
+                id = View.generateViewId()
+                text = optionText
+                textSize = 16f
+                setPadding(16, 16, 16, 16)
+                setLineSpacing(1.2f, 1.2f)
+
+                // 设置选中监听
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        val selectedOption = ('A'.toInt() + index).toChar().toString()
+                        userAnswers[currentQuestionIndex] = selectedOption
+                    }
+                }
+
+                // 恢复已选答案
+                if (userAnswers[currentQuestionIndex] == ('A'.toInt() + index).toChar().toString()) {
+                    isChecked = true
+                }
+            }
             radioGroup.addView(radioButton)
         }
 
@@ -263,53 +331,89 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
     }
 
     private fun createMultipleChoiceOptions(question: ErrorQuizItem) {
+        // 简化为示例，实际需要更复杂的多选逻辑
         question.options.forEachIndexed { index, optionText ->
-            val checkBox = CheckBox(this)
-            checkBox.id = View.generateViewId()
-            checkBox.tag = index
-            checkBox.text = optionText
-            checkBox.textSize = 16f
-            checkBox.setPadding(16, 16, 16, 16)
-            checkBox.setLineSpacing(1.2f, 1.2f)
+            val checkBox = CheckBox(this).apply {
+                id = View.generateViewId()
+                text = optionText
+                textSize = 16f
+                setPadding(16, 16, 16, 16)
+                setLineSpacing(1.2f, 1.2f)
+            }
             view.optionsContainer.addView(checkBox)
         }
     }
 
     private fun createTrueFalseOptions(question: ErrorQuizItem) {
-        question.options.forEachIndexed { index, optionText ->
-            val radioButton = RadioButton(this)
-            radioButton.id = View.generateViewId()
-            radioButton.tag = index
-            radioButton.text = optionText
-            radioButton.textSize = 16f
-            radioButton.setPadding(16, 16, 16, 16)
-            radioButton.setLineSpacing(1.2f, 1.2f)
-            view.optionsContainer.addView(radioButton)
+        val radioGroup = RadioGroup(this)
+        val options = listOf("正确", "错误")
+
+        options.forEachIndexed { index, optionText ->
+            val radioButton = RadioButton(this).apply {
+                id = View.generateViewId()
+                text = optionText
+                textSize = 16f
+                setPadding(16, 16, 16, 16)
+                setLineSpacing(1.2f, 1.2f)
+
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        userAnswers[currentQuestionIndex] = optionText
+                    }
+                }
+
+                if (userAnswers[currentQuestionIndex] == optionText) {
+                    isChecked = true
+                }
+            }
+            radioGroup.addView(radioButton)
         }
+
+        view.optionsContainer.addView(radioGroup)
     }
 
     private fun createFillBlankOptions(question: ErrorQuizItem) {
-        val editText = EditText(this)
-        editText.hint = "请输入答案"
-        editText.textSize = 16f
-        editText.setPadding(16, 16, 16, 16)
+        val editText = EditText(this).apply {
+            hint = "请输入答案"
+            textSize = 16f
+            setPadding(16, 16, 16, 16)
+
+            // 设置文本变化监听
+            addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(editable: Editable?) {
+                    userAnswers[currentQuestionIndex] = editable.toString()
+                }
+            })
+
+            // 恢复已填答案
+            userAnswers[currentQuestionIndex]?.let {
+                setText(it)
+            }
+        }
+
         view.optionsContainer.addView(editText)
     }
 
     private fun createUnknownTypeOptions(question: ErrorQuizItem) {
-        val textView = TextView(this)
-        textView.text = "未知题型，无法显示选项"
-        textView.textSize = 16f
-        textView.setPadding(16, 16, 16, 16)
+        val textView = TextView(this).apply {
+            text = "未知题型，无法显示选项"
+            textSize = 16f
+            setPadding(16, 16, 16, 16)
+        }
         view.optionsContainer.addView(textView)
     }
+
     private fun updateButtonStates() {
         view.btnPrevious.isEnabled = currentQuestionIndex > 0 || currentPage > 1
         view.btnNext.isEnabled = currentQuestionIndex < filteredQuestions.size - 1 || currentPage < totalPages
     }
 
     private fun updatePageInfo() {
-        view.tvPageInfo.text = "第${currentPage}页/共${totalPages}页"
+        // 这里可以根据需要添加页面信息显示
     }
 
     private fun showCorrectAnswer() {
@@ -320,8 +424,12 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         view.tvCorrectAnswer.visibility = View.VISIBLE
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("ErrorQuizActivity", "Activity销毁")
+        Log.d("QuizActivity", "Activity销毁")
     }
 }
