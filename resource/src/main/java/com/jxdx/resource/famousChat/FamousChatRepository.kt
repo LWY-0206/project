@@ -13,18 +13,14 @@ class FamousChatRepository {
         HttpManager.instance.service(FamousChatApi::class.java)
     }
 
-    suspend fun initChatSession(celebrityId: Int): BaseResp<ChatResponse> {
+    suspend fun initChatSession(celebrityId: Int): BaseResp<ChatContent> {
         Log.d("ChatRepository", "初始化聊天会话: celebrityId=$celebrityId")
         return service.initChatSession(celebrityId)
     }
 
-    suspend fun sendMessage( message: String, celebrityId: Int): BaseResp<ChatResponse> {
+    suspend fun sendMessage( message: String, celebrityId: Int): BaseResp<ChatContent> {
         Log.d("ChatRepository", "发送消息:message=$message")
-        val request = SendMessageRequest(
-            content = message,
-            celebrityId = celebrityId
-        )
-        Log.d("ChatRepository", "发送消息:request=$request")
-        return service.sendMessage( request)
+        val request = SendMessageRequest(message, celebrityId)
+        return service.sendMessage(request)
     }
 }

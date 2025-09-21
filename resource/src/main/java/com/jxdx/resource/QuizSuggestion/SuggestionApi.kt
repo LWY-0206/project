@@ -10,6 +10,6 @@ interface SuggestionApi {
     suspend fun getQuizSuggestion(
         @Query("subjectId") subjectId: Int,
         @Query("questionIds") questionIds: List<Int>,
-        @Header("satoken") satoken: String = "0f6b8b4c-6d39-47dc-8da8-0c6addd377d0"
+        @Header("satoken") satoken: String = "f646b77d-257e-4fd2-aaa7-e13263932d50"
     ): BaseResp<SuggestionData>
 }

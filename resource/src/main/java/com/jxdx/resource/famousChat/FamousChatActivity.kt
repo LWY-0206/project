@@ -1,7 +1,9 @@
 package com.jxdx.resource.famousChat
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
@@ -25,7 +27,7 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 初始化 ViewModel
-
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
     override fun initView() {
         viewModel = ViewModelProvider(this)[FamousChatViewModel::class.java]
@@ -59,6 +61,7 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
                         avatarUrl = avatarUrl
                     )
                     viewModel.addMessage(welcomeMessage)
+
                 }
             }.onError { error, _ ->
                 // 显示错误
@@ -70,6 +73,7 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
         viewModel.messageList.observe(this) { messages ->
             adapter.submitList(messages.toList())
             // 滚动到底部
+            Log.d("messageList","change")
             if (messages.isNotEmpty()) {
                 view.rvMessages.postDelayed({
                     view.rvMessages.scrollToPosition(messages.size - 1)
@@ -79,12 +83,12 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
         // 观察发送消息结果
         viewModel.sendMessageLiveData.observe(this) { resource ->
             resource.onSuccess {
-                view.progressBar.visibility = View.GONE
+                Log.d("消息发送成功，获取返回",viewModel.messageList.toString())
             }.onError { error, _ ->
+                Log.d("sendMesssageLiveData","失败")
                 // 显示错误
                 showError(error?.message ?: "发送消息失败")
-                // 隐藏加载状态
-                view.progressBar.visibility = View.GONE
+                // 隐藏加载状态1
             }
         }
     }
@@ -102,8 +106,6 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
         view.btnSend.setOnClickListener {
             val message = view.etMessage.text.toString().trim()
             if (message.isNotEmpty())  {
-                // 显示加载状态
-                view.progressBar.visibility = View.VISIBLE
                 viewModel.sendMessage(message, celebrityId)
                 view.etMessage.setText("")
                     view.etMessage.isEnabled = true

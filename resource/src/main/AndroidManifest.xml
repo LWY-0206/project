@@ -27,6 +27,7 @@
             android:exported="false" />
         <activity
             android:name=".famousChat.FamousChatActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="false" />
         <activity
             android:name=".Schools.SchoolDetailActivity"

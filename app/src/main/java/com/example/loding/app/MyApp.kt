@@ -21,7 +21,7 @@ class MyApp : BaseApplication() {
         SquareModuleInitializer.init()
         with(HttpManager.Builder()){
             baseUrl(BASE_URL)
-            this.timeout(30)
+            this.timeout(15)
             HttpManager.init(this)
         }
     }

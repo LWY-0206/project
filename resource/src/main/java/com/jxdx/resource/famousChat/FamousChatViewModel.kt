@@ -16,12 +16,12 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
         FamousChatRepository()
     }
 
-    val chatSessionLiveData: ResLiveData<ChatResponse> by lazy {
+    val chatSessionLiveData: ResLiveData<ChatContent> by lazy {
         Log.d("ChatViewModel", "Initializing chatSessionLiveData")
         ResLiveData()
     }
 
-    val sendMessageLiveData: ResLiveData<ChatResponse> by lazy {
+    val sendMessageLiveData: ResLiveData<ChatContent> by lazy {
         Log.d("ChatViewModel", "Initializing sendMessageLiveData")
         ResLiveData()
     }
@@ -33,11 +33,11 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
 
         request(
             chatSessionLiveData,
-            object : LiveDataCallback<ChatResponse, ChatResponse> {
+            object : LiveDataCallback<ChatContent, ChatContent> {
                 override fun success(
-                    emit: ResLiveData<ChatResponse>,
+                    emit: ResLiveData<ChatContent>,
                     msg: String?,
-                    data: ChatResponse?
+                    data: ChatContent?
                 ) {
                     Log.d("ChatViewModel", "初始化聊天会话成功: $msg, data: $data")
                     data?.let {
@@ -46,10 +46,10 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
                 }
 
                 override fun otherCode(
-                    emit: ResLiveData<ChatResponse>,
+                    emit: ResLiveData<ChatContent>,
                     code: Int?,
                     msg: String?,
-                    data: ChatResponse?
+                    data: ChatContent?
                 ) {
                     Log.w(
                         "ChatViewModel",
@@ -59,7 +59,7 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
                 }
 
                 override fun error(
-                    emit: ResLiveData<ChatResponse>,
+                    emit: ResLiveData<ChatContent>,
                     e: ErrorResponse
                 ) {
                     Log.e("ChatViewModel", "初始化聊天会话错误: ${e.message},${emit.data}", e.cause)
@@ -87,18 +87,18 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
 
         request(
             sendMessageLiveData,
-            object : LiveDataCallback<ChatResponse, ChatResponse> {
+            object : LiveDataCallback<ChatContent, ChatContent> {
                 override fun success(
-                    emit: ResLiveData<ChatResponse>,
+                    emit: ResLiveData<ChatContent>,
                     msg: String?,
-                    data: ChatResponse?
+                    data: ChatContent?
                 ) {
-                    Log.d("ChatViewModel", "发送消息成功: $msg, data: $data")
+                    Log.d("ChatViewModel", "发送消息成功，获取到返回：$msg, data: $data")
                     data?.let { response ->
                         // 添加AI回复到列表
                         val aiMessage = ChatMessage(
                             messageId = "ai_${System.currentTimeMillis()}",
-                            content = response.data.content,
+                            content = response.content,
                             isUser = false,
                             timestamp = System.currentTimeMillis()
                         )
@@ -107,17 +107,17 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
                 }
 
                 override fun otherCode(
-                    emit: ResLiveData<ChatResponse>,
+                    emit: ResLiveData<ChatContent>,
                     code: Int?,
                     msg: String?,
-                    data: ChatResponse?
+                    data: ChatContent?
                 ) {
                     Log.w("ChatViewModel", "发送消息其他代码: code=$code, msg=$msg, data=$data")
                     emit.error(ErrorResponse.otherCode(code, msg), data)
                 }
 
                 override fun error(
-                    emit: ResLiveData<ChatResponse>,
+                    emit: ResLiveData<ChatContent>,
                     e: ErrorResponse
                 ) {
                     Log.e("ChatViewModel", "发送消息错误: ${e.message},${emit.data}", e.cause)

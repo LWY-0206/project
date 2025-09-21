@@ -37,6 +37,10 @@ class FamousListActivity : BaseActivity<ActivityFamousListBinding>() {
 
         // 加载名人数据
         loadFamous()
+        view.tvFavorite.setOnClickListener {
+            val intent = Intent(this, FavoriteListActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun subscribeUi() {

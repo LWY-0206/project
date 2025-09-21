@@ -34,6 +34,9 @@ class FavoriteListActivity : BaseActivity<ActivityFavoriteListBinding>() {
 
         // 加载收藏数据
         loadFavorites()
+        view.btnBackFavorite.setOnClickListener {
+            finish()
+        }
     }
 
     override fun subscribeUi() {
