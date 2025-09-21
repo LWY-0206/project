@@ -1,5 +1,7 @@
 package com.jxdx.resource.famousChat
 
+import android.R
+
 data class ChatInitResponse(
     val code: Int,
     val message: String,
@@ -21,8 +23,7 @@ data class ChatMessage(
 )
 
 data class SendMessageRequest(
-    val sessionId: String,
-    val message: String,
+    val content: String,
     val celebrityId: Int
 )
 

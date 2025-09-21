@@ -9,6 +9,8 @@ interface FamousDetailApi {
     @GET("/api/celebrity/detail")
     suspend fun getFamousDetail(
         @Query("celebrityId") celebrityId: Int,
-        @Header("satoken") satoken: String = "363a547e-4f76-4da9-9e56-cff752475e00"
+        @Header("satoken") satoken: String = "e4bf8921-b19b-4933-a386-1dc82a5ea501"
     ): BaseResp<FamousDetail>
+
+
 }

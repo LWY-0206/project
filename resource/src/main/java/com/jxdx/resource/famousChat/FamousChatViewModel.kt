@@ -16,7 +16,7 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
         FamousChatRepository()
     }
 
-    val chatSessionLiveData: ResLiveData<ChatSession> by lazy {
+    val chatSessionLiveData: ResLiveData<ChatResponse> by lazy {
         Log.d("ChatViewModel", "Initializing chatSessionLiveData")
         ResLiveData()
     }
@@ -33,11 +33,11 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
 
         request(
             chatSessionLiveData,
-            object : LiveDataCallback<ChatSession, ChatSession> {
+            object : LiveDataCallback<ChatResponse, ChatResponse> {
                 override fun success(
-                    emit: ResLiveData<ChatSession>,
+                    emit: ResLiveData<ChatResponse>,
                     msg: String?,
-                    data: ChatSession?
+                    data: ChatResponse?
                 ) {
                     Log.d("ChatViewModel", "初始化聊天会话成功: $msg, data: $data")
                     data?.let {
@@ -46,10 +46,10 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
                 }
 
                 override fun otherCode(
-                    emit: ResLiveData<ChatSession>,
+                    emit: ResLiveData<ChatResponse>,
                     code: Int?,
                     msg: String?,
-                    data: ChatSession?
+                    data: ChatResponse?
                 ) {
                     Log.w(
                         "ChatViewModel",
@@ -59,7 +59,7 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
                 }
 
                 override fun error(
-                    emit: ResLiveData<ChatSession>,
+                    emit: ResLiveData<ChatResponse>,
                     e: ErrorResponse
                 ) {
                     Log.e("ChatViewModel", "初始化聊天会话错误: ${e.message},${emit.data}", e.cause)
@@ -72,8 +72,9 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
         }
     }
 
-    fun sendMessage(sessionId: String, message: String, celebrityId: Int) {
-        Log.d("ChatViewModel", "sendMessage called with sessionId=$sessionId, message=$message")
+    fun sendMessage( message: String, celebrityId: Int) {
+
+        Log.d("ChatViewModel", "sendMessage called with message=$message")
 
         // 先添加用户消息到列表
         val userMessage = ChatMessage(
@@ -125,7 +126,7 @@ class FamousChatViewModel(application: Application) : BaseViewModel(application)
             }
         ) {
             Log.d("ChatViewModel", "Executing repository call for sendMessage")
-            repository.sendMessage(sessionId, message, celebrityId)
+            repository.sendMessage(message, celebrityId)
         }
     }
 

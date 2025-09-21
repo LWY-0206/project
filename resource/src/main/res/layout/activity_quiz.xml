@@ -49,6 +49,17 @@
                     android:textSize="16sp" />
             </LinearLayout>
 
+            <!-- 页面信息显示 -->
+            <TextView
+                android:id="@+id/tv_page_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="已加载: 0题 | 页码: 1/1"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:gravity="center"/>
+
             <!-- 题目内容区域 -->
             <ScrollView
                 android:layout_width="match_parent"
@@ -102,6 +113,17 @@
                 android:background="@color/white"
                 android:orientation="vertical"
                 android:padding="16dp">
+
+                <!-- 加载更多按钮 -->
+                <Button
+                    android:id="@+id/btn_load_more"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/btn_outline"
+                    android:text="加载更多题目"
+                    android:textColor="@color/primary"
+                    android:visibility="gone"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"

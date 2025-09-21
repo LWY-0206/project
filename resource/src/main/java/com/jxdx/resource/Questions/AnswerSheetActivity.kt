@@ -2,8 +2,10 @@ package com.jxdx.resource.Questions
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.jxdx.resource.QuizSuggestion.SuggestionActivity
 import com.jxdx.resource.adpter.AnswerSheetAdapter
 import com.jxdx.resource.databinding.ActivityAnswerSheetBinding
 
@@ -13,7 +15,9 @@ class AnswerSheetActivity : AppCompatActivity() {
     private lateinit var questions: List<ErrorQuizItem>
     private lateinit var userAnswers: Map<Int, String>
     private lateinit var answerResults: List<Boolean>
+    private var subjectId=-1
     private var currentQuestionIndex: Int = 0
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +29,8 @@ class AnswerSheetActivity : AppCompatActivity() {
         userAnswers = intent.getSerializableExtra("user_answers") as? Map<Int, String> ?: emptyMap()
         answerResults = intent.getBooleanArrayExtra("answer_results")?.toList() ?: emptyList()
         currentQuestionIndex = intent.getIntExtra("current_index", 0)
+        subjectId = intent.getIntExtra("subjectId", 1)
+
 
         // 设置正确率统计
         setupStatistics()
@@ -74,14 +80,19 @@ class AnswerSheetActivity : AppCompatActivity() {
 
     private fun setupButtonListeners() {
         binding.btnBackToQuiz.setOnClickListener {
-            // 返回QuizActivity，继续答题
-            val resultIntent = Intent().apply {
-                putExtra("question_index", currentQuestionIndex)
-            }
-            setResult(RESULT_OK, resultIntent)
-            finish()
-        }
+            // 获取错题的ID列表
+            val wrongQuestionIds = questions.withIndex()
+                .filter { (index, _) ->
+                    userAnswers.containsKey(index) && !answerResults[index]
+                }
+                .map { it.value.questionId }
 
+            if (wrongQuestionIds.isNotEmpty()) {
+                SuggestionActivity.start(this, subjectId, wrongQuestionIds)
+            } else {
+                Toast.makeText(this, "没有错题需要分析", Toast.LENGTH_SHORT).show()
+            }
+        }
         binding.btnFinish.setOnClickListener {
             // 完成答题，返回题型选择页面
             setResult(RESULT_CANCELED)

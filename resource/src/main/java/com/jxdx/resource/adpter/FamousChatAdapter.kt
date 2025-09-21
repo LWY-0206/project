@@ -1,5 +1,6 @@
 package com.jxdx.resource.adpter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -65,9 +66,9 @@ class FamousChatAdapter(
         fun bind(message: ChatMessage, name: String, avatarUrl: String) {
             tvName.text = name
             tvMessage.text = message.content
+            Log.d("AIMessageViewHolder", "avatarUrl: $avatarUrl")
             Glide.with(itemView.context)
                 .load(avatarUrl)
-                .placeholder(R.drawable.ic_person_placeholder)
                 .into(ivAvatar)
         }
     }

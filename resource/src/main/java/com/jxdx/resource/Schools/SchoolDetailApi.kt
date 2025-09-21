@@ -10,6 +10,6 @@ import retrofit2.http.Query
         @GET("/api/school/detail")
         suspend fun getSchoolDetail(
             @Query("schoolId") schoolId: Int,
-            @Header("satoken") satoken: String = "363a547e-4f76-4da9-9e56-cff752475e00"
+            @Header("satoken") satoken: String = "0f6b8b4c-6d39-47dc-8da8-0c6addd377d0"
         ): BaseResp<SchoolDetail>
     }

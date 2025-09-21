@@ -23,4 +23,5 @@ data class FamousRecord (
     val profession: String,
     val era: String,
     val avatarUrl: String,
+    var isfavorite: Boolean = false
 )

@@ -115,12 +115,17 @@ class FamousListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     fun setOnLoadMoreListener(listener: () -> Unit) {
         this.onLoadMoreListener = listener
     }
+    // 在 FamousListAdapter 类中添加这个方法
+    fun getCurrentList(): List<FamousRecord> {
+        return famousList.toList()
+    }
 
     class FamousViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val ivAvatar: ImageView = itemView.findViewById(R.id.iv_avatar)
         private val tvName: TextView = itemView.findViewById(R.id.tv_name)
         private val tvProfession: TextView = itemView.findViewById(R.id.tv_profession)
         private val tvEra: TextView = itemView.findViewById(R.id.tv_era)
+
 
         fun bind(famous: FamousRecord) {
             tvName.text = famous.celebrityName
@@ -134,6 +139,7 @@ class FamousListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 .error(R.drawable.ic_person_placeholder)
                 .into(ivAvatar)
         }
+        // 在 FamousListAdapter 类中添加这个方法
     }
 
     class LoadingViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

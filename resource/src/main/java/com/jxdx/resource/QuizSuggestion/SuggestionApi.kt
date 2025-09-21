@@ -1,16 +1,15 @@
-package com.jxdx.resource.Questions
+package com.jxdx.resource.QuizSuggestion
 
 import com.example.corekit.http.bean.BaseResp
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Query
 
-interface ErrorQuizApi {
-    @GET("api/questions/error")
-    suspend fun getErrorQuestions(
+interface SuggestionApi {
+    @GET("/api/questions/summary")
+    suspend fun getQuizSuggestion(
         @Query("subjectId") subjectId: Int,
-        @Query("page") page: Int,
-        @Query("size") size: Int,
+        @Query("questionIds") questionIds: List<Int>,
         @Header("satoken") satoken: String = "0f6b8b4c-6d39-47dc-8da8-0c6addd377d0"
-    ): BaseResp<ErrorQuizData>
+    ): BaseResp<SuggestionData>
 }

@@ -2,6 +2,7 @@ package com.jxdx.resource.Questions
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.service.autofill.FieldClassification
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -20,7 +21,7 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
 
     private lateinit var viewModel: ErrorQuizViewModel
     private var currentQuestionIndex = 0
-    private lateinit var currentQuestions: List<ErrorQuizItem>
+    private var currentQuestions: MutableList<ErrorQuizItem> = mutableListOf() // 改为可变列表
     private var filteredQuestions: List<ErrorQuizItem> = emptyList()
     private var currentPage = 1
     private var totalPages = 1
@@ -29,10 +30,13 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
     private var selectedQuestionType: QuestionType? = null
     private val userAnswers = mutableMapOf<Int, String>()
     private val answerResults = mutableListOf<Boolean>()
+    private var isLoadingMore = false // 标记是否正在加载更多
+    private var hasMoreQuestions = true // 标记是否还有更多题目
 
     // 添加请求码常量
     private companion object {
         const val REQUEST_ANSWER_SHEET = 1001
+        const val MIN_QUESTIONS_REQUIRED = 10 // 最少需要10道题
     }
 
     override fun bindLayout(): ActivityQuizBinding {
@@ -61,7 +65,14 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         // 设置按钮监听器
         setupButtonListeners()
 
-        // 加载错题
+        // 重置状态并加载错题
+        resetAndLoadQuestions()
+    }
+
+    private fun resetAndLoadQuestions() {
+        currentQuestions.clear()
+        currentPage = 1
+        hasMoreQuestions = true
         loadErrorQuestions()
     }
 
@@ -70,30 +81,42 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
             resource
                 .onSuccess { data ->
                     view.progressBar.visibility = View.GONE
+                    isLoadingMore = false
+
                     data?.let { quizData ->
-                        currentQuestions = quizData.records
+                        // 添加新题目到当前列表
+                        currentQuestions.addAll(quizData.records)
                         totalPages = quizData.pages
-                        currentPage = quizData.current
 
                         // 应用筛选
                         applyQuestionFilter()
 
-                        updatePageInfo()
-                        if (filteredQuestions.isNotEmpty()) {
-                            displayQuestion(0)
-                            initAnswerResults()
-                            view.noQuestionsView.visibility = View.GONE
+                        // 检查是否需要加载更多题目
+                        if (filteredQuestions.size < MIN_QUESTIONS_REQUIRED && currentPage < totalPages) {
+                            currentPage++
+                            isLoadingMore = true
+                            view.progressBar.visibility = View.VISIBLE
+                            loadErrorQuestions()
                         } else {
-                            showNoQuestionsMessage()
+                            // 有足够题目或没有更多题目了
+                            updatePageInfo()
+                            if (filteredQuestions.isNotEmpty()) {
+                                displayQuestion(0)
+                                initAnswerResults()
+                                view.noQuestionsView.visibility = View.GONE
+                            } else {
+                                showNoQuestionsMessage()
+                            }
                         }
                     }
                 }
                 .onError { error, data ->
                     view.progressBar.visibility = View.GONE
+                    isLoadingMore = false
+
                     if (data != null) {
-                        currentQuestions = data.records
+                        currentQuestions.addAll(data.records)
                         totalPages = data.pages
-                        currentPage = data.current
 
                         applyQuestionFilter()
                         updatePageInfo()
@@ -131,8 +154,6 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         view.btnPrevious.setOnClickListener {
             if (currentQuestionIndex > 0) {
                 displayQuestion(currentQuestionIndex - 1)
-            } else if (currentPage > 1) {
-                loadPreviousPage()
             }
         }
 
@@ -140,8 +161,6 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         view.btnNext.setOnClickListener {
             if (currentQuestionIndex < filteredQuestions.size - 1) {
                 displayQuestion(currentQuestionIndex + 1)
-            } else if (currentPage < totalPages) {
-                loadNextPage()
             } else {
                 Toast.makeText(this, "已经是最后一题了", Toast.LENGTH_SHORT).show()
             }
@@ -149,8 +168,11 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
 
         // 提交按钮 - 修改为跳转到答题结果界面
         view.btnSubmit.setOnClickListener {
-            view.btnSubmit.text="返回答题卡"
-            view.btnSubmit.textSize=12f
+            view.btnPrevious.visibility = View.GONE
+            view.btnNext.visibility = View.GONE
+            view.btnSubmit.text = "返回答题卡"
+            view.btnSubmit.layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT
+            view.btnSubmit.textSize = 12f
             // 提交答案并跳转到答题结果界面
             submitAnswersAndNavigate()
         }
@@ -159,6 +181,14 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         view.btnBackToSelection.setOnClickListener {
             startActivity(Intent(this, QuestionSelectionActivity::class.java))
             finish()
+        }
+
+        // 添加加载更多按钮监听
+        view.btnLoadMore.setOnClickListener {
+            if (currentPage < totalPages && !isLoadingMore) {
+                currentPage++
+                loadErrorQuestions()
+            }
         }
     }
 
@@ -184,6 +214,7 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
             putExtra("user_answers", HashMap(userAnswers))
             putExtra("answer_results", answerResults.toBooleanArray())
             putExtra("current_index", currentQuestionIndex)
+            putExtra("subjectId", subjectId)
         }
         startActivityForResult(intent, REQUEST_ANSWER_SHEET)
     }
@@ -218,22 +249,11 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
     }
 
     private fun loadErrorQuestions() {
-        view.progressBar.visibility = View.VISIBLE
+        if (!isLoadingMore) {
+            view.progressBar.visibility = View.VISIBLE
+            isLoadingMore = true
+        }
         viewModel.getErrorQuestions(subjectId, currentPage, pageSize)
-    }
-
-    private fun loadNextPage() {
-        if (currentPage < totalPages) {
-            currentPage++
-            loadErrorQuestions()
-        }
-    }
-
-    private fun loadPreviousPage() {
-        if (currentPage > 1) {
-            currentPage--
-            loadErrorQuestions()
-        }
     }
 
     private fun applyQuestionFilter() {
@@ -339,6 +359,27 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
                 textSize = 16f
                 setPadding(16, 16, 16, 16)
                 setLineSpacing(1.2f, 1.2f)
+
+                // 设置选中监听
+                setOnCheckedChangeListener { _, isChecked ->
+                    val selectedOptions = userAnswers[currentQuestionIndex]?.split(",")?.toMutableSet() ?: mutableSetOf()
+                    val optionKey = ('A'.toInt() + index).toChar().toString()
+
+                    if (isChecked) {
+                        selectedOptions.add(optionKey)
+                    } else {
+                        selectedOptions.remove(optionKey)
+                    }
+
+                    userAnswers[currentQuestionIndex] = selectedOptions.joinToString(",")
+                }
+
+                // 恢复已选答案
+                userAnswers[currentQuestionIndex]?.split(",")?.forEach { selectedOption ->
+                    if (selectedOption == ('A'.toInt() + index).toChar().toString()) {
+                        isChecked = true
+                    }
+                }
             }
             view.optionsContainer.addView(checkBox)
         }
@@ -408,12 +449,15 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
     }
 
     private fun updateButtonStates() {
-        view.btnPrevious.isEnabled = currentQuestionIndex > 0 || currentPage > 1
-        view.btnNext.isEnabled = currentQuestionIndex < filteredQuestions.size - 1 || currentPage < totalPages
+        view.btnPrevious.isEnabled = currentQuestionIndex > 0
+        view.btnNext.isEnabled = currentQuestionIndex < filteredQuestions.size - 1
+        view.btnLoadMore.isEnabled = currentPage < totalPages && !isLoadingMore
+        view.btnLoadMore.visibility = if (currentPage < totalPages) View.VISIBLE else View.GONE
     }
 
     private fun updatePageInfo() {
-        // 这里可以根据需要添加页面信息显示
+        // 显示当前加载的题目数量和总页数信息
+        view.tvPageInfo.text = "已加载: ${filteredQuestions.size}题 | 页码: $currentPage/$totalPages"
     }
 
     private fun showCorrectAnswer() {
