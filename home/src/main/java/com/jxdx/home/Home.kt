@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.jxdx.common.http.service.ClassService
 import com.jxdx.common.http.service.FragmentService
 import com.jxdx.common.http.service.ResourceService
 import com.jxdx.common.http.service.ServiceRegistry
@@ -85,6 +86,7 @@ class Home : AppCompatActivity() {
         val fragmentService = ServiceRegistry.get(FragmentService::class.java)
         val resourceService= ServiceRegistry.get(ResourceService::class.java)
         val squareService= ServiceRegistry.get(SquareService::class.java)
+        var ClassService=ServiceRegistry.get(ClassService::class.java)
         if (fragmentService == null) {
             Log.d("--Home", "FragmentService未注册")
         }else{
@@ -115,7 +117,8 @@ class Home : AppCompatActivity() {
                 navClass.setBackgroundResource(R.drawable.bg_circle_primary_selected)
                 ivClass.setImageResource(R.drawable.ketang)
                 tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                fragmentService?.getFragment("my")
+//                fragmentService?.getFragment("my")
+                ClassService?.getClassFragment("Class")
 
             }
 

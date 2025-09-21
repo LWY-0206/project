@@ -6,12 +6,19 @@ plugins {
 android {
     namespace = "com.jxdx.mylibrary"
     compileSdk = 36
+    ndkVersion = "22.1.7171670"
 
     defaultConfig {
         minSdk = 24
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+        externalNativeBuild {
+            cmake {
+                cppFlags ("")
+            }
+        }
+
     }
 
     buildTypes {
@@ -30,6 +37,23 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/CMakeLists.txt")
+            version ="3.18.1"
+        }
+    }
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
+    }
+//    externalNativeBuild {
+//        cmake {
+//            path = file("src/main/cpp/CMakeLists.txt")
+//            version = "3.22.1"
+//        }
+//    }
+
 }
 
 dependencies {
@@ -37,6 +61,16 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
+//    // IJKPlayer核心依赖
+//    implementation(libs.ijkplayer.java)
+//    implementation(libs.ijkplayer.armv7a)
+//
+//    // 其他架构（可选）
+//    implementation(libs.ijkplayer.armv5)
+//    implementation(libs.ijkplayer.arm64)
+//    implementation(libs.ijkplayer.x86)
+
+    implementation(libs.ffmpegKitVideo)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

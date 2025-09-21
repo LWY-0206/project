@@ -1,4 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- 1. 声明前台服务基础权限（Android 8.0+ 必需） -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <!-- 2. 声明媒体投影专属前台服务权限（Android 10+ 必需，关键！） -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
 
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+
+    <application>
+        <activity android:name="com.jxdx.classroom.activity.ClassActivity"
+            android:exported="false"/>
+
+        <activity android:name="com.jxdx.classroom.activity.MainActivity"
+            android:exported="false"/>
+        
+        <!-- 注册媒体投影前台服务 -->
+        <service 
+            android:name="com.jxdx.classroom.service.MediaProjectionService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
+
+    </application>
 </manifest>

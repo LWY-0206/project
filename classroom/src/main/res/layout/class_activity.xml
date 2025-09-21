@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF">
+
+    <!-- 顶部标题栏 -->
+    <LinearLayout
+        android:id="@+id/titleBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="数学课教学"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="课程时间：2小时"
+            android:textSize="14sp"
+            android:textColor="#666666" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="学生界面"
+            android:textSize="14sp"
+            android:textColor="#666666" />
+    </LinearLayout>
+
+    <!-- 分割线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#EEEEEE"
+        app:layout_constraintTop_toBottomOf="@id/titleBar" />
+
+    <!-- 课件展示区域 -->
+    <SurfaceView
+        android:id="@+id/coursewareContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:background="#F5F5F5"
+        app:layout_constraintBottom_toTopOf="@id/functionButtons"
+        app:layout_constraintTop_toBottomOf="@id/titleBar"
+        app:layout_constraintVertical_weight="1" />
+
+    <!-- 分割线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#EEEEEE"
+        app:layout_constraintTop_toBottomOf="@id/coursewareContainer" />
+
+    <!-- 功能按钮区域 -->
+    <LinearLayout
+        android:id="@+id/functionButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        app:layout_constraintBottom_toTopOf="@id/quizSection"
+        app:layout_constraintTop_toBottomOf="@id/coursewareContainer">
+
+        <TextView
+            android:id="@+id/btnRaiseHand"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#E0E0E0"
+            android:gravity="center"
+            android:text="举手"
+            android:textSize="14sp"
+            android:layout_marginHorizontal="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#333333" />
+
+        <TextView
+            android:id="@+id/btnNote"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#E0E0E0"
+            android:gravity="center"
+            android:text="笔记"
+            android:textSize="14sp"
+            android:layout_marginHorizontal="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#333333" />
+
+        <TextView
+            android:id="@+id/btnConfused"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#E0E0E0"
+            android:gravity="center"
+            android:text="不懂"
+            android:textSize="14sp"
+            android:layout_marginHorizontal="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#333333" />
+
+        <TextView
+            android:id="@+id/btnMaterial"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#E0E0E0"
+            android:gravity="center"
+            android:text="资料"
+            android:textSize="14sp"
+            android:layout_marginHorizontal="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#333333" />
+
+        <TextView
+            android:id="@+id/btnGroup"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="#E0E0E0"
+            android:gravity="center"
+            android:text="小组"
+            android:textSize="14sp"
+            android:layout_marginHorizontal="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="#333333" />
+    </LinearLayout>
+
+    <!-- 分割线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#EEEEEE"
+        app:layout_constraintTop_toBottomOf="@id/functionButtons" />
+
+    <!-- 随堂测验区域 -->
+    <LinearLayout
+        android:id="@+id/quizSection"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:padding="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/functionButtons"
+        app:layout_constraintVertical_weight="1">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="随堂测验："
+            android:textSize="16sp"
+            android:textColor="#333333" />
+
+        <EditText
+            android:id="@+id/quizInput"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#F5F5F5"
+            android:hint="请输入答案"
+            android:padding="16dp"
+            android:textColor="#333333"
+            android:textColorHint="#999999"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <!-- AI助手按钮 -->
+    <TextView
+        android:id="@+id/btnAiAssistant"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:background="#4CAF50"
+        android:gravity="center"
+        android:text="AI助手"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

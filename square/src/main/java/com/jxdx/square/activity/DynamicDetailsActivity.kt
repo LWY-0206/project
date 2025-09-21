@@ -19,12 +19,13 @@ import com.jxdx.square.adapter.Comment_Adapter
 import com.jxdx.square.adapter.LikeDynamicViewModel
 import com.jxdx.square.adapter.PostCommentViewModel
 import com.jxdx.square.adapter.PostDetailsViewModel
-import com.jxdx.square.databinding.ActivityDynamicdetailsMainBinding
+import com.jxdx.square.databinding.ActivityDynamicDetailsMianBinding
+
 import com.jxdx.square.entity.CommentItem
 import com.jxdx.square.entity.DynamicDetail
 import kotlin.collections.isNotEmpty
 
-class DynamicDetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>() {
+class DynamicDetailsActivity : BaseActivity<ActivityDynamicDetailsMianBinding>() {
     val viewModel1: PostDetailsViewModel by lazy {
         ViewModelProvider(this)[PostDetailsViewModel::class.java]
     }
@@ -54,7 +55,7 @@ class DynamicDetailsActivity : BaseActivity<ActivityDynamicdetailsMainBinding>()
     // 点赞的心形图标
     private lateinit var likeHeartIcon: ImageView
 
-    override fun bindLayout(): ActivityDynamicdetailsMainBinding=ActivityDynamicdetailsMainBinding.inflate(layoutInflater)
+    override fun bindLayout(): ActivityDynamicDetailsMianBinding=ActivityDynamicDetailsMianBinding.inflate(layoutInflater)
 
     // 保存当前动态ID
     private var currentDynamicId: Int = -1
