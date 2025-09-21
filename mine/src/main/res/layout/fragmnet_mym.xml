@@ -18,30 +18,35 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            android:theme="?attr/actionBarTheme"
-            android:paddingHorizontal="16dp">
+            android:layout_height="wrap_content"
+            android:background="@color/purple_200"
+            android:paddingHorizontal="35dp"
+            android:paddingTop="20dp">
 
-            <!-- 左侧头像按钮 -->
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/menu_icon"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@drawable/ic_default_avatar"
-                android:scaleType="centerCrop"
-                android:layout_gravity="center_vertical"
-                android:contentDescription="头像按钮"
-                android:padding="4dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="我的"
-                android:textSize="20sp"
-                android:textColor="@android:color/white"
-                android:layout_marginStart="16dp"
-                android:layout_gravity="center_vertical"/>
+                android:orientation="horizontal">
+                <!-- 左侧头像按钮 -->
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/menu_icon"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_default_avatar"
+                    android:scaleType="centerCrop"
+                    android:layout_gravity="center_vertical"
+                    android:contentDescription="头像按钮"
+                    android:padding="4dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="我的"
+                    android:textSize="20sp"
+                    android:textColor="@android:color/white"
+                    android:layout_marginStart="16dp"
+                    android:layout_gravity="center_vertical"/>
+            </LinearLayout>
 
         </androidx.appcompat.widget.Toolbar>
 
@@ -151,15 +156,16 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="课程完成进度"
+                        android:text="本周任务完成进度69%"
                         android:textSize="14sp"
                         android:textColor="#666666"/>
 
                     <ProgressBar
+                        android:id="@+id/progress_bar"
                         style="@android:style/Widget.ProgressBar.Horizontal"
                         android:layout_width="match_parent"
                         android:layout_height="8dp"
-                        android:progress="60"
+                        android:progress="69"
                         android:max="100"
                         android:progressDrawable="@drawable/progress_bar_style"
                         android:layout_marginVertical="8dp"/>
@@ -257,7 +263,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_height="330dp"
                     android:background="@drawable/bg_card"
                     android:padding="12dp"
                     android:elevation="2dp">
@@ -267,9 +273,20 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
                 </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="底部"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="8dp"/>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>
+
+
 
     <!-- 侧边导航栏 -->
     <LinearLayout

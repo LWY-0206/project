@@ -32,8 +32,12 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import com.jxdx.mine.ProfileActivity
 import com.jxdx.mine.R
+import com.jxdx.mine.course.CourseActivity
+import com.jxdx.mine.course.CourseDetailActivity
+import com.jxdx.mine.course.CourseListFragment
 import com.jxdx.mine.databinding.FragmnetMymBinding
-
+import com.jxdx.mine.grade.GradeActivity
+import com.jxdx.mine.homework.HomeworkActivity
 
 class My : Fragment() {
 
@@ -308,6 +312,19 @@ class My : Fragment() {
         binding.editUserBio.setOnClickListener {
             var intent= Intent(requireActivity(), EditProfileActivity::class.java)
             startActivityForResult(intent, 1)
+        }
+        //点击作业跳转到作业页面
+        binding.navSettings.setOnClickListener {
+            startActivity(Intent(requireActivity(), HomeworkActivity::class.java))
+        }
+        //点击班级跳转班级页面
+        binding.navClass.setOnClickListener {
+            startActivity(Intent(requireActivity(), GradeActivity::class.java))
+        }
+
+        //点击课程跳转课程界面
+        binding.navCourses.setOnClickListener {
+            startActivity(Intent(requireActivity(), CourseActivity::class.java))
         }
 
         //加载用户信息

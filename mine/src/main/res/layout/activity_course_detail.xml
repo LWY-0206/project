@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+<!--课程详情页，分为 顶部课程信息 + 历史课件列表 + 学习报告 三部分：-->
+    <!-- 顶部课程信息 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#2196F3">
+
+        <TextView
+            android:id="@+id/tv_course_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="课程名"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/tv_teacher_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="任课老师"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+
+    <!-- 历史课件列表 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="历史课件"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="16dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewCourseware"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp"
+        android:scrollbars="vertical" />
+
+    <!-- 学习报告 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="学习报告"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:padding="16dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#F8F8F8"
+        android:padding="16dp">
+        <!--学习报告-->
+        <TextView
+            android:id="@+id/tv_total_study_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="总学习时长：0小时" />
+
+        <TextView
+            android:id="@+id/tv_homework_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="已完成作业：0/0" />
+
+        <TextView
+            android:id="@+id/tv_average_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="平均得分：0" />
+
+    </LinearLayout>
+
+</LinearLayout>
