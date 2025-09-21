@@ -28,8 +28,9 @@ class RegisterActivity : AppCompatActivity() {
     private var _binding: ActivityRegisterBinding? = null
     private val binding get() = _binding!!
     private val gradeList = arrayOf(
-        "软件111", "软件112", "软件113", "软件114", "软件115", "软件116",
-        "计科111", "计科112", "计科113", "计科114", "计科115", "计科116"
+        "高一1班", "高一2班", "高一3班", "高一4班",
+        "高二1班", "高二2班", "高二3班", "高二4班",
+        "高三1班", "高三2班","高三3班", "高三4班",
     )
     private var isTeacher: Boolean = false
     private var avatarUri: Uri? = null
