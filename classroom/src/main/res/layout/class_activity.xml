@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF">
@@ -44,17 +45,30 @@
         app:layout_constraintTop_toBottomOf="@id/titleBar" />
 
     <!-- 课件展示区域 -->
-    <SurfaceView
+
+    <!-- 分割线 -->
+<!--    <SurfaceView-->
+<!--        android:id="@+id/coursewareContainer"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="0dp"-->
+<!--        android:layout_margin="16dp"-->
+<!--        android:background="#F5F5F5"-->
+<!--        app:layout_constraintBottom_toTopOf="@id/functionButtons"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/titleBar"-->
+<!--        app:layout_constraintVertical_weight="1"-->
+<!--        tools:layout_editor_absoluteX="16dp" />-->
+
+    <com.google.android.exoplayer2.ui.PlayerView
         android:id="@+id/coursewareContainer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_margin="16dp"
-        android:background="#F5F5F5"
+        android:keepScreenOn="true"
         app:layout_constraintBottom_toTopOf="@id/functionButtons"
         app:layout_constraintTop_toBottomOf="@id/titleBar"
-        app:layout_constraintVertical_weight="1" />
+        app:layout_constraintVertical_weight="1"
+        />
 
-    <!-- 分割线 -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

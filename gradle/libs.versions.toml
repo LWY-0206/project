@@ -29,8 +29,8 @@ fragment = "1.6.2"
 imagepicker = "2.1"
 bannerviewpager = "3.5.6"
 banner = "1.4.10"
-ffmpegKit = "4.5.1"
-
+ffmpegKit = "6.0-2"
+exoplayer = "2.18.1"
 
 [libraries]
 
@@ -66,6 +66,8 @@ imagepicker = { module = "com.github.dhaval2404:imagepicker", version.ref = "ima
 bannerviewpager = { module = "com.github.zhpanvip:bannerviewpager", version.ref = "bannerviewpager" }
 banner = { group = "com.youth.banner", name = "banner", version.ref = "banner" }
 ffmpegKitVideo = { group = "com.arthenica", name = "ffmpeg-kit-video", version.ref = "ffmpegKit" }
+exoplayer-core = { group = "com.google.android.exoplayer", name = "exoplayer", version.ref = "exoplayer" }
+exoplayer-extension-rtmp = { group = "com.google.android.exoplayer", name = "extension-rtmp", version.ref = "exoplayer" }
 
 [bundles]
 retrofit = ["retrofit", "converter-gson", "logging-interceptor"]

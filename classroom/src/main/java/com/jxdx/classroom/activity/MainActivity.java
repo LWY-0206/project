@@ -119,9 +119,9 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
             this.mediaProjection.stop();
         }
     }
-//    public void startScreenCapture() {
-//        MediaProjectionManager mediaProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-//        Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
-//        startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE);
-//    }
+    public void startScreenCapture() {
+        MediaProjectionManager mediaProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
+        startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE);
+    }
 }

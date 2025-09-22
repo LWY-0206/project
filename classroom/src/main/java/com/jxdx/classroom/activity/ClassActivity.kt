@@ -1,25 +1,36 @@
 package com.jxdx.classroom.activity
 
-import android.os.Bundle
+import android.graphics.Bitmap
+import android.graphics.Rect
 import android.util.Log
 import android.view.SurfaceHolder
-
+import android.view.SurfaceView
 import android.widget.Toast
-import androidx.core.content.pm.ShortcutInfoCompat
+import com.arthenica.ffmpegkit.FFmpegKit
+import com.arthenica.ffmpegkit.FFmpegSession
+import com.arthenica.ffmpegkit.ReturnCode
+import com.arthenica.ffmpegkit.SessionState
 import com.example.corekit.common.BaseActivity
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.ui.PlayerView
 import com.jxdx.mylibrary.databinding.ClassActivityBinding
-import com.arthenica.ffmpegkit.*
+
 
 class ClassActivity : BaseActivity<ClassActivityBinding>(), SurfaceHolder.Callback {
     //这个是日志标签，用来观察的
     private val TAG = "RTMPLiveViewer"
     //这个是SurfaceHolder对象，用于显示直播画面
+    //这个值 一直Null
     private var surfaceHolder: SurfaceHolder? = null
     // 这个用来控制直播播放
     private var currentSession: FFmpegSession? = null
 
     private var isPlaying = false
     private var isSurfaceReady = false
+    private lateinit var surfaceView: SurfaceView
+    private lateinit var player: ExoPlayer
+    private lateinit var playerView: PlayerView
     //地址：这个测试的地址是可以放的啊
     private val rtmpUrl = "rtmp://liteavapp.qcloud.com/live/liteavdemoplayerstreamid"
     //加载布局，初始化视图
@@ -28,11 +39,24 @@ class ClassActivity : BaseActivity<ClassActivityBinding>(), SurfaceHolder.Callba
     }
     //初始化视图获取 SurfaceHolder 并设置回调监听
     override fun initView() {
-        surfaceHolder = view.coursewareContainer.holder
+//        surfaceHolder = view.coursewareContainer.holder
         surfaceHolder?.addCallback(this)
     }
 
-    override fun subscribeUi() {}
+    override fun subscribeUi() {
+        player = ExoPlayer.Builder(this).build()
+        view.coursewareContainer.player = player
+
+        // RTMP 流 URL
+
+        // 创建 MediaItem
+        val mediaItem = MediaItem.fromUri(rtmpUrl)
+        player.setMediaItem(mediaItem)
+
+        // 准备并播放
+        player.prepare()
+        player.play()
+    }
     //启动直播播放
     private fun startRtmpPlay() {
         val surface = surfaceHolder?.surface ?: return
@@ -40,20 +64,30 @@ class ClassActivity : BaseActivity<ClassActivityBinding>(), SurfaceHolder.Callba
             Log.e(TAG, "Surface 未准备就绪")
             return
         }
+//        val cmd = String.format("-i %s -vf scale=1280:720 -c:v libx264 -c:a aac -f rawvideo", rtmpUrl)
+//        val cmd = String.format("-i %s -vf scale=1280:720 -c:v copy -c:a copy -f rawvideo -", rtmpUrl)
+//        val cmd = String.format("-i %s -vf scale=1280:720 -c:v h264_mediacodec -b:v 1M -c:a aac -f mp4 -", rtmpUrl)
+//dui
+//        val cmd = "-i rtmp://liteavapp.qcloud.com/live/liteavdemoplayerstreamid " +
+//                "-c:v h264_mediacodec " +
+//                "-an " +
+//                "-f android_view_surface pipe:"
+//        val cmd = String.format("-i %s -c:v h264_mediacodec -f rawvideo -pix_fmt yuv420p pipe:1", rtmpUrl)
+//        val cmd = "-i rtmp://liteavapp.qcloud.com/live/liteavdemoplayerstreamid -c:v h264_mediacodec -f android_surface";
+//        // 正确的命令参数列表：确保各选项与参数格式正确，无多余字符
+        val cmd = "-i $rtmpUrl -f rawvideo -pix_fmt rgba pipe:1"
+//        val ffmpegCommand = "-i $rtmpUrl -fflags nobuffer+fastseek -vcodec copy -acodec copy -f android_view_surface ${surface.javaClass.name}@${surface.hashCode()}"
 
-        // 正确的命令参数列表：确保各选项与参数格式正确，无多余字符
-        val ffmpegCommand = "-i $rtmpUrl -fflags nobuffer+fastseek -vcodec copy -acodec copy -f android_view_surface ${surface.javaClass.name}@${surface.hashCode()}"
 
-
-        Log.d(TAG, "执行命令：${ffmpegCommand}")
-
+        Log.d(TAG, "执行命令：${cmd}")
         // 异步执行命令
-        currentSession = FFmpegKit.executeAsync(
-            ffmpegCommand,
-            { session -> handleSessionComplete(session) },
-            { log -> Log.d(TAG, "FFmpeg 日志：${log.message}") },
-            null
-        )
+//        currentSession = FFmpegKit.executeAsync(
+//           cmd,
+//            { session -> handleSessionComplete(session) },
+//            { log -> Log.d(TAG, "FFmpeg 日志：${log.message}") },
+//            null
+//        )
+
     }
 
     private fun handleSessionComplete(session: FFmpegSession) {
@@ -90,6 +124,7 @@ class ClassActivity : BaseActivity<ClassActivityBinding>(), SurfaceHolder.Callba
     override fun surfaceCreated(holder: SurfaceHolder) {
         Log.d(TAG, "直播画面载体已创建")
         isSurfaceReady = true
+        this.surfaceHolder = holder
         // 自动开始拉流播放
         startRtmpPlay()
     }

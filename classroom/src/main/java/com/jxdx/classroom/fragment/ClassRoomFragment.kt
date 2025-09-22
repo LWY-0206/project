@@ -14,7 +14,7 @@ class ClassRoomFragment : BaseFragment<ClassroomFragmentBinding>() {
     override fun bindLayout(): ClassroomFragmentBinding = ClassroomFragmentBinding.inflate(layoutInflater)
     override fun initView() {
         find.btnEnterClass.setOnClickListener {
-            val intent = Intent(requireActivity(), MainActivity::class.java)
+            val intent = Intent(requireActivity(), ClassActivity::class.java)
             startActivity(intent)
         }
     }

@@ -31,34 +31,67 @@ JNIEXPORT jboolean JNICALL
 Java_com_jxdx_classroom_activity_ScreenLive_connect(JNIEnv *env, jobject thiz, jstring url_) {
     const char *url = env->GetStringUTFChars(url_, 0);
 
+    LOGE("开始连接RTMP服务器，URL: %s", url);
+    
+    // 检查URL是否有效
+    if (!url || strlen(url) == 0) {
+        LOGE("错误: RTMP URL为空");
+        env->ReleaseStringUTFChars(url_, url);
+        return false;
+    }
+
     live = (Live*)malloc(sizeof(Live));
+    if (!live) {
+        LOGE("错误: 无法分配Live结构体内存");
+        env->ReleaseStringUTFChars(url_, url);
+        return false;
+    }
 
     live->rtmp = RTMP_Alloc();//分配空间
+    if (!live->rtmp) {
+        LOGE("错误: 无法分配RTMP对象内存");
+        free(live);
+        live = NULL;
+        env->ReleaseStringUTFChars(url_, url);
+        return false;
+    }
+    
     RTMP_Init(live->rtmp);//初始化
 
     live->rtmp->Link.timeout = 10;//连接超时时长为10秒
     live->rtmp->Link.lFlags |= RTMP_LF_LIVE;//设置类型为直播
-    RTMP_SetupURL(live->rtmp, (char*)url);//设置推流URL
+    
+    if (!RTMP_SetupURL(live->rtmp, (char*)url)) {
+        LOGE("错误: RTMP_SetupURL 失败，URL格式可能不正确");
+        close();
+        env->ReleaseStringUTFChars(url_, url);
+        return false;
+    }
 
     RTMP_EnableWrite(live->rtmp);//设置为可写状态
 
-    LOGE("RTMP start Connect");
-
-    int ret;
+    LOGE("开始调用RTMP_Connect连接服务器");
+    
+    int ret = 0;
     if (!(ret = RTMP_Connect(live->rtmp, NULL))){
-        //连接服务器
+        LOGE("错误: RTMP_Connect 连接服务器失败，可能的原因: 服务器不可达、网络问题、URL错误");
         close();
+        env->ReleaseStringUTFChars(url_, url);
+        return false;
+    } else {
+        LOGE("RTMP_Connect 连接服务器成功");
     }
 
-    if (ret&&!(ret = RTMP_ConnectStream(live->rtmp, 0))){
-        //连接流
+    if (!(ret = RTMP_ConnectStream(live->rtmp, 0))){        LOGE("错误: RTMP_ConnectStream 连接流失败");
         close();
+        env->ReleaseStringUTFChars(url_, url);
+        return false;
+    } else {
+        LOGE("RTMP_ConnectStream 连接流成功");
     }
 
-    if (ret){
-        LOGE("RTMP Connect success");
-    }
-
+    LOGE("RTMP连接完全成功");
+    
     env->ReleaseStringUTFChars(url_, url);
     return ret;
 }
@@ -211,10 +244,8 @@ void close(){
         RTMP_Close(live->rtmp);//关闭连接
         RTMP_Free(live->rtmp);
         free(live);
+        live = NULL;
     }
-
-    live->rtmp = NULL;
-    live = NULL;
 }
 
 

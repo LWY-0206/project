@@ -70,6 +70,8 @@ dependencies {
 //    implementation(libs.ijkplayer.arm64)
 //    implementation(libs.ijkplayer.x86)
 
+    implementation(libs.exoplayer.core)
+    implementation(libs.exoplayer.extension.rtmp)
     implementation(libs.ffmpegKitVideo)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
