@@ -1,4 +1,3 @@
-
 package com.jxdx.home
 
 import android.os.Bundle
@@ -16,7 +15,7 @@ import com.jxdx.common.http.service.ServiceRegistry
 import com.jxdx.common.http.service.SquareService
 
 
-class Home : AppCompatActivity() {
+class HomeActivity : AppCompatActivity() {
 
     private lateinit var fragmentContainer: FrameLayout
     private lateinit var navHome: LinearLayout
@@ -109,7 +108,6 @@ class Home : AppCompatActivity() {
                         R.id.fragment_container // 传入容器ID
                     )
                 }
-
             }
 
             2 -> {
@@ -117,7 +115,7 @@ class Home : AppCompatActivity() {
                 navClass.setBackgroundResource(R.drawable.bg_circle_primary_selected)
                 ivClass.setImageResource(R.drawable.ketang)
                 tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                fragmentService?.getFragment("my")
+                ClassService?.getClassFragment("entrance")
 
             }
 

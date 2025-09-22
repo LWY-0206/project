@@ -6,7 +6,7 @@ import com.jxdx.classroom.activity.ClassActivity
 import com.jxdx.classroom.activity.MainActivity
 
 
-import com.jxdx.mylibrary.databinding.ClassroomFragmentBinding
+import com.jxdx.classroom.databinding.ClassroomFragmentBinding
 
 
 

@@ -1,5 +1,6 @@
 package com.jxdx.classroom.entrance
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,6 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.jxdx.classroom.R
+import com.jxdx.classroom.activity.ActivityToClassRoomFragment
 import com.jxdx.classroom.databinding.FragmentEntranceBinding
 
 class EntranceFragment : Fragment() {
@@ -59,6 +61,11 @@ class EntranceFragment : Fragment() {
         // 退出按钮
         binding.exit.setOnClickListener {
             Toast.makeText(requireContext(), "退出登录", Toast.LENGTH_SHORT).show()
+        }
+
+
+        binding.ibLive.setOnClickListener {
+            startActivity(Intent(requireContext(), ActivityToClassRoomFragment::class.java))
         }
     }
 

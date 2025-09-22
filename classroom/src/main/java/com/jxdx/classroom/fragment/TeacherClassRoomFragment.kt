@@ -3,7 +3,7 @@ package com.jxdx.classroom.com.jxdx.classroom.fragment
 import android.content.Intent
 import com.example.corekit.common.BaseFragment
 import com.jxdx.classroom.activity.MainActivity
-import com.jxdx.mylibrary.databinding.TeacherClassRoomFragmentBinding
+import com.jxdx.classroom.databinding.TeacherClassRoomFragmentBinding
 
 class TeacherClassRoomFragment:BaseFragment<TeacherClassRoomFragmentBinding>() {
     override fun bindLayout(): TeacherClassRoomFragmentBinding {

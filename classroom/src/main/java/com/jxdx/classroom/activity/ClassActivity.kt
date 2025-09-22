@@ -14,7 +14,7 @@ import com.example.corekit.common.BaseActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.ui.PlayerView
-import com.jxdx.mylibrary.databinding.ClassActivityBinding
+import com.jxdx.classroom.databinding.ClassActivityBinding
 
 
 class ClassActivity : BaseActivity<ClassActivityBinding>(), SurfaceHolder.Callback {

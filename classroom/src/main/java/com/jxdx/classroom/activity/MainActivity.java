@@ -15,7 +15,7 @@ import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.jxdx.classroom.service.MediaProjectionService;
-import com.jxdx.mylibrary.R;
+import com.jxdx.classroom.R;
 
 public class MainActivity extends AppCompatActivity implements MediaProjectionService.ServiceCallbacks {
 

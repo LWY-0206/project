@@ -15,7 +15,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.jxdx.mylibrary.R;
+import com.jxdx.classroom.R;
 
 public class MediaProjectionService extends Service {
     private static final String TAG = "MediaProjectionService";
