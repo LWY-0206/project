@@ -1,5 +1,8 @@
 package com.jxdx.resource.Questions
 
+import android.os.Parcel
+import android.os.Parcelable
+
 data class ErrorQuizResponse(
     val code: Int,
     val message: String,
@@ -28,7 +31,53 @@ data class ErrorQuizItem(
     val createdTime: String,
     val correctResult: String,
     val trueFalseUserAnswer: String
-) {
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readInt(),
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.createStringArrayList() ?: emptyList(),
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.readByte() != 0.toByte(),
+        parcel.readString() ?: "",
+        parcel.readString() ?: "",
+        parcel.readString() ?: ""
+    )
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(questionId)
+        parcel.writeString(questionText)
+        parcel.writeString(optionA)
+        parcel.writeString(optionB)
+        parcel.writeString(optionC)
+        parcel.writeString(optionD)
+        parcel.writeStringList(options)
+        parcel.writeString(correctOption)
+        parcel.writeString(userAnswer)
+        parcel.writeByte(if (isMastered) 1 else 0)
+        parcel.writeString(createdTime)
+        parcel.writeString(correctResult)
+        parcel.writeString(trueFalseUserAnswer)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<ErrorQuizItem> {
+        override fun createFromParcel(parcel: Parcel): ErrorQuizItem {
+            return ErrorQuizItem(parcel)
+        }
+
+        override fun newArray(size: Int): Array<ErrorQuizItem?> {
+            return arrayOfNulls(size)
+        }
+    }
+
     // 判断题目类型
     fun getQuestionType(): QuestionType {
         return when {

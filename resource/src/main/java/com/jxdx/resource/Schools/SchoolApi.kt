@@ -11,13 +11,13 @@ interface SchoolApi {
         @Query("schoolName") schoolName: String,
         @Query("page") page: Int,
         @Query("size") size: Int,
-        @Header("satoken") satoken: String = "363a547e-4f76-4da9-9e56-cff752475e00"
+        @Header("satoken") satoken: String = "f646b77d-257e-4fd2-aaa7-e13263932d50"
     ): BaseResp<SchoolData>
     @GET("/api/school/select/score")
     suspend fun getSchoolsByScore(
         @Query("score") score: Int,
         @Query("page") page: Int,
         @Query("size") size: Int,
-        @Header("satoken") satoken: String = "363a547e-4f76-4da9-9e56-cff752475e00"
+        @Header("satoken") satoken: String = "f646b77d-257e-4fd2-aaa7-e13263932d50"
     ): BaseResp<SchoolData>
 }
