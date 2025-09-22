@@ -1,6 +1,7 @@
 package com.jxdx.square.common
 
 import com.example.corekit.http.HttpManager
+import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -23,7 +24,7 @@ class CommonRepository {
         val filePart = MultipartBody.Part.createFormData("fileList", fileObj.name, requestBody)
         // 返回封装好的数据
         return common.uploadFile(
-            "6a819474-1cf4-42b2-b12e-794c4b472820",
+            TokenManager.getToken().toString(),
             filePart,
         )
     }

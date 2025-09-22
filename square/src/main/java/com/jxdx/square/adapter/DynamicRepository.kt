@@ -1,6 +1,7 @@
 package com.jxdx.square.adapter
 
 import com.example.corekit.http.HttpManager
+import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.square.entity.Dynamic
 
@@ -12,11 +13,11 @@ class DynamicRepository {
     suspend fun getDynamics(
         page: Int? = null,
         size: Int,
-    ): BaseResp<List<Dynamic>> = service.getDynamics("6a819474-1cf4-42b2-b12e-794c4b472820", page, size)
+    ): BaseResp<List<Dynamic>> = service.getDynamics(TokenManager.getToken().toString(), page, size)
 
     suspend fun postDynamic(dynamicBody: DynamicBody): BaseResp<Unit> =
-        service.postDynamic("6a819474-1cf4-42b2-b12e-794c4b472820", dynamicBody)
+        service.postDynamic(TokenManager.getToken().toString(), dynamicBody)
 
     // 修复参数名：从commentId改为postId，与API接口定义一致
-    suspend fun likeDynamic(postId: Int): BaseResp<Unit> = service.likeDynamic("6a819474-1cf4-42b2-b12e-794c4b472820", postId)
+    suspend fun likeDynamic(postId: Int): BaseResp<Unit> = service.likeDynamic(TokenManager.getToken().toString(), postId)
 }
