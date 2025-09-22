@@ -1,6 +1,7 @@
 package com.jxdx.square.friend
 
 import com.example.corekit.http.HttpManager
+import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.square.entity.UserInfo
 import com.jxdx.square.entity.ApplicationMessage
@@ -10,12 +11,12 @@ class FriendRepository {
         HttpManager.instance.service(FriendApi::class.java)
     }
 
-    suspend fun getFriends(): BaseResp<List<Friend>> = service.getFriends("6a819474-1cf4-42b2-b12e-794c4b472820")
+    suspend fun getFriends(): BaseResp<List<Friend>> = service.getFriends(TokenManager.getToken().toString())
 
-    suspend fun getUserInfo(userId: String): BaseResp<UserInfo> = service.getUserInfo("6a819474-1cf4-42b2-b12e-794c4b472820", userId)
+    suspend fun getUserInfo(userId: String): BaseResp<UserInfo> = service.getUserInfo(TokenManager.getToken().toString(), userId)
 
     suspend fun addFriend(applicationBody: ApplicationBody): BaseResp<String> =
-        service.addFriend("6a819474-1cf4-42b2-b12e-794c4b472820", applicationBody)
+        service.addFriend(TokenManager.getToken().toString(), applicationBody)
 
-    suspend fun getApplications(): BaseResp<List<ApplicationMessage>> = service.getApplications("6a819474-1cf4-42b2-b12e-794c4b472820")
+    suspend fun getApplications(): BaseResp<List<ApplicationMessage>> = service.getApplications(TokenManager.getToken().toString())
 }

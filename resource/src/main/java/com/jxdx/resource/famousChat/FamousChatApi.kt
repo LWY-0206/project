@@ -1,5 +1,6 @@
 package com.jxdx.resource.famousChat
 
+import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -12,11 +13,11 @@ interface FamousChatApi {
     @GET("/api/celebrityChat/init")
     suspend fun initChatSession(
         @Query("celebrityId") celebrityId: Int,
-        @Header("satoken") satoken: String = "f646b77d-257e-4fd2-aaa7-e13263932d50"
+        @Header("satoken") satoken: String = TokenManager.getToken().toString()
     ): BaseResp<ChatContent>
     @POST("/api/celebrityChat/chat")
     suspend fun sendMessage(
         @Body request: SendMessageRequest,
-        @Header("satoken") satoken: String = "f646b77d-257e-4fd2-aaa7-e13263932d50"
+        @Header("satoken") satoken: String = TokenManager.getToken().toString()
     ): BaseResp<ChatContent>
 }

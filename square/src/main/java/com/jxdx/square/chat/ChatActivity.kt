@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.example.corekit.common.BaseActivity
+import com.example.corekit.http.TokenManager
 import com.google.gson.Gson
 import com.jxdx.square.databinding.ActivityChatBinding
 import okhttp3.Response
@@ -21,7 +22,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
     private lateinit var wsManager: WebChatSocketManager
 
     // 配置参数
-    private val saToken = "6a819474-1cf4-42b2-b12e-794c4b472820" // 用户的Sa-Token
+    private val saToken = TokenManager.getToken().toString() // 用户的Sa-Token
     private val targetUserId = 1 // 聊天对象的用户ID
     private val wsBaseUrl = "ws://121.41.176.238:8080/single/chat/" // 基础WebSocket地址
 

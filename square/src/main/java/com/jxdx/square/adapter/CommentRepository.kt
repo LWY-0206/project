@@ -1,6 +1,7 @@
 package com.jxdx.square.adapter
 
 import com.example.corekit.http.HttpManager
+import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.square.entity.CommentItem
 
@@ -13,8 +14,8 @@ class CommentRepository {
         postId: Int,
         page: Int,
         size: Int,
-    ): BaseResp<ArrayList<CommentItem>> = service.getComments("6a819474-1cf4-42b2-b12e-794c4b472820", postId, page, size)
+    ): BaseResp<ArrayList<CommentItem>> = service.getComments(TokenManager.getToken().toString(), postId, page, size)
 
     suspend fun postComment(commentBody: CommentBody): BaseResp<Unit> =
-        service.postComment("6a819474-1cf4-42b2-b12e-794c4b472820", commentBody)
+        service.postComment(TokenManager.getToken().toString(), commentBody)
 }

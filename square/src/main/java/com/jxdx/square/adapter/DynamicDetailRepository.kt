@@ -1,6 +1,7 @@
 package com.jxdx.square.adapter
 
 import com.example.corekit.http.HttpManager
+import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.square.entity.DynamicDetail
 
@@ -10,5 +11,5 @@ class DynamicDetailRepository {
     }
 
     suspend fun getDPostDetails(postId: Int): BaseResp<DynamicDetail> =
-        service.getPostDetail("6a819474-1cf4-42b2-b12e-794c4b472820", postId)
+        service.getPostDetail(TokenManager.getToken().toString(), postId)
 }

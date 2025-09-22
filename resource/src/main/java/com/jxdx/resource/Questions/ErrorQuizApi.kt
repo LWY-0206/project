@@ -1,5 +1,6 @@
 package com.jxdx.resource.Questions
 
+import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -11,6 +12,6 @@ interface ErrorQuizApi {
         @Query("subjectId") subjectId: Int,
         @Query("page") page: Int,
         @Query("size") size: Int,
-        @Header("satoken") satoken: String = "f646b77d-257e-4fd2-aaa7-e13263932d50"
+        @Header("satoken") satoken: String = TokenManager.getToken().toString()
     ): BaseResp<ErrorQuizData>
 }
