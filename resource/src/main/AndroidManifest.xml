@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <application
         android:allowBackup="true"
         android:label="@string/app_name">
+        <activity
+            android:name=".Famous.FavoriteListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".QuizSuggestion.SuggestionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Questions.AnswerSheetActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Questions.QuizActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Questions.QuestionSelectionActivity"
+            android:exported="false" />
         <activity
             android:name=".Famous.FamousDetailActivity"
             android:exported="false" />
@@ -11,12 +27,7 @@
             android:exported="false" />
         <activity
             android:name=".famousChat.FamousChatActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Questions.ErrorQuizActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Questions.QuestionTypeSelectionActivity"
+            android:windowSoftInputMode="adjustResize|stateHidden"
             android:exported="false" />
         <activity
             android:name=".Schools.SchoolDetailActivity"
@@ -25,4 +36,5 @@
             android:name=".Schools.SchoolListActivity"
             android:exported="false" />
     </application>
+
 </manifest>

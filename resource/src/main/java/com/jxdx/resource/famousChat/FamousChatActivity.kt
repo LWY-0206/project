@@ -1,7 +1,9 @@
 package com.jxdx.resource.famousChat
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelProvider
@@ -18,8 +20,6 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
     private var celebrityId: Int = -1
     private var celebrityName: String = ""
     private var avatarUrl: String = ""
-    private var sessionId: String = ""
-
     override fun bindLayout(): ActivityFamousChatBinding {
         return ActivityFamousChatBinding.inflate(layoutInflater)
     }
@@ -27,7 +27,7 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 初始化 ViewModel
-
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
     }
     override fun initView() {
         viewModel = ViewModelProvider(this)[FamousChatViewModel::class.java]
@@ -38,6 +38,8 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
             finish()
             return
         }
+        celebrityName = intent.getStringExtra("CELEBRITY_NAME") ?: ""
+        avatarUrl = intent.getStringExtra("CELEBRITY_AVATAR") ?: ""
         // 设置 RecyclerView
         setupRecyclerView()
 
@@ -50,16 +52,16 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
         viewModel.chatSessionLiveData.observe(this) { resource ->
             resource.onSuccess { data ->
                 data?.let {
-                    sessionId = it.sessionId
                     // 添加欢迎消息
                     val welcomeMessage = ChatMessage(
                         messageId = "welcome_${System.currentTimeMillis()}",
-                        content = "你好，我是${it.celebrityName}，很高兴与你交流！",
+                        content = "你好，我是${celebrityName}，很高兴与你交流！",
                         isUser = false,
                         timestamp = System.currentTimeMillis(),
-                        avatarUrl = it.avatarUrl
+                        avatarUrl = avatarUrl
                     )
                     viewModel.addMessage(welcomeMessage)
+
                 }
             }.onError { error, _ ->
                 // 显示错误
@@ -71,6 +73,7 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
         viewModel.messageList.observe(this) { messages ->
             adapter.submitList(messages.toList())
             // 滚动到底部
+            Log.d("messageList","change")
             if (messages.isNotEmpty()) {
                 view.rvMessages.postDelayed({
                     view.rvMessages.scrollToPosition(messages.size - 1)
@@ -80,12 +83,12 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
         // 观察发送消息结果
         viewModel.sendMessageLiveData.observe(this) { resource ->
             resource.onSuccess {
-                view.progressBar.visibility = View.GONE
+                Log.d("消息发送成功，获取返回",viewModel.messageList.toString())
             }.onError { error, _ ->
+                Log.d("sendMesssageLiveData","失败")
                 // 显示错误
                 showError(error?.message ?: "发送消息失败")
-                // 隐藏加载状态
-                view.progressBar.visibility = View.GONE
+                // 隐藏加载状态1
             }
         }
     }
@@ -102,20 +105,17 @@ class FamousChatActivity : BaseActivity<ActivityFamousChatBinding>() {
         // 发送按钮
         view.btnSend.setOnClickListener {
             val message = view.etMessage.text.toString().trim()
-            if (message.isNotEmpty() && sessionId.isNotEmpty()) {
-                // 显示加载状态
-                view.progressBar.visibility = View.VISIBLE
-                viewModel.sendMessage(sessionId, message, celebrityId)
+            if (message.isNotEmpty())  {
+                viewModel.sendMessage(message, celebrityId)
                 view.etMessage.setText("")
-            } else if (sessionId.isEmpty()) {
-                showError("聊天会话未初始化，请稍后再试")
+                    view.etMessage.isEnabled = true
             }
         }
 
         // 设置输入框的文本变化监听，控制发送按钮的可用性
         view.etMessage.doAfterTextChanged { text ->
             val message = text?.toString()?.trim() ?: ""
-            view.btnSend.isEnabled = message.isNotEmpty() && sessionId.isNotEmpty()
+            view.btnSend.isEnabled = message.isNotEmpty()
         }
     }
 

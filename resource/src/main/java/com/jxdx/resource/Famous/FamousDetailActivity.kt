@@ -125,7 +125,9 @@ class FamousDetailActivity : BaseActivity<ActivityFamousDetailBinding>() {
 
         view.btnTalk.setOnClickListener {
             val intent = Intent(this, FamousChatActivity::class.java)
+            intent.putExtra("CELEBRITY_NAME", famousDetail.celebrityName)
             intent.putExtra("CELEBRITY_ID", famousDetail.celebrityId)
+            intent.putExtra("CELEBRITY_AVATAR", famousDetail.avatarUrl)
             startActivity(intent)
         }
         // 使用Glide加载头像

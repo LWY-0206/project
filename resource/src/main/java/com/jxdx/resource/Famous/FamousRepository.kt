@@ -16,4 +16,7 @@ class FamousRepository {
     ): BaseResp<FamousData> {
         return service.getFamous(profession, page, size)
     }
+    suspend fun getFavoriteList(page: Int, size: Int): BaseResp<FamousData> {
+        return service.getFavoriteList(page, size)
+    }
 }

@@ -1,20 +1,27 @@
 package com.jxdx.resource.Questions
-
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.jxdx.resource.databinding.ActivityQuestionTypeSelectionBinding
+import com.example.corekit.common.BaseActivity
+import com.jxdx.resource.databinding.ActivityQuestionSelectionBinding
 
-class QuestionTypeSelectionActivity : AppCompatActivity() {
-
-    private lateinit var binding: ActivityQuestionTypeSelectionBinding
-
+class QuestionSelectionActivity : BaseActivity<ActivityQuestionSelectionBinding>() {
+    private lateinit var binding: ActivityQuestionSelectionBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityQuestionTypeSelectionBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    }
 
+    override fun bindLayout(): ActivityQuestionSelectionBinding {
+        binding = ActivityQuestionSelectionBinding.inflate(layoutInflater)
+        return binding
+    }
+
+    override fun initView() {
         setupClickListeners()
+    }
+
+    override fun subscribeUi() {
+
     }
 
     private fun setupClickListeners() {
@@ -45,7 +52,7 @@ class QuestionTypeSelectionActivity : AppCompatActivity() {
     }
 
     private fun navigateToErrorQuiz(questionType: QuestionType?) {
-        val intent = Intent(this, ErrorQuizActivity::class.java).apply {
+        val intent = Intent(this, QuizActivity::class.java).apply {
             putExtra("QUESTION_TYPE", questionType?.name)
         }
         startActivity(intent)
