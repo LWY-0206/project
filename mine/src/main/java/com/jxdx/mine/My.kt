@@ -30,21 +30,27 @@ import java.util.Date
 import java.util.Locale
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import com.example.corekit.http.bean.BaseResp
 import com.jxdx.mine.ProfileActivity
 import com.jxdx.mine.R
+import com.jxdx.mine.UserInfo
 import com.jxdx.mine.course.CourseActivity
 import com.jxdx.mine.course.CourseDetailActivity
 import com.jxdx.mine.course.CourseListFragment
 import com.jxdx.mine.databinding.FragmnetMymBinding
 import com.jxdx.mine.grade.GradeActivity
 import com.jxdx.mine.homework.HomeworkActivity
+import com.jxdx.mine.http.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class My : Fragment() {
 
     private var _binding: FragmnetMymBinding? = null
     private val binding get() = _binding!!
 
-    private var currentPhotoPath: String? = null
+    private var currentAvater: String? = null
 
 
     // 权限请求Launcher
@@ -87,52 +93,12 @@ class My : Fragment() {
         }
     }
 
-
-
-
-
-
-
-
-
-    // 保存头像URI到SharedPreferences
-    private fun saveAvatarUri(uriString: String) {
-        val preferences = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val uesName=preferences.getString("username","用户名")
-        preferences.edit {
-            putString("${uesName}_uri", uriString)
-            // 同时清除路径，避免冲突
-            remove("${uesName}_path")
-        }
+    private fun loadImage(str: String) {
+        loadImageIntoTarget(str,binding.userAvatar)
+        loadImageIntoTarget(str,binding.navAvatar)
+        loadImageIntoTarget(str,binding.menuIcon)
     }
-    // 保存头像路径到SharedPreferences
-    private fun saveAvatarPath(path: String) {
-        val preferences = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val uesName=preferences.getString("username","用户名")
-        preferences.edit {
-            putString("${uesName}_path", path)
-            // 同时清除URI，避免冲突
-            remove("${uesName}_uri")
-        }
-    }
-    private fun loadImageFromUri(uri: Uri) {
-        // 保存URI
-        saveAvatarUri(uri.toString())
-
-        loadImageIntoTarget(uri,binding.userAvatar)
-        loadImageIntoTarget(uri,binding.navAvatar)
-        loadImageIntoTarget(uri,binding.menuIcon)
-    }
-
-    private fun loadImageFromPath(path: String) {
-        // 保存路径
-        saveAvatarPath(path)
-
-        loadImageIntoTarget(path,binding.userAvatar)
-        loadImageIntoTarget(path,binding.navAvatar)
-        loadImageIntoTarget(path,binding.menuIcon)
-    }
-    private fun loadImageIntoTarget(source: Any, target: ImageView) {
+    private fun loadImageIntoTarget(source: String?, target: ImageView) {
         Glide.with(this)
             .load(source)
             .circleCrop()
@@ -215,7 +181,7 @@ class My : Fragment() {
                 photoFile
             )
 
-            currentPhotoPath = photoFile.absolutePath
+            currentAvater = photoFile.absolutePath
             takePictureResult.launch(photoUri)
         } catch (e: Exception) {
             Toast.makeText(requireContext(), "创建文件失败", Toast.LENGTH_SHORT).show()
@@ -249,8 +215,8 @@ class My : Fragment() {
     private val takePictureResult = registerForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
-        if (success && currentPhotoPath != null) {
-            loadImageFromPath(currentPhotoPath!!)
+        if (success && currentAvater != null) {
+            loadImage(currentAvater!!)
             Toast.makeText(requireContext(), "拍照成功，头像已更新", Toast.LENGTH_SHORT).show()
         }
     }
@@ -259,7 +225,7 @@ class My : Fragment() {
         ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
-            loadImageFromUri(it)
+            loadImage(it.toString())
             Toast.makeText(requireContext(), "头像已更新", Toast.LENGTH_SHORT).show()
         }
     }
@@ -309,7 +275,7 @@ class My : Fragment() {
             checkPermissionsAndShowDialog()
         }
         //点击修改个人简介
-        binding.editUserBio.setOnClickListener {
+        binding.editUserProfile.setOnClickListener {
             var intent= Intent(requireActivity(), EditProfileActivity::class.java)
             startActivityForResult(intent, 1)
         }
@@ -328,7 +294,7 @@ class My : Fragment() {
         }
 
         //加载用户信息
-        loadSavedDate()
+        loadDate()
         //加载学习时间分布柱状图
         setupWebViewChart()
     }
@@ -338,58 +304,54 @@ class My : Fragment() {
         if (requestCode == 1 && resultCode == AppCompatActivity.RESULT_OK) {
             val newBio = data?.getStringExtra("newBio")
             newBio?.let {
-                binding.userBio.text = it
-                // 可选：立即保存到 SharedPreferences
-                saveBioToPrefs(it)
+                binding.userProfile.text = it
             }
         }
     }
-
-    private fun saveBioToPrefs(bio: String) {
-        val preferences = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val userName = preferences.getString("username", "未命名")
-        preferences.edit {
-            putString("${userName}_bio", bio)
-        }
-    }
-
-
-
-
-
-
-
     // 加载保存的信息
-    private fun loadSavedDate() {
+    private fun loadDate() {
         //用户信息 我的 中   有  用户名/班级/个人简介/头像（uri/path）
-        val preferences = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val userName=preferences.getString("user_name","小明")
-        val grade=preferences.getString("user_grade","高一1班")
-        val bio=preferences.getString("user_bio","点击添加兴趣爱好")
+        RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
+            override fun onResponse(
+                call: Call<BaseResp<UserInfo>?>,
+                response: Response<BaseResp<UserInfo>?>
+            ) {
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        if (it.code == 0) {
+                            binding.navName.text=it.data?.userName//更新侧边栏名字
+                            binding.userName.text=it.data?.userName//更新我的 名字
+                            binding.userGrade.text=it.data?.className//更新我的 班级
+                            binding.userProfile.text=it.data?.profile//更新我的 个人简介
+                            currentAvater=it.data?.avatarUrl
+                            if(currentAvater != null){
+                                loadImageIntoTarget(currentAvater, binding.userAvatar)
+                                loadImageIntoTarget(currentAvater, binding.navAvatar)
+                                loadImageIntoTarget(currentAvater, binding.menuIcon)
+                            }
+                        } else {
+                            Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                        }
 
-
-        val uriString = preferences.getString("${userName}_uri", null)
-        val path = preferences.getString("${userName}_path", null)
-
-
-        binding.navName.text=userName//更新侧边栏名字
-
-        binding.userName.text=userName//更新我的 名字
-        binding.userGrade.text=grade//更新我的 班级
-        binding.userBio.text=bio//更新我的 个人简介
-        when {
-            uriString != null -> {
-                val uri = Uri.parse(uriString)
-                loadImageIntoTarget(uri, binding.userAvatar)
-                loadImageIntoTarget(uri, binding.navAvatar)
-                loadImageIntoTarget(uri, binding.menuIcon)
+                    }
+                }
+                else{
+                    Toast.makeText(
+                        requireContext(),
+                        "获取用户信息失败，错误: ${response.message()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
-            path != null -> {
-                loadImageIntoTarget(path, binding.userAvatar)
-                loadImageIntoTarget(path, binding.navAvatar)
-                loadImageIntoTarget(path, binding.menuIcon)
+
+            override fun onFailure(
+                call: Call<BaseResp<UserInfo>?>,
+                t: Throwable
+            ) {
+                Toast.makeText(requireContext(), "网络连接失败，请检查网络设置", Toast.LENGTH_SHORT).show()
+
             }
-        }
+        })
     }
 
 

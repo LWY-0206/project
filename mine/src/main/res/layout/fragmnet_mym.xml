@@ -114,7 +114,7 @@
                             android:layout_marginTop="8dp">
 
                             <TextView
-                                android:id="@+id/user_bio"
+                                android:id="@+id/user_profile"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
@@ -123,7 +123,7 @@
                                 android:textColor="#666666"/>
 
                             <TextView
-                                android:id="@+id/edit_user_bio"
+                                android:id="@+id/edit_user_profile"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="编辑"

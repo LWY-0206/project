@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- ScrollView 包裹内容，防止内容溢出 -->
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 顶部头部区域 -->
+            <!-- 顶部头部区域 -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/top_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_header_gradient"
+                android:padding="16dp"
+                android:elevation="8dp">
+
+                <!-- 圆形头像 -->
+                <ImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/bg_avatar_circle"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/img_loading_error"
+                    android:contentDescription="用户头像"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:elevation="4dp" />
+
+                <!-- 用户信息容器 -->
+                <LinearLayout
+                    android:id="@+id/user_info_container"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_vertical"
+                    app:layout_constraintStart_toEndOf="@id/iv_avatar"
+                    app:layout_constraintTop_toTopOf="@id/iv_avatar"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_avatar"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/tv_user_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="姜老师"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium" />
+                        <TextView
+                            android:id="@+id/exit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="200dp"
+                            android:text="退出登录"
+                            android:textColor="#FF0003"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_greeting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="今天有3节课程待处理"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <!-- 学科入口标题 -->
+            <TextView
+                android:id="@+id/tv_subjects"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="学科入口"
+                android:textColor="#4CAF50"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- 横向自动滚动的课程卡片区域 -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewpager_subjects"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp" />
+
+
+            <!-- 环形交互带 -->
+            <FrameLayout
+                android:id="@+id/ring_container"
+                android:layout_width="match_parent"
+                android:layout_height="400dp"
+                android:padding="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/scroll_view">
+
+                <!-- 中心圆形按钮 -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+                    <ImageButton
+                        android:id="@+id/ib_live"
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/live"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="直播"
+                        android:textSize="18dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|start"
+                    android:layout_marginStart="30dp"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iv_homework"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_gravity="top|start"
+                        android:background="@drawable/ic_homework"
+                        android:contentDescription="作业" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="作业"
+                        android:textSize="18dp" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:layout_marginEnd="40dp"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iv_class"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_gravity="top|start"
+                        android:background="@drawable/ic_class_k"
+                        android:contentDescription="班级" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="班级"
+                        android:textSize="18dp" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start"
+                    android:layout_marginStart="30dp"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iv_resource"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_gravity="top|start"
+                        android:background="@drawable/ic_resource"
+                        android:contentDescription="资源" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="资源"
+                        android:textSize="18dp" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginEnd="40dp"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/iv_explore"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:layout_gravity="top|start"
+                        android:background="@drawable/ic_explore"
+                        android:contentDescription="探索" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="探索"
+                        android:textSize="18dp" />
+                </LinearLayout>
+            </FrameLayout>
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

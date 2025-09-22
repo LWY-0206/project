@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.jxdx.mylibrary"
+    namespace = "com.jxdx.classroom"
     compileSdk = 36
 
     defaultConfig {
@@ -29,6 +29,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+    }
+    buildFeatures {
+        dataBinding = true
+        viewBinding = true
     }
 }
 

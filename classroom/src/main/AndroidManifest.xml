@@ -3,7 +3,7 @@
 
     <application>
         <activity
-            android:name="com.jxdx.classroom.entrance.Entrance"
+            android:name=".entrance.EntranceActivity"
             android:exported="false" />
     </application>
 

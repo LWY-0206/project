@@ -1,13 +1,18 @@
 package com.jxdx.mine.service
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
+import com.example.corekit.http.TokenManager
+import com.example.corekit.http.bean.BaseResp
+import com.jxdx.mine.UserInfo
 import com.jxdx.mine.databinding.ActivityEditProfile2Binding
+import com.jxdx.mine.http.RetrofitClient
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 
 class EditProfileActivity : AppCompatActivity() {
@@ -28,13 +33,38 @@ class EditProfileActivity : AppCompatActivity() {
         // 设置返回按钮点击事件
         setupBackButton()
 
-        // 获取传递过来的原始简介（如果有）
-        val preferences: SharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val userName=preferences.getString("username","用户名")
-        val currentBio = preferences.getString("${userName}_bio", "个人简介") ?: "个人简介"
+        setupTextWatcher()
+        RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
+            override fun onResponse(
+                call: Call<BaseResp<UserInfo>?>,
+                response: Response<BaseResp<UserInfo>?>
+            ) {
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        if (it.code == 0) {
+                            binding.profile.setText(it.data?.profile)
+                        } else {
+                            Toast.makeText(
+                                this@EditProfileActivity,
+                                "获取用户信息失败",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                } else {
+                    Toast.makeText(this@EditProfileActivity, "获取用户信息失败", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
 
-        binding.etBio.setText(currentBio)
-        updateWordCount(currentBio.length)
+            override fun onFailure(
+                call: Call<BaseResp<UserInfo>?>,
+                t: Throwable
+            ) {
+                Toast.makeText(this@EditProfileActivity, "网络连接失败", Toast.LENGTH_SHORT).show()
+            }
+
+        })
     }
 
     // 设置返回按钮点击事件
@@ -45,7 +75,7 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun setupTextWatcher() {
-        binding.etBio.addTextChangedListener(object : TextWatcher {
+        binding.profile.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 // 不需要实现
             }
@@ -60,15 +90,14 @@ class EditProfileActivity : AppCompatActivity() {
 
                 // 如果超过限制，截断文本
                 if (currentLength > MAX_BIO_LENGTH) {
-                    binding.etBio.setText(currentText.substring(0, MAX_BIO_LENGTH))
-                    binding.etBio.setSelection(MAX_BIO_LENGTH) // 将光标移动到末尾
+                    binding.profile.setText(currentText.substring(0, MAX_BIO_LENGTH))
+                    binding.profile.setSelection(MAX_BIO_LENGTH) // 将光标移动到末尾
                 } else {
                     updateWordCount(currentLength)
                 }
             }
         })
     }
-
     private fun updateWordCount(count: Int) {
         binding.tvWordCount.text = "$count/$MAX_BIO_LENGTH"
 
@@ -82,7 +111,7 @@ class EditProfileActivity : AppCompatActivity() {
 
     private fun setupSaveButton() {
         binding.btnSave.setOnClickListener {
-            val newBio = binding.etBio.text.toString().trim()
+            val newBio = binding.profile.text.toString().trim()
 
             // 验证字数
             if (newBio.length > MAX_BIO_LENGTH) {
@@ -90,8 +119,42 @@ class EditProfileActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // 保存逻辑 - 这里可以添加保存到数据库或服务器的代码
-            saveBio(newBio)
+            RetrofitClient.apiService.updateProfile(newBio, TokenManager.getToken()).enqueue(object : Callback<BaseResp<String>> {
+                override fun onResponse(
+                    call: Call<BaseResp<String>?>,
+                    response: Response<BaseResp<String>?>
+                ) {
+                    if (response.isSuccessful) {
+                        response.body()?.let {
+                            if (it.code == 0) {
+                                Toast.makeText(
+                                    this@EditProfileActivity,
+                                    "个人简介更新成功",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                Toast.makeText(
+                                    this@EditProfileActivity,
+                                    it.message,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(
+                            this@EditProfileActivity,
+                            "获取用户信息失败，错误: ${response.message()}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+                override fun onFailure(
+                    call: Call<BaseResp<String>?>,
+                    t: Throwable
+                ) {
+                    Toast.makeText(this@EditProfileActivity, "网络连接失败，请检查网络设置", Toast.LENGTH_SHORT).show()
+                }
+            })
 
             // 返回结果给上一个Activity
             val resultIntent = Intent().apply {
@@ -101,17 +164,6 @@ class EditProfileActivity : AppCompatActivity() {
             finish()
         }
     }
-
-    private fun saveBio(bio: String) {
-        // 这里实现保存逻辑，例如保存到SharedPreferences或发送到服务器
-        val preferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        val userName = preferences.getString("username", "用户名")
-        preferences.edit()
-        {
-            putString("${userName}_bio", bio)
-        }
-    }
-
     companion object {
         const val MAX_BIO_LENGTH = 150
     }

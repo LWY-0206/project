@@ -8,9 +8,14 @@ xmlns:tools="http://schemas.android.com/tools">
     tools:ignore="MissingClass">
 
     <activity
-        android:name=".Home"
+        android:name=".HomeActivity"
         android:exported="true" />
-
+    <activity
+        android:name=".TeacherHomeActivity"
+        android:exported="true" />
+    <activity
+        android:name=".TestLoginService"
+        android:exported="true" />
 </application>
 
 </manifest>

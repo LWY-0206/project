@@ -15,7 +15,9 @@ import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.common.http.service.HomeService
 import com.jxdx.common.http.service.ServiceRegistry
+import com.jxdx.login.LoginResponse
 import com.jxdx.login.R
+import com.jxdx.login.UserInfo
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -99,25 +101,26 @@ class LoginActivity : AppCompatActivity() {
 
         val loginRequest = LoginRequest(phone, password)
 
-        RetrofitClient.apiService.login(loginRequest).enqueue(object : Callback<BaseResp<UserInfo>> {
-            override fun onResponse(call: Call<BaseResp<UserInfo>>, response: Response<BaseResp<UserInfo>>) {
+        RetrofitClient.apiService.login(loginRequest).enqueue(object : Callback<BaseResp<LoginResponse>> {
+            override fun onResponse(call: Call<BaseResp<LoginResponse>>, response: Response<BaseResp<LoginResponse>>) {
                 progressDialog.dismiss()
 
                 if (response.isSuccessful) {
                     response.body()?.let {
                         if (it.code == 0) {
-                            val userInfo = it.data
 
-                            // 1. 保存 Token
-                            userInfo?.satoken?.let {
+                            // 保存 Token
+                            it.data?.satoken?.let {
                                 //持久化在本地 MMKV:保存 Token 到内存 + 本地存储，并更新请求头
                                 TokenManager.login(it)
                             }
 
-                            // 2. 保存用户信息
-                            saveUserInfo(userInfo)
-
-                            // 3. 跳转到主页
+                            //保存登录状态
+                            val preferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
+                            preferences.edit {
+                                putBoolean("is_logged_in", true)
+                            }
+                            // 跳转到主页
                             ServiceRegistry.get(HomeService::class.java)?.navigateToHome(this@LoginActivity)
                             Toast.makeText(this@LoginActivity, "登录成功", Toast.LENGTH_SHORT).show()
                             finish()
@@ -134,24 +137,10 @@ class LoginActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<BaseResp<UserInfo>>, t: Throwable) {
+            override fun onFailure(call: Call<BaseResp<LoginResponse>>, t: Throwable) {
                 progressDialog.dismiss()
                 Toast.makeText(this@LoginActivity, "网络连接失败，请检查网络设置", Toast.LENGTH_SHORT).show()
             }
         })
-    }
-
-    private fun saveUserInfo(userInfo: UserInfo?) {
-        val preferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
-        preferences.edit {
-            putBoolean("is_logged_in", true)
-            putInt("user_id", userInfo?.userId ?: 0)
-            putString("user_name", userInfo?.userName)
-            putString("avatar_url", userInfo?.avatarUrl ?: "")
-            putString("user_phone", userInfo?.phone)
-            putString("user_identity", userInfo?.identity.toString())
-            putString("user_className", userInfo?.className)
-            putString("user_bio", userInfo?.bio)
-        }
     }
 }

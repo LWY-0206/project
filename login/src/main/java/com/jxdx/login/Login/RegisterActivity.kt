@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.corekit.http.bean.BaseResp
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.jxdx.login.R
+import com.jxdx.login.UserInfo
 import com.jxdx.login.databinding.ActivityRegisterBinding
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
