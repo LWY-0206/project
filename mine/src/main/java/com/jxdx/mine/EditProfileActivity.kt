@@ -4,54 +4,48 @@ import android.content.SharedPreferences
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
-import com.jxdx.mine.R
+import com.jxdx.mine.databinding.ActivityEditProfile2Binding
 
 
 class EditProfileActivity : AppCompatActivity() {
 
-    private lateinit var etBio: EditText
-    private lateinit var tvWordCount: TextView
-    private lateinit var btnSave: Button
+    private lateinit var binding: ActivityEditProfile2Binding
+
 
     // 从Intent获取的原始简介内容
     private var originalBio: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_edit_profile)
-
-        // 初始化视图
-        initViews()
-
-        // 设置文本变化监听器
-        setupTextWatcher()
-
+        binding = ActivityEditProfile2Binding.inflate(layoutInflater)
+        setContentView(binding.root)
         // 设置保存按钮点击事件
         setupSaveButton()
+
+        // 设置返回按钮点击事件
+        setupBackButton()
 
         // 获取传递过来的原始简介（如果有）
         val preferences: SharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE)
         val userName=preferences.getString("username","用户名")
         val currentBio = preferences.getString("${userName}_bio", "个人简介") ?: "个人简介"
 
-        etBio.setText(currentBio)
+        binding.etBio.setText(currentBio)
         updateWordCount(currentBio.length)
     }
 
-    private fun initViews() {
-        etBio = findViewById(R.id.etBio)
-        tvWordCount = findViewById(R.id.tvWordCount)
-        btnSave = findViewById(R.id.btnSave)
+    // 设置返回按钮点击事件
+    private fun setupBackButton() {
+        binding.backButton.setOnClickListener {
+            onBackPressed()
+        }
     }
 
     private fun setupTextWatcher() {
-        etBio.addTextChangedListener(object : TextWatcher {
+        binding.etBio.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
                 // 不需要实现
             }
@@ -66,8 +60,8 @@ class EditProfileActivity : AppCompatActivity() {
 
                 // 如果超过限制，截断文本
                 if (currentLength > MAX_BIO_LENGTH) {
-                    etBio.setText(currentText.substring(0, MAX_BIO_LENGTH))
-                    etBio.setSelection(MAX_BIO_LENGTH) // 将光标移动到末尾
+                    binding.etBio.setText(currentText.substring(0, MAX_BIO_LENGTH))
+                    binding.etBio.setSelection(MAX_BIO_LENGTH) // 将光标移动到末尾
                 } else {
                     updateWordCount(currentLength)
                 }
@@ -76,19 +70,19 @@ class EditProfileActivity : AppCompatActivity() {
     }
 
     private fun updateWordCount(count: Int) {
-        tvWordCount.text = "$count/$MAX_BIO_LENGTH"
+        binding.tvWordCount.text = "$count/$MAX_BIO_LENGTH"
 
         // 当接近字数限制时改变颜色提示
         if (count > MAX_BIO_LENGTH * 0.8) {
-            tvWordCount.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
+            binding.tvWordCount.setTextColor(resources.getColor(android.R.color.holo_red_dark, null))
         } else {
-            tvWordCount.setTextColor(resources.getColor(android.R.color.darker_gray, null))
+            binding.tvWordCount.setTextColor(resources.getColor(android.R.color.darker_gray, null))
         }
     }
 
     private fun setupSaveButton() {
-        btnSave.setOnClickListener {
-            val newBio = etBio.text.toString().trim()
+        binding.btnSave.setOnClickListener {
+            val newBio = binding.etBio.text.toString().trim()
 
             // 验证字数
             if (newBio.length > MAX_BIO_LENGTH) {
@@ -120,5 +114,10 @@ class EditProfileActivity : AppCompatActivity() {
 
     companion object {
         const val MAX_BIO_LENGTH = 150
+    }
+    // 添加返回按钮点击事件
+    override fun onSupportNavigateUp(): Boolean {
+        onBackPressed()
+        return true
     }
 }

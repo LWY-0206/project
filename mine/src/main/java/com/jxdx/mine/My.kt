@@ -1,6 +1,7 @@
 package com.jxdx.mine.service
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -31,12 +32,16 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import com.jxdx.mine.ProfileActivity
 import com.jxdx.mine.R
-import com.jxdx.mine.databinding.FragmentMyBinding
-
+import com.jxdx.mine.course.CourseActivity
+import com.jxdx.mine.course.CourseDetailActivity
+import com.jxdx.mine.course.CourseListFragment
+import com.jxdx.mine.databinding.FragmnetMymBinding
+import com.jxdx.mine.grade.GradeActivity
+import com.jxdx.mine.homework.HomeworkActivity
 
 class My : Fragment() {
 
-    private var _binding: FragmentMyBinding? = null
+    private var _binding: FragmnetMymBinding? = null
     private val binding get() = _binding!!
 
     private var currentPhotoPath: String? = null
@@ -280,7 +285,7 @@ class My : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMyBinding.inflate(inflater, container, false)
+        _binding = FragmnetMymBinding.inflate(inflater, container, false)
 
         return binding.root
     }
@@ -308,6 +313,19 @@ class My : Fragment() {
             var intent= Intent(requireActivity(), EditProfileActivity::class.java)
             startActivityForResult(intent, 1)
         }
+        //点击作业跳转到作业页面
+        binding.navSettings.setOnClickListener {
+            startActivity(Intent(requireActivity(), HomeworkActivity::class.java))
+        }
+        //点击班级跳转班级页面
+        binding.navClass.setOnClickListener {
+            startActivity(Intent(requireActivity(), GradeActivity::class.java))
+        }
+
+        //点击课程跳转课程界面
+        binding.navCourses.setOnClickListener {
+            startActivity(Intent(requireActivity(), CourseActivity::class.java))
+        }
 
         //加载用户信息
         loadSavedDate()
@@ -329,7 +347,7 @@ class My : Fragment() {
 
     private fun saveBioToPrefs(bio: String) {
         val preferences = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val userName = preferences.getString("username", "用户名")
+        val userName = preferences.getString("username", "未命名")
         preferences.edit {
             putString("${userName}_bio", bio)
         }
@@ -345,9 +363,9 @@ class My : Fragment() {
     private fun loadSavedDate() {
         //用户信息 我的 中   有  用户名/班级/个人简介/头像（uri/path）
         val preferences = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val userName=preferences.getString("user_name","用户名")
-        val grade=preferences.getString("user_grade","大一")
-        val bio=preferences.getString("user_bio","个人简介")
+        val userName=preferences.getString("user_name","小明")
+        val grade=preferences.getString("user_grade","高一1班")
+        val bio=preferences.getString("user_bio","点击添加兴趣爱好")
 
 
         val uriString = preferences.getString("${userName}_uri", null)
@@ -377,17 +395,18 @@ class My : Fragment() {
 
 
     //柱状图
+    @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebViewChart() {
         val webView = view?.findViewById<WebView>(R.id.barChartWebView)
 
         // 启用JavaScript
-        webView?.settings?.javaScriptEnabled = true
-
-        // 可选：添加其他WebView设置
-        webView?.settings?.domStorageEnabled = true
-        webView?.settings?.setSupportZoom(false)
-        webView?.settings?.builtInZoomControls = false
-        webView?.settings?.displayZoomControls = false
+        webView?.settings?.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            setSupportZoom(false)
+            builtInZoomControls = false
+            displayZoomControls = false
+        }
 
         // 加载本地HTML文件
         webView?.loadUrl("file:///android_asset/chart.html")

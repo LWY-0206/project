@@ -14,7 +14,7 @@ import com.example.corekit.recyclerview.MultipleTypeAdapter
 import com.example.corekit.recyclerview.ViewHolderTag
 import com.example.corekit.util.load
 import com.jxdx.square.R
-import com.jxdx.square.activity.DynamicdetailsActivity
+import com.jxdx.square.activity.DynamicDetailsActivity
 import com.jxdx.square.entity.Dynamic
 import kotlin.math.min
 
@@ -58,7 +58,8 @@ class DynamicAdapter : MultipleTypeAdapter() {
                     Log.d("DynamicAdapter", "传递的点赞状态: ${dynamicData.isLiked}")
                     Log.d("DynamicAdapter", "传递的动态ID: ${dynamicData.id}")
                     // 从上下文启动动态详情页Activity
-                    val intent = Intent(view.context, DynamicdetailsActivity::class.java)
+                    val intent = Intent(view.context, DynamicDetailsActivity::class.java)
+
                     // 传递动态ID
                     intent.putExtra("Id", dynamicData.id)
                     // 传递评论数量

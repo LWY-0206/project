@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -40,10 +41,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-
+    api(project(":annotations"))
     api(libs.pictureselector)
-    annotationProcessor(libs.auto.service)
-    api(libs.auto.service.annotations)
+    ksp(project(":processor"))
     runtimeOnly(libs.constraintlayout)
 
 }
