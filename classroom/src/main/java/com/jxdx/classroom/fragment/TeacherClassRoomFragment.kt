@@ -1,0 +1,23 @@
+package com.jxdx.classroom.com.jxdx.classroom.fragment
+
+import android.content.Intent
+import com.example.corekit.common.BaseFragment
+import com.jxdx.classroom.activity.MainActivity
+import com.jxdx.mylibrary.databinding.TeacherClassRoomFragmentBinding
+
+class TeacherClassRoomFragment:BaseFragment<TeacherClassRoomFragmentBinding>() {
+    override fun bindLayout(): TeacherClassRoomFragmentBinding {
+        return TeacherClassRoomFragmentBinding.inflate(layoutInflater)
+    }
+
+    override fun initView() {
+        find.startLive.setOnClickListener {
+            val intent = Intent(activity, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+    }
+
+    override fun subscribeUi() {
+    }
+}
