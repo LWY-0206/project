@@ -10,9 +10,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
+import com.bumptech.glide.Glide
+import com.example.corekit.http.bean.BaseResp
 import com.jxdx.classroom.R
 import com.jxdx.classroom.activity.ActivityToClassRoomFragment
 import com.jxdx.classroom.databinding.FragmentEntranceBinding
+import com.jxdx.classroom.http.RetrofitClient
+import com.jxdx.classroom.http.UserInfo
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
 
 class EntranceFragment : Fragment() {
 
@@ -64,9 +72,12 @@ class EntranceFragment : Fragment() {
         }
 
 
+        //直播按钮
         binding.ibLive.setOnClickListener {
             startActivity(Intent(requireContext(), ActivityToClassRoomFragment::class.java))
         }
+
+        updateEntranceUseInfo()
     }
 
     /**
@@ -89,5 +100,44 @@ class EntranceFragment : Fragment() {
         super.onDestroyView()
         handler.removeCallbacksAndMessages(null)
         _binding = null
+    }
+
+
+    private fun updateEntranceUseInfo() {
+        RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
+            override fun onResponse(
+                call: Call<BaseResp<UserInfo>?>,
+                response: Response<BaseResp<UserInfo>?>
+            ) {
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        if (it.code==0) {
+                            if(it.data?.identity ==0) {
+                                binding.tvUserName.text = "欢迎" + it.data?.userName + "同学！"
+                                Glide.with(requireContext())
+                                    .load(it.data?.avatarUrl)
+                                    .circleCrop()
+                                    .into(binding.ivAvatar)
+                            }else{
+                                binding.tvUserName.text = "欢迎" + it.data?.userName + "老师！"
+                                Glide.with(requireContext())
+                                    .load(it.data?.avatarUrl)
+                                    .circleCrop()
+                                    .into(binding.ivAvatar)
+                            }
+                        }else{
+                            Toast.makeText(requireContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+
+            override fun onFailure(
+                call: Call<BaseResp<UserInfo>?>,
+                t: Throwable
+            ) {
+                Toast.makeText(requireContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

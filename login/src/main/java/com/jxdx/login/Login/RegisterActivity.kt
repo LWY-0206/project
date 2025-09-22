@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.corekit.http.bean.BaseResp
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.jxdx.login.R
-import com.jxdx.login.UserInfo
 import com.jxdx.login.databinding.ActivityRegisterBinding
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -61,7 +60,7 @@ class RegisterActivity : AppCompatActivity() {
             val selectedGrade = parent.getItemAtPosition(position) as String
             binding.etGrade.setText(selectedGrade, false)
         }
-        binding.etGrade.setText("软件111", false)
+        binding.etGrade.setText("高一1班", false)
     }
 
     private fun setupListeners() {
@@ -110,6 +109,7 @@ class RegisterActivity : AppCompatActivity() {
     //检查注册信息
     private fun validateInput(): Boolean {
         val selectedId = binding.rgIdentity.checkedRadioButtonId
+        Toast.makeText(this, "selectedId: $selectedId==teacherId: ${R.id.rb_teacher}", Toast.LENGTH_SHORT).show()
         isTeacher = (selectedId == R.id.rb_teacher)
 
         val username = binding.etUsername.text.toString().trim()
@@ -264,8 +264,11 @@ class RegisterActivity : AppCompatActivity() {
 
         val registerRequest = RegisterRequest(userName=userName,avatarUrl=avatarUrl, phone = phone,identity=identity, password = password,className=className)
 
-        RetrofitClient.apiService.register(registerRequest).enqueue(object : Callback<BaseResp<UserInfo>> {
-            override fun onResponse(call: Call<BaseResp<UserInfo>>, response: Response<BaseResp<UserInfo>>) {
+        RetrofitClient.apiService.register(registerRequest).enqueue(object : Callback<BaseResp<Any>> {
+            override fun onResponse(
+                call: Call<BaseResp<Any>?>,
+                response: Response<BaseResp<Any>?>
+            ) {
                 progressDialog.dismiss()
 
                 if (response.isSuccessful) {
@@ -290,7 +293,10 @@ class RegisterActivity : AppCompatActivity() {
                 }
             }
 
-            override fun onFailure(call: Call<BaseResp<UserInfo>>, t: Throwable) {
+            override fun onFailure(
+                call: Call<BaseResp<Any>>,
+                t: Throwable)
+            {
                 progressDialog.dismiss()
                 Log.d("---Register_onFailure",t.message.toString())
                 Toast.makeText(this@RegisterActivity, "网络连接失败，请检查网络设置", Toast.LENGTH_SHORT).show()

@@ -22,7 +22,7 @@ interface ApiService {
     @POST("/user/register")
     fun register(
         @Body registerRequest: RegisterRequest,
-    ): Call<BaseResp<UserInfo>>
+    ): Call<BaseResp<Any>>
     @Multipart
     @POST("/common/upload")
     fun uploadAvatar(
