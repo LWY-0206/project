@@ -5,6 +5,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.corekit.common.BaseFragment
 import com.jxdx.resource.Famous.FamousListActivity
+import com.jxdx.resource.FirstPage.EntranceActivity
 import com.jxdx.resource.Questions.QuestionSelectionActivity
 import com.jxdx.resource.Schools.SchoolListActivity
 import com.jxdx.resource.databinding.FragmentResourceBinding
@@ -51,6 +52,10 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
         }
         val test = find.tvSchools.setOnClickListener {
             val intent = Intent(requireContext(), SchoolListActivity::class.java)
+            startActivity(intent)
+        }
+        val First=find.tvChem.setOnClickListener {
+            val intent = Intent(requireContext(), EntranceActivity::class.java)
             startActivity(intent)
         }
     }

@@ -96,7 +96,7 @@ class HomeActivity : AppCompatActivity() {
             0 -> {
                 ivHome.setImageResource(R.drawable.ketang)
                 tvHome.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                fragmentService?.getFragment("my")
+                fragmentService?.getFragment("firstfragment")
             }
 
             1 -> {

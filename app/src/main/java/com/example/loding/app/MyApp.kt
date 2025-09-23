@@ -25,7 +25,7 @@ class MyApp : BaseApplication() {
         ClassModuleInitializer.init()
         with(HttpManager.Builder()){
             baseUrl(BASE_URL)
-            this.timeout(15)
+            this.timeout(25)
             HttpManager.init(this)
         }
     }
