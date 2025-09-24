@@ -219,7 +219,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="2小时前 完成了数学作业"
+                        android:text="2小时前 完成了高等数学作业"
                         android:textSize="14sp"
                         android:textColor="#444444"/>
 
@@ -232,7 +232,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="昨天 参加了英语小测"
+                        android:text="昨天 参加了数据库小测"
                         android:textSize="14sp"
                         android:textColor="#444444"/>
 
@@ -245,7 +245,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="3天前 完成了物理实验报告"
+                        android:text="3天前 完成了大学物理实验报告"
                         android:textSize="14sp"
                         android:textColor="#444444"/>
                 </LinearLayout>
