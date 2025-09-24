@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.18.1)
 
+
 project("rtmptester")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DNO_CRYPTO")#设置RTMP不适用OpenSSL

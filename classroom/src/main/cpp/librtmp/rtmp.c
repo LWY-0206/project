@@ -189,7 +189,7 @@ int
 RTMPPacket_Alloc(RTMPPacket *p, uint32_t nSize)
 {
   char *ptr;
-  if (nSize > SIZE_MAX - RTMP_MAX_HEADER_SIZE)
+  if (nSize > (UINT32_MAX - RTMP_MAX_HEADER_SIZE))
     return FALSE;
   ptr = calloc(1, nSize + RTMP_MAX_HEADER_SIZE);
   if (!ptr)
