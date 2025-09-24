@@ -32,7 +32,7 @@ Java_com_jxdx_classroom_activity_ScreenLive_connect(JNIEnv *env, jobject thiz, j
     const char *url = env->GetStringUTFChars(url_, 0);
 
     LOGE("开始连接RTMP服务器，URL: %s", url);
-    
+
     // 检查URL是否有效
     if (!url || strlen(url) == 0) {
         LOGE("错误: RTMP URL为空");
@@ -55,12 +55,12 @@ Java_com_jxdx_classroom_activity_ScreenLive_connect(JNIEnv *env, jobject thiz, j
         env->ReleaseStringUTFChars(url_, url);
         return false;
     }
-    
+
     RTMP_Init(live->rtmp);//初始化
 
     live->rtmp->Link.timeout = 10;//连接超时时长为10秒
     live->rtmp->Link.lFlags |= RTMP_LF_LIVE;//设置类型为直播
-    
+
     if (!RTMP_SetupURL(live->rtmp, (char*)url)) {
         LOGE("错误: RTMP_SetupURL 失败，URL格式可能不正确");
         close();
@@ -71,7 +71,7 @@ Java_com_jxdx_classroom_activity_ScreenLive_connect(JNIEnv *env, jobject thiz, j
     RTMP_EnableWrite(live->rtmp);//设置为可写状态
 
     LOGE("开始调用RTMP_Connect连接服务器");
-    
+
     int ret = 0;
     if (!(ret = RTMP_Connect(live->rtmp, NULL))){
         LOGE("错误: RTMP_Connect 连接服务器失败，可能的原因: 服务器不可达、网络问题、URL错误");
@@ -91,30 +91,43 @@ Java_com_jxdx_classroom_activity_ScreenLive_connect(JNIEnv *env, jobject thiz, j
     }
 
     LOGE("RTMP连接完全成功");
-    
+
     env->ReleaseStringUTFChars(url_, url);
     return ret;
 }
 
 // 传递第一帧 00 00 00 01 67 64 00 28ACB402201E3CBCA41408081B4284D4  00000001 68 EE 06 F2 C0
 void prepareVideo(int8_t *data, int len, Live *live) {
-    for (int i = 0; i < len; i++) {
-        if (i + 4 < len) {
-            if (data[i] == 0x00 && data[i + 1] == 0x00 && data[i + 2] == 0x00 && data[i + 3] == 0x01) {
-                if (data[i + 4]  == 0x68) {
-                    //sps解析
-                    live->sps_len = i - 4;
-                    live->sps = static_cast<int8_t *>(malloc(live->sps_len));
-                    memcpy(live->sps, data + 4, live->sps_len);
-
-                    //pps解析
-                    live->pps_len = len - (4 + live->sps_len) - 4;
-                    live->pps = static_cast<int8_t *>(malloc(live->pps_len));
-                    memcpy(live->pps, data + 4 + live->sps_len + 4, live->pps_len);
-                    break;
-                }
+    LOGE("开始解析SPS/PPS，数据长度: %d", len);
+    
+    // 查找SPS (0x67)
+    int sps_start = -1, pps_start = -1;
+    for (int i = 0; i < len - 4; i++) {
+        if (data[i] == 0x00 && data[i + 1] == 0x00 && data[i + 2] == 0x00 && data[i + 3] == 0x01) {
+            if (data[i + 4] == 0x67) { // SPS
+                sps_start = i + 4;
+                LOGE("找到SPS起始位置: %d", sps_start);
+            } else if (data[i + 4] == 0x68) { // PPS
+                pps_start = i + 4;
+                LOGE("找到PPS起始位置: %d", pps_start);
             }
         }
+    }
+    
+    if (sps_start > 0 && pps_start > sps_start) {
+        // 解析SPS
+        live->sps_len = pps_start - sps_start - 4; // 减去PPS的起始码长度
+        live->sps = static_cast<int8_t *>(malloc(live->sps_len));
+        memcpy(live->sps, data + sps_start, live->sps_len);
+        LOGE("SPS长度: %d", live->sps_len);
+        
+        // 解析PPS
+        live->pps_len = len - pps_start;
+        live->pps = static_cast<int8_t *>(malloc(live->pps_len));
+        memcpy(live->pps, data + pps_start, live->pps_len);
+        LOGE("PPS长度: %d", live->pps_len);
+    } else {
+        LOGE("错误: 未找到有效的SPS/PPS数据");
     }
 }
 
@@ -209,9 +222,20 @@ RTMPPacket *createVideoPackage(int8_t *buf, int len, const long tms, Live *live)
 }
 
 int sendPacket(RTMPPacket *packet) {
+    if (!live || !live->rtmp || !packet) {
+        LOGE("错误: 无效的RTMP连接或数据包");
+        return 0;
+    }
+    
     int r = RTMP_SendPacket(live->rtmp, packet, 1);
     if(r){
-        LOGE("发送rtmp包成功");
+        LOGE("发送rtmp包成功，大小: %d", packet->m_nBodySize);
+    } else {
+        LOGE("发送rtmp包失败，错误码: %d", r);
+        // 检查连接状态
+        if (!RTMP_IsConnected(live->rtmp)) {
+            LOGE("RTMP连接已断开");
+        }
     }
     RTMPPacket_Free(packet);
     free(packet);
@@ -221,21 +245,43 @@ int sendPacket(RTMPPacket *packet) {
 // 传递第一帧 00 00 00 01 67 64 00 28ACB402201E3CBCA41408081B4284D4  0000000168 EE 06 F2 C0
 int sendVideo(int8_t *buf, int len, long tms) {
     int ret = 0;
+    
+    // 检查RTMP连接状态
+    if (!live || !live->rtmp || !RTMP_IsConnected(live->rtmp)) {
+        LOGE("错误: RTMP连接已断开，无法发送数据");
+        return 0;
+    }
+    
+    LOGE("发送视频数据: 长度=%d, 时间戳=%ld, 首字节=0x%02x", len, tms, buf[4]);
+    
     if (buf[4] == 0x67) {
         // 缓存sps 和pps 到全局遍历 不需要推流
         if (live && (!live->pps || !live->sps)) {
+            LOGE("解析SPS/PPS数据");
             prepareVideo(buf, len, live);
         }
         return ret;
     }
 
     if (buf[4] == 0x65) {//关键帧
-        RTMPPacket *packet = createVideoPackage(live);
-        sendPacket(packet);
+        LOGE("发送关键帧，先发送SPS/PPS");
+        if (live->sps && live->pps) {
+            RTMPPacket *packet = createVideoPackage(live);
+            ret = sendPacket(packet);
+            if (!ret) {
+                LOGE("发送SPS/PPS包失败");
+                return ret;
+            }
+        } else {
+            LOGE("警告: SPS/PPS未准备好，跳过关键帧");
+        }
     }
 
     RTMPPacket *packet2 = createVideoPackage(buf, len, tms, live);
     ret = sendPacket(packet2);
+    if (!ret) {
+        LOGE("发送视频包失败");
+    }
     return ret;
 }
 
