@@ -49,10 +49,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         topBanner = find.topBanner
         val imageUrls: MutableList<String?> = ArrayList<String?>()
         imageUrls.add(
-            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E8%BD%AE%E6%92%AD%E5%9B%BE/%E5%AE%89%E5%8D%93%E7%95%8C%E9%9D%A2%E5%BC%80%E5%8F%91%20%281%29.png?Expires=1758025833&OSSAccessKeyId=TMP.3Kpqp3B7B5MRduvvcG9pSUWQt7fs6zDatQ1eAx4Rw8EQQrwA3CkzJrirxbvBHagaUqryiv4mQ4MoCfU1JnVkXR8DotSs3w&Signature=NaPpLmQVBRavavmOZ9NjcF7g7aU%3D&x-oss-request-payer=requester"
-        )
-        imageUrls.add(
-            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E8%BD%AE%E6%92%AD%E5%9B%BE/%E5%AE%89%E5%8D%93%E7%95%8C%E9%9D%A2%E5%BC%80%E5%8F%91%20%282%29.png?Expires=1758025896&OSSAccessKeyId=TMP.3Kpqp3B7B5MRduvvcG9pSUWQt7fs6zDatQ1eAx4Rw8EQQrwA3CkzJrirxbvBHagaUqryiv4mQ4MoCfU1JnVkXR8DotSs3w&Signature=Rpwd5fmF9AS4yGmyaQpE6uDnEz0%3D&x-oss-request-payer=requester"
+            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/d7e459cf-e03c-4cac-b6e1-0aa5783f1466.png"
         )
 
         topBanner?.setImages(imageUrls)
@@ -253,7 +250,7 @@ private fun setUpFloatingActionButton() {
                 id = "7",
                 title = "新添加的内容1",
                 description = "这是加载更多的测试内容",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/6eb67003-bf57-476a-95d4-164185bbe585.png?Expires=1758180374&OSSAccessKeyId=TMP.3KmTD5G3H5bUGu1uheE2QxEByUn4sK9srcCa4gGvZsy3zn8vKZzeY86JMyzhQtx8sDPut5U1FcQT2TArF7p7vZHnPP1k8U&Signature=niV7AjFEVWuVDJ9h5kbctBC%2Bbu0%3D&x-oss-request-payer=requester",
+                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
                 type = "video",
                 duration = "10:15",
                 viewCount = 500,
@@ -263,7 +260,7 @@ private fun setUpFloatingActionButton() {
                 id = "8",
                 title = "新添加的内容2",
                 description = "这是另一个加载更多的测试内容",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/6eb67003-bf57-476a-95d4-164185bbe585.png?Expires=1758180374&OSSAccessKeyId=TMP.3KmTD5G3H5bUGu1uheE2QxEByUn4sK9srcCa4gGvZsy3zn8vKZzeY86JMyzhQtx8sDPut5U1FcQT2TArF7p7vZHnPP1k8U&Signature=niV7AjFEVWuVDJ9h5kbctBC%2Bbu0%3D&x-oss-request-payer=requester",
+                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
                 type = "article",
                 viewCount = 300,
                 likeCount = 15
@@ -374,7 +371,7 @@ private fun setUpFloatingActionButton() {
                 id = "1",
                 title = "学校举办春季运动会，各学院积极备战",
                 summary = "为丰富校园文化生活，学校将于下月举办春季运动会，各学院已经开始积极备战...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E8%BF%90%E5%8A%A8%E4%BC%9A.jpg?Expires=1758643640&OSSAccessKeyId=TMP.3KmbhVjgFBopy5MiaexPDdGMAywJML7xiAdjC8meLJZQBxz4ASdFJwP93s2mtBbrRFTN3iXakNc58LMhaZ6D6nS1Eu6qgG&Signature=NpeivXPF%2BR40XEIYzojHiQCOAac%3D&x-oss-request-payer=requester",
+                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/d9a280aa-15c5-42b1-a0d9-c5a962bcd8b2.jpg",
                 source = "校园新闻",
                 publishTime = "2小时",
                 viewCount = 1250
@@ -383,7 +380,7 @@ private fun setUpFloatingActionButton() {
                 id = "2",
                 title = "计算机学院学生在编程大赛中荣获一等奖",
                 summary = "在刚刚结束的全国大学生程序设计大赛中，我校计算机学院代表队表现出色...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E5%96%9C%E6%8A%A5.jpg?Expires=1758643591&OSSAccessKeyId=TMP.3KmbhVjgFBopy5MiaexPDdGMAywJML7xiAdjC8meLJZQBxz4ASdFJwP93s2mtBbrRFTN3iXakNc58LMhaZ6D6nS1Eu6qgG&Signature=iZ3sgI5gCZ4XXeMYdNPa9OZha5I%3D&x-oss-request-payer=requester",
+                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/451278d3-c571-406d-8a57-276a71efe710.jpg",
                 source = "学术动态",
                 publishTime = "5小时",
                 viewCount = 890
@@ -392,7 +389,7 @@ private fun setUpFloatingActionButton() {
                 id = "3",
                 title = "图书馆新增电子资源，助力学术研究",
                 summary = "为满足师生学术研究需求，图书馆近期引进了多个知名数据库和电子期刊...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E5%9B%BE%E4%B9%A6%E9%A6%86.jpg?Expires=1758643612&OSSAccessKeyId=TMP.3KmbhVjgFBopy5MiaexPDdGMAywJML7xiAdjC8meLJZQBxz4ASdFJwP93s2mtBbrRFTN3iXakNc58LMhaZ6D6nS1Eu6qgG&Signature=K8XuaASYNHHkdAk4GMIVNpPDc%2F8%3D&x-oss-request-payer=requester",
+                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/c9338d44-4517-45dd-bc86-763f6c1eac03.jpg",
                 source = "资源更新",
                 publishTime = "1天",
                 viewCount = 567
@@ -401,7 +398,7 @@ private fun setUpFloatingActionButton() {
                 id = "4",
                 title = "学校开展心理健康教育周活动",
                 summary = "为关注学生心理健康，学校将于本周举办系列心理健康教育活动...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E5%BF%83%E7%90%86%E5%91%A8.jpg?Expires=1758643625&OSSAccessKeyId=TMP.3KmbhVjgFBopy5MiaexPDdGMAywJML7xiAdjC8meLJZQBxz4ASdFJwP93s2mtBbrRFTN3iXakNc58LMhaZ6D6nS1Eu6qgG&Signature=MRRepC%2FW1QB6H3uVuDOEyhrYwsQ%3D&x-oss-request-payer=requester",
+                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/4588f1e9-9b03-4033-a6c6-b73355a51b3d.jpg",
                 source = "学生工作",
                 publishTime = "3小时",
                 viewCount = 432
