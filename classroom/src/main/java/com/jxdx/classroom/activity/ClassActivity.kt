@@ -32,8 +32,7 @@ class ClassActivity : BaseActivity<ClassActivityBinding>(), SurfaceHolder.Callba
     private lateinit var player: ExoPlayer
     private lateinit var playerView: PlayerView
     //地址：这个测试的地址是可以放的啊
-    private val rtmpUrl = "rtmp://liteavapp.qcloud.com/live/liteavdemoplayerstreamid"
-    //加载布局，初始化视图
+    private val rtmpUrl = "rtmp://121.41.176.238:1935/live/c92d2299-8e03-4194-9d01-5a0233eaeaf5?userId=1&liveId=65"    //加载布局，初始化视图
     override fun bindLayout(): ClassActivityBinding {
         return ClassActivityBinding.inflate(layoutInflater)
     }

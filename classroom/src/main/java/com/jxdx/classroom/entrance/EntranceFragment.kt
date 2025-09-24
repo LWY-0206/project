@@ -48,14 +48,14 @@ class EntranceFragment : Fragment() {
 
         // 学科数据源
         val subjects = listOf(
-            Subject("语文", R.drawable.ic_chinese),
-            Subject("数学", R.drawable.ic_math),
-            Subject("英语", R.drawable.ic_english),
-            Subject("物理", R.drawable.ic_physics),
-            Subject("化学", R.drawable.ic_chemistry),
-            Subject("生物", R.drawable.ic_biology),
-            Subject("历史", R.drawable.ic_history),
-            Subject("政治", R.drawable.ic_politics)
+            Subject("科目一", R.drawable.ig1),
+            Subject("科目二", R.drawable.ic_math),
+            Subject("科目三", R.drawable.ic_english),
+            Subject("科目四", R.drawable.ic_physics),
+            Subject("科目五", R.drawable.ic_chemistry),
+            Subject("科目六", R.drawable.ic_biology),
+            Subject("科目七", R.drawable.ic_history),
+            Subject("科目八", R.drawable.ic_politics)
         )
 
         // 设置 ViewPager2
