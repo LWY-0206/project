@@ -72,13 +72,15 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
         )
         dataList.add(
             StaggeredItem(
-                "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/6eb67003-bf57-476a-95d4-164185bbe585.png?Expires=1758180374&OSSAccessKeyId=TMP.3KmTD5G3H5bUGu1uheE2QxEByUn4sK9srcCa4gGvZsy3zn8vKZzeY86JMyzhQtx8sDPut5U1FcQT2TArF7p7vZHnPP1k8U&Signature=niV7AjFEVWuVDJ9h5kbctBC%2Bbu0%3D&x-oss-request-payer=requester",
+                "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/1682405980883837.png?Expires=1758710901&OSSAccessKeyId=TMP.3KnLrwztLwgj4YEFYEW4MnPHhv7bcNgr6hLASC5ombV3HsqEZgkzohwn4HRouVZBRqT15eqgMQ7LZjcytsnzSbB6KwMebK&Signature=rcgV5SUcoghGuBkDX5V2LK4HOPE%3D&x-oss-request-payer=requester",
                 "联考试卷",
                 "2025优质模拟"
             )
         )
         dataList.add(
-            StaggeredItem("https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/6eb67003-bf57-476a-95d4-164185bbe585.png?Expires=1758180374&OSSAccessKeyId=TMP.3KmTD5G3H5bUGu1uheE2QxEByUn4sK9srcCa4gGvZsy3zn8vKZzeY86JMyzhQtx8sDPut5U1FcQT2TArF7p7vZHnPP1k8U&Signature=niV7AjFEVWuVDJ9h5kbctBC%2Bbu0%3D&x-oss-request-payer=requester","数栋优质题库",
+            StaggeredItem(
+                "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/1682405980883837.png?Expires=1758710901&OSSAccessKeyId=TMP.3KnLrwztLwgj4YEFYEW4MnPHhv7bcNgr6hLASC5ombV3HsqEZgkzohwn4HRouVZBRqT15eqgMQ7LZjcytsnzSbB6KwMebK&Signature=rcgV5SUcoghGuBkDX5V2LK4HOPE%3D&x-oss-request-payer=requester",
+                "数栋优质题库",
                 "分类汇编"
             )
         )

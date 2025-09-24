@@ -14,6 +14,8 @@ import com.bumptech.glide.Glide
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.classroom.R
 import com.jxdx.classroom.activity.ActivityToClassRoomFragment
+import com.jxdx.classroom.activity.ActivityToTeacherClassRoomFragment
+import com.jxdx.classroom.com.jxdx.classroom.fragment.TeacherClassRoomFragment
 import com.jxdx.classroom.databinding.FragmentEntranceBinding
 import com.jxdx.classroom.http.RetrofitClient
 import com.jxdx.classroom.http.UserInfo
@@ -30,6 +32,7 @@ class EntranceFragment : Fragment() {
     private lateinit var viewPager: ViewPager2
     private val handler = Handler(Looper.getMainLooper())
     private var currentPage = 0
+    private var identity=0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,9 +77,12 @@ class EntranceFragment : Fragment() {
 
         //直播按钮
         binding.ibLive.setOnClickListener {
-            startActivity(Intent(requireContext(), ActivityToClassRoomFragment::class.java))
+            if(identity==0) {
+                startActivity(Intent(requireContext(), ActivityToClassRoomFragment::class.java))
+            }else{
+                startActivity(Intent(requireContext(), ActivityToTeacherClassRoomFragment::class.java))
+            }
         }
-
         updateEntranceUseInfo()
     }
 
@@ -112,6 +118,7 @@ class EntranceFragment : Fragment() {
                 if (response.isSuccessful) {
                     response.body()?.let {
                         if (it.code==0) {
+                            identity= it.data?.identity ?:0
                             if(it.data?.identity ==0) {
                                 binding.tvUserName.text = "欢迎" + it.data?.userName + "同学！"
                                 Glide.with(requireContext())

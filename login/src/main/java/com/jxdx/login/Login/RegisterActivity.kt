@@ -28,9 +28,9 @@ class RegisterActivity : AppCompatActivity() {
     private var _binding: ActivityRegisterBinding? = null
     private val binding get() = _binding!!
     private val gradeList = arrayOf(
-        "高一1班", "高一2班", "高一3班", "高一4班",
-        "高二1班", "高二2班", "高二3班", "高二4班",
-        "高三1班", "高三2班","高三3班", "高三4班",
+        "软件111", "软件222", "软件333", "软件444",
+        "计科111", "计科 222", "计科333", "计科444",
+        "网络111", "网络222","网络333", "网络444",
     )
     private var isTeacher: Boolean = false
     private var avatarUri: Uri? = null
@@ -60,7 +60,7 @@ class RegisterActivity : AppCompatActivity() {
             val selectedGrade = parent.getItemAtPosition(position) as String
             binding.etGrade.setText(selectedGrade, false)
         }
-        binding.etGrade.setText("高一1班", false)
+        binding.etGrade.setText("软件111", false)
     }
 
     private fun setupListeners() {
