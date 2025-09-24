@@ -12,7 +12,8 @@ import com.jxdx.square.SquareModuleInitializer
 
 
 
-class MyApp : BaseApplication() {
+class
+MyApp : BaseApplication() {
     override fun onCreate() {
         super.onCreate()
         Log.d("---MyApp", "MyApp.onCreate() 执行了")

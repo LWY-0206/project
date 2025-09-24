@@ -1,8 +1,8 @@
 package com.jxdx.mine.util
 
 import androidx.recyclerview.widget.DiffUtil
-import com.jxdx.mine.homework.Homework
-import com.jxdx.mine.homework.SubjectGroup
+import com.jxdx.mine.Homework
+import com.jxdx.mine.SubjectGroup
 
 class HomeworkDiffCallback(
     private val oldList: List<Any>,

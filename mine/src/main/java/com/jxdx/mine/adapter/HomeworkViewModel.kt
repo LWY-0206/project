@@ -5,25 +5,38 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jxdx.mine.homework.SubjectGroup
+import com.jxdx.mine.SubjectGroup
 import kotlinx.coroutines.launch
-
 class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel() {
 
-    private val _homeworkLiveData = MutableLiveData<List<SubjectGroup>>()
-    val homeworkLiveData: LiveData<List<SubjectGroup>> = _homeworkLiveData
+    private val _homeworkLiveData = MutableLiveData<List<SubjectGroup>?>()
+    val homeworkLiveData: LiveData<List<SubjectGroup>> = _homeworkLiveData as LiveData<List<SubjectGroup>>
+
+    private var currentPage = 1
+    private val pageSize = 5
 
     /**
-     * 加载对应状态的作业
+     * 加载作业列表
+     * @param isLoadMore 是否为加载更多
      */
-    fun loadHomework(status: Int) {
+    fun loadHomework(status: Int, isLoadMore: Boolean = false) {
         viewModelScope.launch {
             try {
-                val homeworkList = repository.getHomeworkByStatus(status)
-                Log.d("---",homeworkList.toString())
-                _homeworkLiveData.postValue(homeworkList)
+                if (!isLoadMore) currentPage = 1
+
+                val homeworkList = repository.getHomeworkByStatus(status, currentPage, pageSize)
+
+                if (isLoadMore) {
+                    val currentList = _homeworkLiveData.value?.toMutableList() ?: mutableListOf()
+                    homeworkList?.let { currentList.addAll(it) }
+                    _homeworkLiveData.postValue(currentList)
+                } else {
+                    _homeworkLiveData.postValue(homeworkList)
+                }
+
+                currentPage++
             } catch (e: Exception) {
-                // 处理异常，这里可以添加错误日志或错误状态通知
+                Log.e("HomeworkViewModel", "加载作业失败", e)
                 _homeworkLiveData.postValue(emptyList())
             }
         }

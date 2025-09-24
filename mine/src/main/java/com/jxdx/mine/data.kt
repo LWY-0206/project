@@ -10,6 +10,41 @@ data class UserInfo(
     val identity: Int,              //身份：0-学生，1-老师
     val className: String,          //班级名称
 )
+// 单个作业
+data class Homework(
+    val id: String,          // 作业ID
+    val title: String,       // 作业标题
+    val deadline: String,    // 截止日期
+    val subject: String,     // 所属科目
+    var status: Int,         // 当前状态0未提交/1已提交未批改/3已完成
+    val sendTime: String = ""
+)
+
+// 科目分组
+class SubjectGroup(
+    val subjectName: String,             // 科目名，如 数学、语文
+    var isExpanded: Boolean = false,     // 是否展开
+    val homeworkList: MutableList<Homework> // 科目下的作业列表
+){
+    // 添加一个唯一标识符用于比较
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as SubjectGroup
+        return subjectName == other.subjectName
+    }
+
+    override fun hashCode(): Int {
+        return subjectName.hashCode()
+    }
+}
+data class PageData<T>(
+    val records: List<T>,
+    val total: Int,
+    val size: Int,
+    val current: Int,
+    val pages: Int
+)
 data class Member(
     val id: String,
     val name: String,

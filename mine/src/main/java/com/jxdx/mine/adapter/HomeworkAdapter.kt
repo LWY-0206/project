@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.jxdx.mine.R
-import com.jxdx.mine.homework.Homework
-import com.jxdx.mine.homework.SubjectGroup
+import com.jxdx.mine.Homework
+import com.jxdx.mine.SubjectGroup
 import com.jxdx.mine.util.HomeworkDiffCallback
 
 class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
