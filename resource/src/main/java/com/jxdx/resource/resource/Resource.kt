@@ -25,10 +25,9 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
         topBanner = find.topBanner
         val imageUrls: MutableList<String?> = ArrayList<String?>()
         imageUrls.add(
-            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E8%BD%AE%E6%92%AD%E5%9B%BE/%E5%AE%89%E5%8D%93%E7%95%8C%E9%9D%A2%E5%BC%80%E5%8F%91%20%281%29.png?Expires=1758025833&OSSAccessKeyId=TMP.3Kpqp3B7B5MRduvvcG9pSUWQt7fs6zDatQ1eAx4Rw8EQQrwA3CkzJrirxbvBHagaUqryiv4mQ4MoCfU1JnVkXR8DotSs3w&Signature=NaPpLmQVBRavavmOZ9NjcF7g7aU%3D&x-oss-request-payer=requester"
-        ) // 替换为实际图片 URL
+            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/8dadc437-9f67-412c-b057-6a902b25e438.png") // 替换为实际图片 URL
         imageUrls.add(
-            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E8%BD%AE%E6%92%AD%E5%9B%BE/%E5%AE%89%E5%8D%93%E7%95%8C%E9%9D%A2%E5%BC%80%E5%8F%91%20%282%29.png?Expires=1758025896&OSSAccessKeyId=TMP.3Kpqp3B7B5MRduvvcG9pSUWQt7fs6zDatQ1eAx4Rw8EQQrwA3CkzJrirxbvBHagaUqryiv4mQ4MoCfU1JnVkXR8DotSs3w&Signature=Rpwd5fmF9AS4yGmyaQpE6uDnEz0%3D&x-oss-request-payer=requester"
+            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/f97fba60-a22b-431d-a55b-a5c182963bc5.png"
         )
         topBanner?.setImages(imageUrls)      // 设置图片列表
             ?.setImageLoader(GlideImageLoader()) // 设置图片加载器
@@ -54,10 +53,6 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
             val intent = Intent(requireContext(), SchoolListActivity::class.java)
             startActivity(intent)
         }
-        val First=find.tvChem.setOnClickListener {
-            val intent = Intent(requireContext(), EntranceActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     override fun subscribeUi() {
@@ -65,22 +60,20 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
 
     private fun prepareTestData() {
         dataList.add(
-            StaggeredItem("https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/6eb67003-bf57-476a-95d4-164185bbe585.png?Expires=1758180374&OSSAccessKeyId=TMP.3KmTD5G3H5bUGu1uheE2QxEByUn4sK9srcCa4gGvZsy3zn8vKZzeY86JMyzhQtx8sDPut5U1FcQT2TArF7p7vZHnPP1k8U&Signature=niV7AjFEVWuVDJ9h5kbctBC%2Bbu0%3D&x-oss-request-payer=requester",
+            StaggeredItem("https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
                 "高中优质数学资源",
                 "100讲基础必看"
             )
         )
         dataList.add(
             StaggeredItem(
-                "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/1682405980883837.png?Expires=1758710901&OSSAccessKeyId=TMP.3KnLrwztLwgj4YEFYEW4MnPHhv7bcNgr6hLASC5ombV3HsqEZgkzohwn4HRouVZBRqT15eqgMQ7LZjcytsnzSbB6KwMebK&Signature=rcgV5SUcoghGuBkDX5V2LK4HOPE%3D&x-oss-request-payer=requester",
+                "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
                 "联考试卷",
                 "2025优质模拟"
             )
         )
         dataList.add(
-            StaggeredItem(
-                "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/1682405980883837.png?Expires=1758710901&OSSAccessKeyId=TMP.3KnLrwztLwgj4YEFYEW4MnPHhv7bcNgr6hLASC5ombV3HsqEZgkzohwn4HRouVZBRqT15eqgMQ7LZjcytsnzSbB6KwMebK&Signature=rcgV5SUcoghGuBkDX5V2LK4HOPE%3D&x-oss-request-payer=requester",
-                "数栋优质题库",
+            StaggeredItem("https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png","数栋优质题库",
                 "分类汇编"
             )
         )
