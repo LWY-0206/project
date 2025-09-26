@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
     // 备用公共测试服务器（仅用于测试，不保证长期可用）
 //     private final String url = "rtmp://192.168.2.104:1935/live/home";
 
-    private final String url = "rtmp://121.41.176.238:1935/live/80e4ae0e-ffe8-4d02-baa4-2adc653ae974?userId=1&liveId=63";
+    private final String url = "rtmp://121.41.176.238:1935/live/c8264c57-ddab-4430-acfe-5ab43ad9866a?userId=1&liveId=71";
     private static final String TAG = "MainActivity";
     private MediaProjectionManager mediaProjectionManager;
     private MediaProjection mediaProjection;

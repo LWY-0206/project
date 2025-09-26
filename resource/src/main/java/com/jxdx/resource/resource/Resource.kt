@@ -24,10 +24,10 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
         topBanner = find.topBanner
         val imageUrls: MutableList<String?> = ArrayList<String?>()
         imageUrls.add(
-            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E8%BD%AE%E6%92%AD%E5%9B%BE/%E5%AE%89%E5%8D%93%E7%95%8C%E9%9D%A2%E5%BC%80%E5%8F%91%20%281%29.png?Expires=1758025833&OSSAccessKeyId=TMP.3Kpqp3B7B5MRduvvcG9pSUWQt7fs6zDatQ1eAx4Rw8EQQrwA3CkzJrirxbvBHagaUqryiv4mQ4MoCfU1JnVkXR8DotSs3w&Signature=NaPpLmQVBRavavmOZ9NjcF7g7aU%3D&x-oss-request-payer=requester"
+            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E8%BD%AE%E6%92%AD%E5%9B%BE/%E5%AE%89%E5%8D%93%E7%95%8C%E9%9D%A2%E5%BC%80%E5%8F%91%20%282%29.png?Expires=1758705206&OSSAccessKeyId=TMP.3KmGefmTYJr9VBcL1u72ZBuPCvRb6rV8qCjPheumURttoJdEvQ8nCiZyPNtk2HVbzAVWyVdVBHWRjuryY4nYHZUQkjzwWC&Signature=LcnAmvvwkfhdrFkkO3MyaK7Oa0k%3D&x-oss-request-payer=requester"
         ) // 替换为实际图片 URL
         imageUrls.add(
-            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E8%BD%AE%E6%92%AD%E5%9B%BE/%E5%AE%89%E5%8D%93%E7%95%8C%E9%9D%A2%E5%BC%80%E5%8F%91%20%282%29.png?Expires=1758025896&OSSAccessKeyId=TMP.3Kpqp3B7B5MRduvvcG9pSUWQt7fs6zDatQ1eAx4Rw8EQQrwA3CkzJrirxbvBHagaUqryiv4mQ4MoCfU1JnVkXR8DotSs3w&Signature=Rpwd5fmF9AS4yGmyaQpE6uDnEz0%3D&x-oss-request-payer=requester"
+            "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/%E8%BD%AE%E6%92%AD%E5%9B%BE/%E5%AE%89%E5%8D%93%E7%95%8C%E9%9D%A2%E5%BC%80%E5%8F%91%20%281%29.png?Expires=1758705849&OSSAccessKeyId=TMP.3KmGefmTYJr9VBcL1u72ZBuPCvRb6rV8qCjPheumURttoJdEvQ8nCiZyPNtk2HVbzAVWyVdVBHWRjuryY4nYHZUQkjzwWC&Signature=lSZVx5kJoU3KH6rrt05voPp439Y%3D&x-oss-request-payer=requester"
         )
         topBanner?.setImages(imageUrls)      // 设置图片列表
             ?.setImageLoader(GlideImageLoader()) // 设置图片加载器
@@ -38,6 +38,7 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
         adapter = StaggeredAdapter(requireContext(), dataList)
         rvStaggered = find.rvStaggered
         rvStaggered.adapter = adapter
+
         val layoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         rvStaggered.setLayoutManager(layoutManager)
