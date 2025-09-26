@@ -1,40 +1,46 @@
 package com.jxdx.mine.course
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.activity.viewModels
 import com.jxdx.mine.databinding.ActivityCourseDetailBinding
 
-class CourseDetailActivity : AppCompatActivity() {
+class CourseListActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityCourseDetailBinding
-    private lateinit var adapter: CoursewareAdapter
-    private val viewModel: CourseDetailViewModel by viewModels()
+    private lateinit var adapter: CourseListAdapter
+    private val viewModel: CourseListViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCourseDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val courseId = intent.getStringExtra("courseId") ?: return
+        var courseId = intent.getIntExtra("courseId", -1)
+        Log.d("CourseListActivity", "courseId: $courseId")
 
-        adapter = CoursewareAdapter(
-            onPreviewClick = { courseware ->
-                Toast.makeText(this, "预览: ${courseware.title}", Toast.LENGTH_SHORT).show()
+        adapter = CourseListAdapter(
+            onPreviewClick = {
+                Toast.makeText(this, "预览: ${it.CoursewareName}", Toast.LENGTH_SHORT).show()
             },
-            onDownloadClick = { courseware ->
-                Toast.makeText(this, "下载: ${courseware.title}", Toast.LENGTH_SHORT).show()
+            onDownloadClick = {
+                Toast.makeText(this, "下载: ${it.CoursewareName}", Toast.LENGTH_SHORT).show()
             }
         )
 
         binding.recyclerViewCourseware.adapter = adapter
         binding.recyclerViewCourseware.layoutManager = LinearLayoutManager(this)
 
+
         // 观察课件列表
-        viewModel.coursewareList.observe(this) {
-            adapter.submitList(it)
+        viewModel.courseWareList.observe(this) {
+            Log.d("CourseListActivity", "coursewareList: $it")
+            if (it != null) {
+                adapter.submitList(it)
+            }
         }
 
         // 观察学习报告

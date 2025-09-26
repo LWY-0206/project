@@ -9,29 +9,30 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jxdx.mine.Courseware
 import com.jxdx.mine.R
 
-class CoursewareAdapter(
+class CourseListAdapter(
     private val onPreviewClick: (Courseware) -> Unit,
     private val onDownloadClick: (Courseware) -> Unit
-) : RecyclerView.Adapter<CoursewareAdapter.CoursewareViewHolder>() {
+) : RecyclerView.Adapter<CourseListAdapter.CoursewareViewHolder>() {
 
-    private val coursewares = mutableListOf<Courseware>()
+    private val items  = mutableListOf<Courseware>()
 
-    fun submitList(list: List<Courseware>) {
-        coursewares.clear()
-        coursewares.addAll(list)
+    fun submitList(list: List<Courseware>?) {
+        items .clear()
+        if(list!=null){
+            items .addAll(list)
+        }
         notifyDataSetChanged()
     }
 
     inner class CoursewareViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvUploadTime: TextView = itemView.findViewById(R.id.tv_upload_time)
-        private val tvTitle: TextView = itemView.findViewById(R.id.tv_courseware_title)
-        private val btnPreview: Button = itemView.findViewById(R.id.btn_preview)
+        private val tvTitle: TextView = itemView.findViewById(R.id.tv_course_description)
+        private val btnPrevie: Button = itemView.findViewById(R.id.btn_preview)
         private val btnDownload: Button = itemView.findViewById(R.id.btn_download)
 
         fun bind(courseware: Courseware) {
-            tvUploadTime.text = "上传时间：${courseware.uploadTime}"
-            tvTitle.text = courseware.title
-            btnPreview.setOnClickListener { onPreviewClick(courseware) }
+            tvTitle.text = courseware.CoursewareName
+            btnPrevie.setOnClickListener { onPreviewClick(courseware) }
             btnDownload.setOnClickListener { onDownloadClick(courseware) }
         }
     }
@@ -42,8 +43,8 @@ class CoursewareAdapter(
         return CoursewareViewHolder(view)
     }
 
-    override fun getItemCount() = coursewares.size
+    override fun getItemCount() = items .size
     override fun onBindViewHolder(holder: CoursewareViewHolder, position: Int) {
-        holder.bind(coursewares[position])
+        holder.bind(items [position])
     }
 }

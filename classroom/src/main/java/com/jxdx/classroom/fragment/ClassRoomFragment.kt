@@ -5,6 +5,7 @@ import com.example.corekit.common.BaseFragment
 import com.jxdx.classroom.activity.ClassActivity
 import com.jxdx.classroom.activity.FFmpegScreenLive
 import com.jxdx.classroom.activity.MainActivity
+import com.jxdx.classroom.com.jxdx.classroom.fragment.TeacherClassRoomFragment
 
 
 import com.jxdx.classroom.databinding.ClassroomFragmentBinding
@@ -15,7 +16,7 @@ class ClassRoomFragment : BaseFragment<ClassroomFragmentBinding>() {
     override fun bindLayout(): ClassroomFragmentBinding = ClassroomFragmentBinding.inflate(layoutInflater)
     override fun initView() {
         find.btnEnterClass.setOnClickListener {
-            val intent = Intent(requireActivity(), ClassActivity::class.java)
+            val intent = Intent(requireActivity(), MainActivity::class.java)
             startActivity(intent)
         }
     }

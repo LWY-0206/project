@@ -3,10 +3,8 @@ package com.jxdx.mine.service
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -20,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 
@@ -35,8 +32,6 @@ import com.jxdx.mine.ProfileActivity
 import com.jxdx.mine.R
 import com.jxdx.mine.UserInfo
 import com.jxdx.mine.course.CourseActivity
-import com.jxdx.mine.course.CourseDetailActivity
-import com.jxdx.mine.course.CourseListFragment
 import com.jxdx.mine.databinding.FragmnetMymBinding
 import com.jxdx.mine.grade.GradeActivity
 import com.jxdx.mine.homework.HomeworkActivity

@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.fragment.app.viewModels
 import com.jxdx.mine.databinding.FragmentCourseListBinding
 
-class CourseListFragment : Fragment() {
+class CourseFragment : Fragment() {
 
     private lateinit var binding: FragmentCourseListBinding
     private lateinit var adapter: CourseAdapter
@@ -30,8 +30,8 @@ class CourseListFragment : Fragment() {
         adapter = CourseAdapter(
             { course ->
                 // 点击跳转到课程详情页
-                val intent = Intent(requireContext(), CourseDetailActivity::class.java)
-                intent.putExtra("courseId", course.id)
+                val intent = Intent(requireContext(), CourseListActivity::class.java)
+                intent.putExtra("courseId", course.subjectId)
                 startActivity(intent)
             }
         )

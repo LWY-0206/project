@@ -49,17 +49,32 @@ class EntranceFragment : Fragment() {
 
         viewPager = binding.viewpagerSubjects
 
-        // 学科数据源
-        val subjects = listOf(
-            Subject("科目一", R.drawable.ig1),
-            Subject("科目二", R.drawable.ic_math),
-            Subject("科目三", R.drawable.ic_english),
-            Subject("科目四", R.drawable.ic_physics),
-            Subject("科目五", R.drawable.ic_chemistry),
-            Subject("科目六", R.drawable.ic_biology),
-            Subject("科目七", R.drawable.ic_history),
-            Subject("科目八", R.drawable.ic_politics)
+
+
+        val iconReS=listOf(
+            R.drawable.ig1,
+            R.drawable.ic_math,
+            R.drawable.ic_english,
+            R.drawable.ic_physics,
+            R.drawable.ic_chemistry,
+            R.drawable.ic_biology,
+            R.drawable.ic_history,
+            R.drawable.ic_politics
         )
+        var pos=0
+        // 查询用户的所有课程
+        val subjects = listOf(
+            Subject("科目一", iconReS[pos++]),
+            Subject("科目二", iconReS[pos++]),
+            Subject("科目三", iconReS[pos++]),
+            Subject("科目四", iconReS[pos++]),
+            Subject("科目五", iconReS[pos++]),
+            Subject("科目六", iconReS[pos++]),
+            Subject("科目七", iconReS[pos++]),
+            Subject("科目八", iconReS[pos]),
+        )
+
+
 
         // 设置 ViewPager2
         viewPager.adapter = SubjectAdapter(subjects)

@@ -12,11 +12,11 @@ data class UserInfo(
 )
 // 单个作业
 data class Homework(
-    val id: String,          // 作业ID
-    val title: String,       // 作业标题
-    val deadline: String,    // 截止日期
-    val subject: String,     // 所属科目
-    var status: Int,         // 当前状态0未提交/1已提交未批改/3已完成
+    val homeworkId: String,             // 作业ID
+    val subject: String,                // 所属科目
+    val completeAndCorrect:Int,         // 当前状态0未提交/1已提交未批改/3已完成
+    val homeworkName: String,           // 作业标题
+    val deadTime: String,               // 截止日期
     val sendTime: String = ""
 )
 
@@ -59,22 +59,30 @@ data class ApiMember(
     val role: String?,
     val type: Int // 1=老师, 2=学生
 )
-//课程
-data class Course(
-    val id: String,
-    val name: String,          // 课程名
+//查看所有课程
+data class AllCourse(
+    val subjectId: Int,
+    val subjectName: String,          // 课程名
     val teacherName: String,   // 任课老师
-    val progress: String       // 课程进度描述，如"8/12"
+    val avatarUrl: String,          //老师头像
+    val status:Int,
 )
 
-// 历史课件数据
-data class Courseware(
-    val id: String,
-    val courseId: String,
-    val title: String,         // 课件名称
-    val uploadTime: String,    // 上传时间
-    val fileUrl: String        // 文件下载或预览地址
+//获取课程详情
+data class CourseDetail(
+    val subjectName: String,        //课程名称
+    val subjectId: Int?,             //课程id
+    val teacherName: String,        //老师名字
+    val teacherId: Int,             //老师id
+    val uploadTime: String,         // 上传时间
+    val file: Map<String, String>,  // 课件名称:文件地址
 )
+//将CourseDetail中的file：Map<String, String>转换为List<Courseware>
+data class Courseware(
+    val CoursewareName: String, // 文件描述
+    val url: String,         // 文件下载地址
+)
+
 
 // 学习报告
 data class StudyReport(

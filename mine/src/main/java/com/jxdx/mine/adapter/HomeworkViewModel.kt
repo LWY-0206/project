@@ -19,12 +19,12 @@ class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel(
      * 加载作业列表
      * @param isLoadMore 是否为加载更多
      */
-    fun loadHomework(status: Int, isLoadMore: Boolean = false) {
+    fun loadHomework(completeAndCorrect: Int, isLoadMore: Boolean = false) {
         viewModelScope.launch {
             try {
                 if (!isLoadMore) currentPage = 1
 
-                val homeworkList = repository.getHomeworkByStatus(status, currentPage, pageSize)
+                val homeworkList = repository.getHomeworkByStatus(completeAndCorrect, currentPage, pageSize)
 
                 if (isLoadMore) {
                     val currentList = _homeworkLiveData.value?.toMutableList() ?: mutableListOf()

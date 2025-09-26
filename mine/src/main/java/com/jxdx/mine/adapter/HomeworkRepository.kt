@@ -35,9 +35,9 @@ class HomeworkRepository {
      * 获取作业数据并按 subject 分组
      * @param status 作业状态：0 未提交，1 待批改，2 已完成
      */
-    suspend fun getHomeworkByStatus(status: Int, page: Int = 1, size: Int = 5): List<SubjectGroup>? {
+    suspend fun getHomeworkByStatus(completeAndCorrect: Int, page: Int = 1, size: Int = 5): List<SubjectGroup>? {
         // 调用接口
-        val resp: BaseResp<PageData<Homework>> =
+        val resp: BaseResp<PageData<Homework>> = 
             RetrofitClient.apiService.getHomework(page, size).await()
 
         if (resp.code != 0) {
@@ -46,7 +46,7 @@ class HomeworkRepository {
 
         Log.d("HomeworkRepository", "接口请求成功: ${resp.data?.records}")
         // 只保留该状态的数据
-        val filteredList = resp.data?.records?.filter { it.status == status }
+        val filteredList = resp.data?.records?.filter { it.completeAndCorrect == completeAndCorrect }
 
         // 按 subject 分组
         val groupedMap = filteredList?.groupBy { it.subject }

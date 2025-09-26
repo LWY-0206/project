@@ -20,7 +20,7 @@ class HomeworkDiffCallback(
             oldItem is SubjectGroup && newItem is SubjectGroup ->
                 oldItem.subjectName == newItem.subjectName
             oldItem is Homework && newItem is Homework ->
-                oldItem.id == newItem.id
+                oldItem.homeworkId == newItem.homeworkId
             else -> false
         }
     }
