@@ -259,6 +259,10 @@ class My : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //加载用户信息
+        loadDate()
+        //加载学习时间分布柱状图
+        setupWebViewChart()
         //点击查看个人主页
         binding.navProfile.setOnClickListener {
             var intent= Intent(requireActivity(), ProfileActivity::class.java)
@@ -280,18 +284,15 @@ class My : Fragment() {
         }
         //点击班级跳转班级页面
         binding.navClass.setOnClickListener {
-            startActivity(Intent(requireActivity(), GradeActivity::class.java))
+            var intent= Intent(requireActivity(), GradeActivity::class.java)
+            intent.putExtra("CLASS_NAME",binding.userGrade.text)
+            startActivity(intent)
         }
 
         //点击课程跳转课程界面
         binding.navCourses.setOnClickListener {
             startActivity(Intent(requireActivity(), CourseActivity::class.java))
         }
-
-        //加载用户信息
-        loadDate()
-        //加载学习时间分布柱状图
-        setupWebViewChart()
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

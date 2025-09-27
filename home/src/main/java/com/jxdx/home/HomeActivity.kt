@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.jxdx.common.http.service.ClassService
-import com.jxdx.common.http.service.FragmentService
+import com.jxdx.common.http.service.MineService
 import com.jxdx.common.http.service.ResourceService
 import com.jxdx.common.http.service.ServiceRegistry
 import com.jxdx.common.http.service.SquareService
@@ -82,7 +82,7 @@ class HomeActivity : AppCompatActivity() {
     private fun switchFragment(position: Int) {
         currentTab = position
         resetAllTabs()
-        val fragmentService = ServiceRegistry.get(FragmentService::class.java)
+        val fragmentService = ServiceRegistry.get(MineService::class.java)
         val resourceService= ServiceRegistry.get(ResourceService::class.java)
         val squareService= ServiceRegistry.get(SquareService::class.java)
         var ClassService=ServiceRegistry.get(ClassService::class.java)

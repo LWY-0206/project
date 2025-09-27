@@ -13,16 +13,19 @@ import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.classroom.R
+import com.jxdx.classroom.Subject
+import com.jxdx.classroom.UserInfo
 import com.jxdx.classroom.activity.ActivityToClassRoomFragment
 import com.jxdx.classroom.activity.ActivityToTeacherClassRoomFragment
-import com.jxdx.classroom.com.jxdx.classroom.fragment.TeacherClassRoomFragment
 import com.jxdx.classroom.databinding.FragmentEntranceBinding
 import com.jxdx.classroom.http.RetrofitClient
-import com.jxdx.classroom.http.UserInfo
+import com.jxdx.common.http.service.MineService
+import com.jxdx.common.http.service.ServiceRegistry
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
+import kotlin.getValue
+import androidx.fragment.app.viewModels
 
 class EntranceFragment : Fragment() {
 
@@ -33,6 +36,10 @@ class EntranceFragment : Fragment() {
     private val handler = Handler(Looper.getMainLooper())
     private var currentPage = 0
     private var identity=0
+    private val viewModel: SubjectViewModel by viewModels()
+    private var subjects: List<Subject> = listOf()
+    // 添加用于自动滚动的Runnable变量
+    private lateinit var autoScrollRunnable: Runnable
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,8 +56,7 @@ class EntranceFragment : Fragment() {
 
         viewPager = binding.viewpagerSubjects
 
-
-
+        viewModel.getSubject()
         val iconReS=listOf(
             R.drawable.ig1,
             R.drawable.ic_math,
@@ -61,32 +67,56 @@ class EntranceFragment : Fragment() {
             R.drawable.ic_history,
             R.drawable.ic_politics
         )
-        var pos=0
+
+
         // 查询用户的所有课程
-        val subjects = listOf(
-            Subject("科目一", iconReS[pos++]),
-            Subject("科目二", iconReS[pos++]),
-            Subject("科目三", iconReS[pos++]),
-            Subject("科目四", iconReS[pos++]),
-            Subject("科目五", iconReS[pos++]),
-            Subject("科目六", iconReS[pos++]),
-            Subject("科目七", iconReS[pos++]),
-            Subject("科目八", iconReS[pos]),
-        )
+        viewModel.subjectsList.observe(requireActivity()){
+            subjects = it?.mapIndexed { index, course ->
+                val iconIndex = index % iconReS.size
+                Subject(
+                    course?.subjectName ?: "科目${index + 1}",
+                    iconReS[iconIndex]
+                )
+            } ?: emptyList()
 
 
+                var adapter = SubjectAdapter(
+                    subjects,
+                    onSubjectClick = {
+                        ServiceRegistry.get(MineService::class.java)?.navigationToCourseActivity(requireContext())
+                    }
+                )
+                viewPager.adapter = adapter
+                viewPager.offscreenPageLimit = 3
+                viewPager.setCurrentItem(1, false) // 初始定位到开始实现循环
 
-        // 设置 ViewPager2
-        viewPager.adapter = SubjectAdapter(subjects)
-        viewPager.offscreenPageLimit = 3
-        viewPager.setCurrentItem(Int.MAX_VALUE / 2, false) // 初始定位到中间实现循环
+                // 如果适配器已存在，通知数据更新
+                adapter?.notifyDataSetChanged()
+                
+                // 如果有数据，启动自动滚动
+                if (subjects.isNotEmpty()) {
+                    startAutoScroll()
+                }
+                // 如果无数据，停止自动滚动
+                else if (subjects.isEmpty()) {
+                    stopAutoScroll()
+                }
 
-        // 启动自动滚动
-        startAutoScroll()
+        }
 
         // 退出按钮
         binding.exit.setOnClickListener {
             Toast.makeText(requireContext(), "退出登录", Toast.LENGTH_SHORT).show()
+        }
+
+        //作业按钮
+        binding.ivHomework.setOnClickListener {
+            ServiceRegistry.get(MineService::class.java)?.navigationToHomeworkActivity(requireContext())
+        }
+
+        //班级按钮
+        binding.ivClass.setOnClickListener {
+            ServiceRegistry.get(MineService::class.java)?.navigationToGradeActivity(requireContext())
         }
 
 
@@ -100,18 +130,28 @@ class EntranceFragment : Fragment() {
         }
         updateEntranceUseInfo()
     }
-
+    
     /**
      * 自动轮播逻辑
      */
     private fun startAutoScroll() {
-        handler.postDelayed(object : Runnable {
+        autoScrollRunnable = object : Runnable {
             override fun run() {
                 currentPage++
                 viewPager.setCurrentItem(currentPage, true)
                 handler.postDelayed(this, 2000) // 每2秒切换一次
             }
-        }, 2000)
+        }
+        handler.postDelayed(autoScrollRunnable, 2000)
+    }
+    
+    /**
+     * 停止自动轮播
+     */
+    private fun stopAutoScroll() {
+        if (::autoScrollRunnable.isInitialized) {
+            handler.removeCallbacks(autoScrollRunnable)
+        }
     }
 
     /**

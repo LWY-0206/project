@@ -1,4 +1,4 @@
-package com.jxdx.classroom.com.jxdx.classroom.fragment
+package com.jxdx.classroom.fragment
 
 import android.content.Intent
 import com.example.corekit.common.BaseFragment

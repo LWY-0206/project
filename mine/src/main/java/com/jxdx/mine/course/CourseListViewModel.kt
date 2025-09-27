@@ -31,10 +31,11 @@ class CourseListViewModel : ViewModel() {
                         val baseResp = response.body()
 
                         if (response.isSuccessful && baseResp != null && baseResp.code == 0) {
-                            var coursedDetail = baseResp.data
-                            if (coursedDetail != null) {                                                //如果有返回数据，则更新MutableLiveData
+                            val coursedDetail = baseResp.data
+                            if (coursedDetail != null) {
+                                Log.d("CourseListViewModel", "Response data: $coursedDetail")//如果有返回数据，则更新MutableLiveData
                                 courseDetailList.value = listOf(coursedDetail)                          //保存一个CourseDetail类型的
-
+                                Log.d("CourseListViewModel", "courseDetailList: ${courseDetailList.value}")
                                 val fileMap = baseResp.data?.file                                       //CourseDetail中的file为Map提出来单独保存
                                 Log.d("CourseListViewModel", "File map: $fileMap")
                                 if (fileMap != null && fileMap.isNotEmpty()) {
