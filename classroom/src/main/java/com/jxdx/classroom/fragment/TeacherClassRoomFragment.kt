@@ -1,24 +1,45 @@
-package com.jxdx.classroom.com.jxdx.classroom.fragment
+package com.jxdx.classroom.fragment
 
-import android.content.Intent
+import android.util.Log
+import androidx.lifecycle.ViewModelProvider
 import com.example.corekit.common.BaseFragment
-import com.jxdx.classroom.activity.ClassActivity
-import com.jxdx.classroom.activity.MainActivity
+import com.jxdx.classroom.activity.SelectClassAdapter
+import com.jxdx.classroom.activity.SelectClassViewModel
 import com.jxdx.classroom.databinding.TeacherClassRoomFragmentBinding
 
+
 class TeacherClassRoomFragment:BaseFragment<TeacherClassRoomFragmentBinding>() {
+    val adapter: SelectClassAdapter by lazy { SelectClassAdapter() }
+    private lateinit var viewModel: SelectClassViewModel
     override fun bindLayout(): TeacherClassRoomFragmentBinding {
         return TeacherClassRoomFragmentBinding.inflate(layoutInflater)
     }
 
     override fun initView() {
-        find.startLive.setOnClickListener {
-            val intent = Intent(activity, ClassActivity::class.java)
-            startActivity(intent)
-        }
+        viewModel = ViewModelProvider(this)[SelectClassViewModel::class.java]
+        val recyclerView =find.TeacherRecyclerView
+        recyclerView.adapter = adapter
+        recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+
 
     }
 
     override fun subscribeUi() {
+        // 观察ViewModel中的数据变化
+        viewModel.selectClassLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    adapter.clearAndAdd(data)
+                } else {
+                    Log.w("TeacherClassRoomFragment", "数据为空")
+                }
+            }
+            result.onError { error, _ ->
+                Log.e("TeacherClassRoomFragment", "数据获取失败：$error")
+            }
+        }
+
+        // 请求数据
+        viewModel.getSelectClass()
     }
 }

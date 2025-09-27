@@ -1,17 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:orientation="vertical"
+    android:background="#F8F9FA">
 
-    <Button
-        android:id="@+id/start_live"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="开启直播"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <!-- 标题栏包含返回键和标题 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:paddingHorizontal="8dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- 箭头返回按钮 -->
+        <ImageButton
+            android:id="@+id/TeacherBtnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_back_arrow"
+            android:background="@drawable/button_selector"
+            android:contentDescription="返回"
+            android:scaleType="centerInside"
+            android:padding="12dp"
+            android:focusable="true"/>
+
+        <!-- 标题文本 -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="我教的课"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1A1A1A"/>
+    </LinearLayout>
+
+    <!-- 顶部装饰性渐变条 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@drawable/gradient_divider"/>
+
+    <!-- 课程列表容器 -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/TeacherRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp"
+            android:clipToPadding="false"
+            android:scrollbars="none"/>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- 底部装饰 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="8dp"
+        android:background="@drawable/bottom_shadow"/>
+
+</LinearLayout>

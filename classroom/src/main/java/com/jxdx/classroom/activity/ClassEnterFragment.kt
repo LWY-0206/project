@@ -1,4 +1,4 @@
-package com.jxdx.classroom.com.jxdx.classroom.activity
+package com.jxdx.classroom.activity
 
 import android.util.Log
 import androidx.lifecycle.ViewModelProvider
@@ -38,7 +38,6 @@ class ClassEnterFragment : BaseFragment<FragmentClassenterBinding>() {
     }
 
     override fun subscribeUi() {
-        // 观察ViewModel中的数据变化
         viewModel.classLiveData.observe(this) { result ->
             result.onSuccess { data ->
                 if (data != null) {
@@ -53,5 +52,6 @@ class ClassEnterFragment : BaseFragment<FragmentClassenterBinding>() {
         }
 
         viewModel.getClassRoom()
+
     }
 }

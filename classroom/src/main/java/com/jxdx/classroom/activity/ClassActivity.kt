@@ -1,19 +1,13 @@
 package com.jxdx.classroom.activity
 
-import android.graphics.Bitmap
-import android.graphics.Rect
 import android.util.Log
 import android.view.SurfaceHolder
-import android.view.SurfaceView
-import android.widget.Toast
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFmpegSession
-import com.arthenica.ffmpegkit.ReturnCode
 import com.arthenica.ffmpegkit.SessionState
 import com.example.corekit.common.BaseActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.ui.PlayerView
 import com.jxdx.classroom.databinding.ClassActivityBinding
 
 
@@ -25,12 +19,14 @@ class ClassActivity : BaseActivity<ClassActivityBinding>(), SurfaceHolder.Callba
     private var surfaceHolder: SurfaceHolder? = null
     // 这个用来控制直播播放
     private var currentSession: FFmpegSession? = null
-
     private var isPlaying = false
     private var isSurfaceReady = false
-    private lateinit var surfaceView: SurfaceView
     private lateinit var player: ExoPlayer
-    private lateinit var playerView: PlayerView
+
+    
+    // 接收传递的参数
+    private var liveId: Int = 0
+    
     //地址：这个测试的地址是可以放的啊
     private val rtmpUrl = "rtmp://liteavapp.qcloud.com/live/liteavdemoplayerstreamid"
     //加载布局，初始化视图
@@ -39,6 +35,8 @@ class ClassActivity : BaseActivity<ClassActivityBinding>(), SurfaceHolder.Callba
     }
     //初始化视图获取 SurfaceHolder 并设置回调监听
     override fun initView() {
+        // 接收传递的参数
+        liveId = intent.getIntExtra("liveId", 0)
 //        surfaceHolder = view.coursewareContainer.holder
         surfaceHolder?.addCallback(this)
     }
@@ -90,26 +88,26 @@ class ClassActivity : BaseActivity<ClassActivityBinding>(), SurfaceHolder.Callba
 
     }
 
-    private fun handleSessionComplete(session: FFmpegSession) {
-        runOnUiThread {
-            isPlaying = false
-
-            when {
-                ReturnCode.isSuccess(session.returnCode) ->
-                    Toast.makeText(this, "直播已结束（主播已下播）", Toast.LENGTH_SHORT).show()
-                ReturnCode.isCancel(session.returnCode) ->
-                    Toast.makeText(this, "直播播放已取消", Toast.LENGTH_SHORT).show()
-                else -> {
-                    val errorMsg = session.failStackTrace ?: "未知错误（网络断开或地址无效）"
-                    val exitCode = session.returnCode?.value ?: -1
-                    val output = session.output
-                    Toast.makeText(this, "直播播放失败: $errorMsg", Toast.LENGTH_LONG).show()
-                    Log.e(TAG, String.format("命令执行失败，状态: %s, 退出码: %s. %s\n输出: %s",
-                            session.state, session.returnCode, errorMsg, output))
-                }
-            }
-        }
-    }
+//    private fun handleSessionComplete(session: FFmpegSession) {
+//        runOnUiThread {
+//            isPlaying = false
+//
+//            when {
+//                ReturnCode.isSuccess(session.returnCode) ->
+//                    Toast.makeText(this, "直播已结束（主播已下播）", Toast.LENGTH_SHORT).show()
+//                ReturnCode.isCancel(session.returnCode) ->
+//                    Toast.makeText(this, "直播播放已取消", Toast.LENGTH_SHORT).show()
+//                else -> {
+//                    val errorMsg = session.failStackTrace ?: "未知错误（网络断开或地址无效）"
+//                    val exitCode = session.returnCode?.value ?: -1
+//                    val output = session.output
+//                    Toast.makeText(this, "直播播放失败: $errorMsg", Toast.LENGTH_LONG).show()
+//                    Log.e(TAG, String.format("命令执行失败，状态: %s, 退出码: %s. %s\n输出: %s",
+//                            session.state, session.returnCode, errorMsg, output))
+//                }
+//            }
+//        }
+//    }
 
     private fun stopPlay() {
         isPlaying = false

@@ -2,10 +2,9 @@ package com.jxdx.classroom.fragment
 
 import android.content.Intent
 import com.example.corekit.common.BaseFragment
-import com.jxdx.classroom.activity.ClassActivity
-import com.jxdx.classroom.activity.FFmpegScreenLive
-import com.jxdx.classroom.activity.MainActivity
-import com.jxdx.classroom.com.jxdx.classroom.activity.ClassEnterFragment
+
+import com.jxdx.classroom.activity.ClassEnterFragment
+
 
 
 import com.jxdx.classroom.databinding.ClassroomFragmentBinding

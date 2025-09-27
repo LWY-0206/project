@@ -1,4 +1,4 @@
-package com.jxdx.classroom.com.jxdx.classroom.activity
+package com.jxdx.classroom.activity
 
 import android.app.Application
 import android.util.Log
@@ -8,7 +8,7 @@ import com.example.corekit.http.bean.ResLiveData
 import com.example.corekit.http.listener.LiveDataCallback
 import com.example.corekit.http.request
 import com.jxdx.classroom.com.jxdx.classroom.entity.ClassLive
-import com.jxdx.classroom.com.jxdx.classroom.response.ClassEnterRepository
+import com.jxdx.classroom.response.ClassEnterRepository
 
 class ClassRoomViewModel(application: Application): BaseViewModel(application) {
     private val repository: ClassEnterRepository by lazy {
