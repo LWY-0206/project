@@ -92,7 +92,7 @@ class EntranceFragment : Fragment() {
 
                 // 如果适配器已存在，通知数据更新
                 adapter?.notifyDataSetChanged()
-                
+
                 // 如果有数据，启动自动滚动
                 if (subjects.isNotEmpty()) {
                     startAutoScroll()
@@ -130,7 +130,7 @@ class EntranceFragment : Fragment() {
         }
         updateEntranceUseInfo()
     }
-    
+
     /**
      * 自动轮播逻辑
      */
@@ -144,7 +144,7 @@ class EntranceFragment : Fragment() {
         }
         handler.postDelayed(autoScrollRunnable, 2000)
     }
-    
+
     /**
      * 停止自动轮播
      */

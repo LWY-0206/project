@@ -5,7 +5,6 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.corekit.common.BaseFragment
 import com.jxdx.resource.Famous.FamousListActivity
-import com.jxdx.resource.FirstPage.EntranceActivity
 import com.jxdx.resource.Questions.QuestionSelectionActivity
 import com.jxdx.resource.Schools.SchoolListActivity
 import com.jxdx.resource.databinding.FragmentResourceBinding
@@ -38,6 +37,7 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
         adapter = StaggeredAdapter(requireContext(), dataList)
         rvStaggered = find.rvStaggered
         rvStaggered.adapter = adapter
+
         val layoutManager =
             StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
         rvStaggered.setLayoutManager(layoutManager)

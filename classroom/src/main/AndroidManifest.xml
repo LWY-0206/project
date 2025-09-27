@@ -24,6 +24,8 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="false" /> <!-- 注册媒体投影前台服务 -->
+        <activity android:name=".activity.ActivityClassDynamic"
+            android:exported="false"/>
         <service
             android:name=".service.MediaProjectionService"
             android:exported="false"
