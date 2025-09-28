@@ -2,7 +2,7 @@ package com.jxdx.mine.http
 
 import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
-import com.jxdx.mine.AllCourse
+import com.jxdx.mine.Course
 import com.jxdx.mine.CourseDetail
 import com.jxdx.mine.Homework
 import com.jxdx.mine.PageData
@@ -42,7 +42,7 @@ interface ApiService {
     @GET("/api/student/courses/list")
     fun getAllCourse(
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
-    ): Call<BaseResp<List<AllCourse>>>
+    ): Call<BaseResp<List<Course>>>
 
     //获取课程详情
     @GET("/api/student/courses/detail")

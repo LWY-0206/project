@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- 学生姓名 -->
+        <TextView
+            android:id="@+id/tvStudentName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="学生姓名"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 作业内容 -->
+        <TextView
+            android:id="@+id/tvHomeworkContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="作业内容"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 分数输入框 -->
+        <EditText
+            android:id="@+id/etScore"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="请输入分数"
+            android:inputType="number"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 评语输入框 -->
+        <EditText
+            android:id="@+id/etComment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="请输入评语"
+            android:inputType="textMultiLine"
+            android:gravity="top"
+            android:minHeight="100dp"
+            android:padding="12dp"
+            android:background="@android:drawable/edit_text"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- 保存按钮 -->
+        <Button
+            android:id="@+id/btnSaveReview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="保存批改结果"/>
+    </LinearLayout>
+</ScrollView>

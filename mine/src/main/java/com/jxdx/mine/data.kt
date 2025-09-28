@@ -60,7 +60,7 @@ data class ApiMember(
     val type: Int // 1=老师, 2=学生
 )
 //查看所有课程
-data class AllCourse(
+data class Course(
     val subjectId: Int,
     val subjectName: String,          // 课程名
     val teacherName: String,   // 任课老师
@@ -75,7 +75,7 @@ data class CourseDetail(
     val teacherName: String,        //老师名字
     val teacherId: Int,             //老师id
     val uploadTime: String,         // 上传时间
-    val file: Map<String, String>,  // 课件名称:文件地址
+    val file: Map<String, String>?,  // 课件名称:文件地址
 )
 //将CourseDetail中的file：Map<String, String>转换为List<Courseware>
 data class Courseware(
@@ -90,4 +90,23 @@ data class StudyReport(
     val completedHomework: Int,  // 已完成作业数
     val totalHomework: Int,      // 作业总数
     val averageScore: Int        // 平均得分
+)
+
+
+// 作业模型
+data class HomeworkDetail(
+    val id: String,
+    var title: String,
+    var description: String,
+    var dueDate: String,
+    val submissions: MutableList<StudentSubmission>
+)
+// 学生提交模型
+data class StudentSubmission(
+    val studentId: String,
+    val studentName: String,
+    val content: String, // 作业内容（文字/图片URL）
+    var score: Int?,     // 老师评分
+    var comment: String?,// 老师评语
+    var isReviewed: Boolean // 是否批改
 )

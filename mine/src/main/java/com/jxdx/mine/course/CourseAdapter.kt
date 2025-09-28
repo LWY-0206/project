@@ -7,16 +7,16 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.jxdx.mine.AllCourse
+import com.jxdx.mine.Course
 import com.jxdx.mine.R
 
 class CourseAdapter(
-    private val onItemClick: (AllCourse) -> Unit
+    private val onItemClick: (Course) -> Unit
 ) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
 
-    private val allCourses = mutableListOf<AllCourse>()
+    private val allCourses = mutableListOf<Course>()
 
-    fun submitList(list: List<AllCourse>?) {
+    fun submitList(list: List<Course>?) {
         allCourses.clear()
         if (list != null) {
             allCourses.addAll(list)
@@ -29,14 +29,14 @@ class CourseAdapter(
         private val tvTeacherName: TextView = itemView.findViewById(R.id.tv_teacher_name)
         private val tvTeacherAvatar: ImageView = itemView.findViewById(R.id.tv_teacher_avatar)
 
-        fun bind(allCourse: AllCourse) {
-            tvCourseName.text = allCourse.subjectName
+        fun bind(course: Course) {
+            tvCourseName.text = course.subjectName
 
-            tvTeacherName.text = "任课老师：${allCourse.teacherName}"
+            tvTeacherName.text = "任课老师：${course.teacherName}"
             Glide.with(itemView.context)
-                .load(allCourse.avatarUrl)
+                .load(course.avatarUrl)
                 .into(tvTeacherAvatar)
-            itemView.setOnClickListener { onItemClick(allCourse) }
+            itemView.setOnClickListener { onItemClick(course) }
         }
     }
 

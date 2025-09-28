@@ -23,6 +23,18 @@ class CourseFragment : Fragment() {
         binding.backButton.setOnClickListener {
             requireActivity().onBackPressed()
         }
+
+        val identity=activity?.intent?.getIntExtra("identity",0)
+        if(identity==1){
+            //如果是老师，显示create_course
+            binding.createCourse.visibility = View.VISIBLE
+        }else{
+            binding.createCourse.visibility=View.GONE
+        }
+        binding.createCourse.setOnClickListener {
+            val intent = Intent(requireContext(), CreateCourseActivity::class.java)
+            startActivity(intent)
+        }
         return binding.root
     }
 

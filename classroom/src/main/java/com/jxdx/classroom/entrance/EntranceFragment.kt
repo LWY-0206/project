@@ -26,6 +26,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import kotlin.getValue
 import androidx.fragment.app.viewModels
+import com.jxdx.common.http.service.LoginService
 
 class EntranceFragment : Fragment() {
 
@@ -83,7 +84,7 @@ class EntranceFragment : Fragment() {
                 var adapter = SubjectAdapter(
                     subjects,
                     onSubjectClick = {
-                        ServiceRegistry.get(MineService::class.java)?.navigationToCourseActivity(requireContext())
+                        ServiceRegistry.get(MineService::class.java)?.navigationToCourseActivity(requireContext(),identity)
                     }
                 )
                 viewPager.adapter = adapter
@@ -106,12 +107,16 @@ class EntranceFragment : Fragment() {
 
         // 退出按钮
         binding.exit.setOnClickListener {
-            Toast.makeText(requireContext(), "退出登录", Toast.LENGTH_SHORT).show()
+            ServiceRegistry.get(LoginService::class.java)?.navigateToLogin(requireContext())
         }
 
         //作业按钮
         binding.ivHomework.setOnClickListener {
-            ServiceRegistry.get(MineService::class.java)?.navigationToHomeworkActivity(requireContext())
+            if(identity==1) {
+                ServiceRegistry.get(MineService::class.java)?.navigationToCourseListActivity(requireContext())
+            }else{
+                ServiceRegistry.get(MineService::class.java)?.navigationToHomeworkActivity(requireContext())
+            }
         }
 
         //班级按钮

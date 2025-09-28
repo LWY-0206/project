@@ -34,6 +34,9 @@ class SubjectAdapter(
             // 设置默认值
             holder.name.text = "暂无科目"
             holder.icon.setBackgroundResource(R.drawable.ic_chemistry)
+            holder.icon.setOnClickListener {
+                onSubjectClick(holder.itemView.context)
+            }
             return
         }else{
             val subject = subjects[position % subjects.size] // 无限循环
