@@ -30,7 +30,7 @@ class EntranceFragment : Fragment() {
     private lateinit var viewPager: ViewPager2
     private val handler = Handler(Looper.getMainLooper())
     private var currentPage = 0
-    private var identity = 0
+    private var identity = 1
 
     override fun onCreateView(
         inflater: LayoutInflater,

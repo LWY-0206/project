@@ -16,6 +16,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.jxdx.classroom.service.MediaProjectionService;
 import com.jxdx.classroom.R;
@@ -28,7 +29,8 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
     // 备用公共测试服务器（仅用于测试，不保证长期可用）
 //     private final String url = "rtmp://192.168.2.104:1935/live/home";
 
-    private final String url = "rtmp://121.41.176.238:1935/live/c8264c57-ddab-4430-acfe-5ab43ad9866a?userId=1&liveId=71";
+    private final String baseUrl = "rtmp://121.41.176.238:1935/live/";
+    private String url = "rtmp://121.41.176.238:1935/live/c8264c57-ddab-4430-acfe-5ab43ad9866a?userId=1&liveId=71";
     private static final String TAG = "MainActivity";
     private MediaProjectionManager mediaProjectionManager;
     private MediaProjection mediaProjection;
@@ -39,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
     private Intent screenCaptureData; // 保存屏幕捕获Intent数据
     private int screenCaptureResultCode; // 保存屏幕捕获结果码
     private boolean useFFmpegLive = false; // 控制使用哪种推流方式，默认为Native
+    private boolean isStreamKeyReady = false; // 推流码是否已获取
+    private StreamKeyHelper streamKeyHelper; // 推流码获取助手
+    private int liveId = 0; // 接收传递的liveId
 
     private final int REQUEST_CODE_SCREEN_CAPTURE = 100;
 
@@ -65,9 +70,27 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_updated); // 使用新的布局文件
 
+        // 接收传递的参数
+        String subjectName = "";
+        if (getIntent() != null) {
+            subjectName = getIntent().getStringExtra("subjectName");
+            this.liveId = getIntent().getIntExtra("liveId", 0);
+            Log.d(TAG, "接收到subjectName: " + subjectName + ", liveId: " + this.liveId);
+        }
+
+        // 更新标题显示subjectName
+        TextView titleView = findViewById(R.id.title);
+        if (subjectName != null && !subjectName.isEmpty()) {
+            titleView.setText(subjectName);
+        }
+
         // 显示RTMP服务器地址
         TextView tvUrl = findViewById(R.id.tv_url);
-        tvUrl.setText("RTMP服务器地址：" + url);
+        if (subjectName != null && !subjectName.isEmpty()) {
+            tvUrl.setText(subjectName + " - RTMP服务器地址：" + url);
+        } else {
+            tvUrl.setText("RTMP服务器地址：" + url);
+        }
 
         // 设置推流方式选择监听
         RadioGroup radioGroup = findViewById(R.id.radio_group_stream_type);
@@ -102,6 +125,10 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
         
         // 初始化MediaProjectionManager
         this.mediaProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        
+        // 初始化推流码获取助手
+        streamKeyHelper = new StreamKeyHelper(this);
+        streamKeyHelper.init();
         
         // 绑定按钮点击事件
         findViewById(R.id.btn_start_screen_capture).setOnClickListener(new View.OnClickListener() {
@@ -231,12 +258,74 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
      */
     public void startScreenCapture(View view) {
         Log.i(TAG, "用户触发开始屏幕捕获");
+        
+        // 如果有liveId，先获取推流码
+        if (liveId > 0) {
+            Log.d(TAG, "开始获取推流码，liveId: " + liveId);
+            streamKeyHelper.getStreamKey(liveId, new kotlin.jvm.functions.Function1<String, kotlin.Unit>() {
+                @Override
+                public kotlin.Unit invoke(String streamKey) {
+                    // 更新推流地址
+                    if (streamKey != null && !streamKey.isEmpty()) {
+                        url = baseUrl + streamKey;
+                        Log.d(TAG, "更新推流地址: " + url);
+                        
+                        // 更新UI显示的RTMP地址
+                        updateRtmpUrlDisplay();
+                        
+                        updateStreamStatus("推流地址已更新，准备开始推流");
+                        
+                        // 推流地址更新后，开始屏幕捕获
+                        startScreenCaptureInternal();
+                    } else {
+                        Log.w(TAG, "获取推流码失败，使用默认地址");
+                        // 即使获取推流码失败，也要开始推流
+                        startScreenCaptureInternal();
+                    }
+                    return kotlin.Unit.INSTANCE;
+                }
+            });
+        } else {
+            // 没有liveId，直接开始屏幕捕获
+            startScreenCaptureInternal();
+        }
+    }
+    
+    /**
+     * 内部开始屏幕捕获方法
+     */
+    private void startScreenCaptureInternal() {
         if (mediaProjectionManager != null) {
             Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
             startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE);
         } else {
             Log.e(TAG, "MediaProjectionManager未初始化");
         }
+    }
+    
+    /**
+     * 更新RTMP地址显示
+     */
+    private void updateRtmpUrlDisplay() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                TextView tvUrl = findViewById(R.id.tv_url);
+                if (tvUrl != null) {
+                    // 获取subjectName（如果有的话）
+                    String subjectName = "";
+                    if (getIntent() != null) {
+                        subjectName = getIntent().getStringExtra("subjectName");
+                    }
+                    
+                    if (subjectName != null && !subjectName.isEmpty()) {
+                        tvUrl.setText(subjectName + " - RTMP服务器地址：" + url);
+                    } else {
+                        tvUrl.setText("RTMP服务器地址：" + url);
+                    }
+                }
+            }
+        });
     }
     
     /**

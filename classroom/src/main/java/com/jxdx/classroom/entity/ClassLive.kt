@@ -1,4 +1,4 @@
-package com.jxdx.classroom.com.jxdx.classroom.entity
+package com.jxdx.classroom.entity
 
 import com.example.corekit.recyclerview.MultipleType
 

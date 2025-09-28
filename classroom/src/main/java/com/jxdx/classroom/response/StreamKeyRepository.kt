@@ -3,15 +3,14 @@ package com.jxdx.classroom.response
 import com.example.corekit.http.HttpManager
 import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
-import com.jxdx.classroom.entity.ClassLive
 import com.jxdx.classroom.http.ApiService
 
-class ClassEnterRepository {
+class StreamKeyRepository {
     private val service: ApiService by lazy {
         HttpManager.instance.service(ApiService::class.java)
     }
-
-    suspend fun getClassRoom(): BaseResp<ArrayList<ClassLive>> {
-        return service.getClassRoom(TokenManager.getToken() ?: "")
+    
+    suspend fun getStreamKey(liveId: Int): BaseResp<String> {
+        return service.getStreamKey(TokenManager.getToken() ?: "", liveId)
     }
 }
