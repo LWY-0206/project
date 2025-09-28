@@ -3,7 +3,9 @@ package com.jxdx.classroom.fragment
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import com.example.corekit.common.BaseFragment
+import com.jxdx.classroom.R
 import com.jxdx.classroom.activity.ClassActivity
+import com.jxdx.classroom.activity.ClassEnterFragment
 
 import com.jxdx.classroom.databinding.ClassroomFragmentBinding
 import com.luck.picture.lib.utils.ToastUtils.showToast
@@ -92,8 +94,11 @@ class ClassRoomFragment : BaseFragment<ClassroomFragmentBinding>() {
 
         // 进入显示所有课堂直播按钮
         find.btnEnterAllClass.setOnClickListener {
-            val intent = Intent(requireActivity(), ClassActivity::class.java)
-            startActivity(intent)
+            // 切换到 ClassEnterFragment
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, ClassEnterFragment())
+                .addToBackStack(null) //添加到返回栈
+                .commit()
         }
     }
     override fun subscribeUi() {

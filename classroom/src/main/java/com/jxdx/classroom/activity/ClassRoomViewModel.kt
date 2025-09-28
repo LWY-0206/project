@@ -7,7 +7,7 @@ import com.example.corekit.http.bean.ErrorResponse
 import com.example.corekit.http.bean.ResLiveData
 import com.example.corekit.http.listener.LiveDataCallback
 import com.example.corekit.http.request
-import com.jxdx.classroom.com.jxdx.classroom.entity.ClassLive
+import com.jxdx.classroom.entity.ClassLive
 import com.jxdx.classroom.response.ClassEnterRepository
 
 class ClassRoomViewModel(application: Application): BaseViewModel(application) {

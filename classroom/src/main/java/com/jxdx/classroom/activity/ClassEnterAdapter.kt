@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.viewbinding.ViewBinding
 import com.example.corekit.recyclerview.SingleTypeAdapter
 import com.example.corekit.recyclerview.SingleViewHolder
-import com.jxdx.classroom.com.jxdx.classroom.entity.ClassLive
+import com.jxdx.classroom.entity.ClassLive
 import com.jxdx.classroom.databinding.ItemClassenterBinding
 
 class ClassEnterAdapter : SingleTypeAdapter<ClassLive>() {

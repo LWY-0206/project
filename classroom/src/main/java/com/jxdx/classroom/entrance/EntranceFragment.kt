@@ -123,9 +123,9 @@ class EntranceFragment : Fragment() {
         //直播按钮
         binding.ibLive.setOnClickListener {
             if(identity==0) {
-                startActivity(Intent(requireContext(), ActivityToClassRoomFragment::class.java))
+                startActivity(Intent(requireContext(), ActivityToClassRoomFragment::class.java))//学生
             }else{
-                startActivity(Intent(requireContext(), ActivityToTeacherClassRoomFragment::class.java))
+                startActivity(Intent(requireContext(), ActivityToTeacherClassRoomFragment::class.java))//老师
             }
         }
         updateEntranceUseInfo()
@@ -173,7 +173,6 @@ class EntranceFragment : Fragment() {
                 if (response.isSuccessful) {
                     response.body()?.let {
                         if (it.code==0) {
-                            identity= it.data?.identity ?:0
                             if(it.data?.identity ==0) {
                                 binding.tvUserName.text = "欢迎" + it.data?.userName + "同学！"
                                 Glide.with(requireContext())
