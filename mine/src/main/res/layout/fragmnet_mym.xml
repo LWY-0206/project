@@ -378,7 +378,7 @@
         <LinearLayout
             android:id="@+id/nav_class"
             style="@style/NavItemStyle">
-            <ImageView android:src="@drawable/ic_class" style="@style/NavItemIcon"/>
+            <ImageView android:src="@drawable/ic_class_mine" style="@style/NavItemIcon"/>
             <TextView android:text="我的班级" style="@style/NavItemText"/>
         </LinearLayout>
     </LinearLayout>

@@ -39,7 +39,7 @@ class EntranceFragment : Fragment() {
     private var subjects: List<Subject> = listOf()
     // 添加用于自动滚动的Runnable变量
     private lateinit var autoScrollRunnable: Runnable
-    private var identity = 1
+    private var identity = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -174,12 +174,14 @@ class EntranceFragment : Fragment() {
                     response.body()?.let {
                         if (it.code==0) {
                             if(it.data?.identity ==0) {
+                                identity=0
                                 binding.tvUserName.text = "欢迎" + it.data?.userName + "同学！"
                                 Glide.with(requireContext())
                                     .load(it.data?.avatarUrl)
                                     .circleCrop()
                                     .into(binding.ivAvatar)
                             }else{
+                                identity=1
                                 binding.tvUserName.text = "欢迎" + it.data?.userName + "老师！"
                                 Glide.with(requireContext())
                                     .load(it.data?.avatarUrl)

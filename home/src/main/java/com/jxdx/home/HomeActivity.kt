@@ -114,7 +114,7 @@ class HomeActivity : AppCompatActivity() {
             2 -> {
                 // 设置圆形按钮的选中状态
                 navClass.setBackgroundResource(R.drawable.bg_circle_primary_selected)
-                ivClass.setImageResource(R.drawable.ic_class)
+                ivClass.setImageResource(R.drawable.ic_class_home)
                 tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
                 ClassService?.getClassFragment("entrance")
 
@@ -160,7 +160,7 @@ class HomeActivity : AppCompatActivity() {
 
         // 重置圆形按钮
         navClass.setBackgroundResource(R.drawable.bg_circle_primary)
-        ivClass.setImageResource(R.drawable.ic_class1)
+        ivClass.setImageResource(R.drawable.ic_class1_home)
 
         tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.white))
     }
