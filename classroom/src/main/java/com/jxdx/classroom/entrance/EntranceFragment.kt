@@ -35,11 +35,11 @@ class EntranceFragment : Fragment() {
     private lateinit var viewPager: ViewPager2
     private val handler = Handler(Looper.getMainLooper())
     private var currentPage = 0
-    private var identity=0
     private val viewModel: SubjectViewModel by viewModels()
     private var subjects: List<Subject> = listOf()
     // 添加用于自动滚动的Runnable变量
     private lateinit var autoScrollRunnable: Runnable
+    private var identity = 1
 
     override fun onCreateView(
         inflater: LayoutInflater,

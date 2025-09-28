@@ -18,6 +18,15 @@
         android:gravity="center_vertical"
         android:background="?android:attr/selectableItemBackground">
 
+        <!-- 选择框 -->
+        <CheckBox
+            android:id="@+id/cb_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:focusable="false"
+            android:clickable="false" />
+
 
 
 
