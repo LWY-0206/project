@@ -20,7 +20,14 @@
             android:exported="false" />
         <activity
             android:name=".activity.ClassActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <activity
+            android:name=".activity.WhiteboardActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
             android:name=".activity.MainActivity"
             android:exported="false" /> <!-- 注册媒体投影前台服务 -->
