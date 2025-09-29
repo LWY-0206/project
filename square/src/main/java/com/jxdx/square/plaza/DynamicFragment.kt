@@ -43,7 +43,7 @@ class DynamicFragment(
         setupSwipeRefreshLayout()
 
         // 添加发布动态按钮的点击事件
-        find.tvPublishDynamic.setOnClickListener {
+        find.btnPublishDynamic.setOnClickListener {
             // 跳转到发布动态页面
             callback.invoke()
         }
