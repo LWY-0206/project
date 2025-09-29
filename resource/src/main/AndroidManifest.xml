@@ -5,6 +5,15 @@
         android:allowBackup="true"
         android:label="@string/app_name">
         <activity
+            android:name=".StudySuggestions.StudySuggestionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FirstPage.Study"
+            android:exported="false" />
+        <activity
+            android:name=".FirstPage.EntranceActivity"
+            android:exported="false" />
+        <activity
             android:name=".Famous.FavoriteListActivity"
             android:exported="false" />
         <activity
@@ -27,8 +36,8 @@
             android:exported="false" />
         <activity
             android:name=".famousChat.FamousChatActivity"
-            android:windowSoftInputMode="adjustResize|stateHidden"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".Schools.SchoolDetailActivity"
             android:exported="false" />

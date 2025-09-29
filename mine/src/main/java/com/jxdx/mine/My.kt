@@ -3,10 +3,8 @@ package com.jxdx.mine.service
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -20,7 +18,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 
@@ -35,8 +32,6 @@ import com.jxdx.mine.ProfileActivity
 import com.jxdx.mine.R
 import com.jxdx.mine.UserInfo
 import com.jxdx.mine.course.CourseActivity
-import com.jxdx.mine.course.CourseDetailActivity
-import com.jxdx.mine.course.CourseListFragment
 import com.jxdx.mine.databinding.FragmnetMymBinding
 import com.jxdx.mine.grade.GradeActivity
 import com.jxdx.mine.homework.HomeworkActivity
@@ -264,6 +259,10 @@ class My : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //加载用户信息
+        loadDate()
+        //加载学习时间分布柱状图
+        setupWebViewChart()
         //点击查看个人主页
         binding.navProfile.setOnClickListener {
             var intent= Intent(requireActivity(), ProfileActivity::class.java)
@@ -285,18 +284,15 @@ class My : Fragment() {
         }
         //点击班级跳转班级页面
         binding.navClass.setOnClickListener {
-            startActivity(Intent(requireActivity(), GradeActivity::class.java))
+            var intent= Intent(requireActivity(), GradeActivity::class.java)
+            intent.putExtra("CLASS_NAME",binding.userGrade.text)
+            startActivity(intent)
         }
 
         //点击课程跳转课程界面
         binding.navCourses.setOnClickListener {
             startActivity(Intent(requireActivity(), CourseActivity::class.java))
         }
-
-        //加载用户信息
-        loadDate()
-        //加载学习时间分布柱状图
-        setupWebViewChart()
     }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

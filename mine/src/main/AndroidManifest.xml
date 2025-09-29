@@ -35,7 +35,7 @@
             android:name=".grade.GradeActivity"
             android:exported="false" />
         <activity
-            android:name=".course.CourseDetailActivity"
+            android:name=".course.CourseListActivity"
             android:exported="false" />
     </application>
 

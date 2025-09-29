@@ -1,8 +1,8 @@
 package com.jxdx.mine.util
 
 import androidx.recyclerview.widget.DiffUtil
-import com.jxdx.mine.homework.Homework
-import com.jxdx.mine.homework.SubjectGroup
+import com.jxdx.mine.Homework
+import com.jxdx.mine.SubjectGroup
 
 class HomeworkDiffCallback(
     private val oldList: List<Any>,
@@ -20,7 +20,7 @@ class HomeworkDiffCallback(
             oldItem is SubjectGroup && newItem is SubjectGroup ->
                 oldItem.subjectName == newItem.subjectName
             oldItem is Homework && newItem is Homework ->
-                oldItem.id == newItem.id
+                oldItem.homeworkId == newItem.homeworkId
             else -> false
         }
     }

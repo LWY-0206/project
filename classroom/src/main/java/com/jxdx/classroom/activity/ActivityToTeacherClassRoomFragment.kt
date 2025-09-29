@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.jxdx.classroom.R
 import com.jxdx.classroom.fragment.TeacherClassRoomFragment
 
-
 class ActivityToTeacherClassRoomFragment : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

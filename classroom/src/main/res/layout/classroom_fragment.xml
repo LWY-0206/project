@@ -14,95 +14,210 @@
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />
 
-    <!-- 学科按钮区域 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="2"
-        android:layout_marginBottom="16dp">
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:background="#FFF9F4"
+        android:layout_marginBottom="16dp"
+        android:elevation="2dp"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false">
 
-        <Button
-            android:layout_width="0dp"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="语文"
-            android:layout_marginRight="8dp" />
+            android:orientation="vertical"
+            android:background="#FFF3E0"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp"
+            android:clipToPadding="false"
+            android:layout_gravity="center">
 
-        <Button
-            android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📚 今日小知识"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#FF7043"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tv_daily_tip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="你知道吗？大脑在早晨学习效率最高哦～"
+                android:textSize="14sp"
+                android:textColor="#444444" />
+        </LinearLayout>
+
+        <!-- 课堂状态模块 -->
+        <LinearLayout
+            android:id="@+id/btn_enter_class"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="数学"
-            android:layout_marginLeft="8dp" />
-    </LinearLayout>
+            android:orientation="horizontal"
+            android:background="#E3F2FD"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:elevation="2dp"
+            android:clipToPadding="false">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="2"
-        android:layout_marginBottom="16dp">
+            <!-- 左侧图标 -->
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/live"
+                android:contentDescription="Classroom icon"
+                android:layout_gravity="center_vertical"
+                android:layout_marginRight="12dp" />
 
-        <Button
-            android:layout_width="0dp"
+            <!-- 中间状态文字 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/tv_class_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="××老师正在课堂直播..."
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#1565C0"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:id="@+id/tv_class_countdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🎉已开播时间：02:35"
+                    android:textSize="14sp"
+                    android:textColor="#444444" />
+            </LinearLayout>
+
+            <!-- 右侧签到按钮 -->
+            <Button
+                android:id="@+id/btn_daily_checkin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="签到 ✅"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:backgroundTint="#FFC107"
+                android:textColor="#000000"
+                android:drawablePadding="6dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"/>
+        </LinearLayout>
+
+        <!-- 课堂小测 / 参与投票 -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="英语"
-            android:layout_marginRight="8dp" />
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
 
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="物理"
-            android:layout_marginLeft="8dp" />
-    </LinearLayout>
+            <Button
+                android:id="@+id/btn_preclass_challenge"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="课前小测 🌟"
+                android:textSize="16sp"
+                android:backgroundTint="#4CAF50"
+                android:textColor="#FFFFFF"
+                android:layout_marginRight="8dp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="2"
-        android:layout_marginBottom="16dp">
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="化学"
-            android:layout_marginRight="8dp" />
-
-        <Button
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="更多"
-            android:layout_marginLeft="8dp" />
-    </LinearLayout>
-
+            <Button
+                android:id="@+id/btn_vote"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="参与投票🗳 "
+                android:textSize="16sp"
+                android:backgroundTint="#FFC107"
+                android:textColor="#000000" />
+        </LinearLayout>
     <!-- 分割线 -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/darker_gray"
+        android:background="@android:color/holo_blue_bright"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp" />
 
-    <!-- 我的小组按钮 -->
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="我的小组"
-        android:layout_marginBottom="16dp" />
+        <!-- 我的⼩组按钮（卡片式设计） -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp"
+            android:clickable="true"
+            android:focusable="true">
 
-    <!-- 进入课堂按钮 -->
-    <Button
-        android:id="@+id/btn_enter_class"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:text="进入课堂"
-        android:textSize="24sp"
-        android:layout_gravity="center_horizontal" />
+            <!-- 左侧图标 -->
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_group"
+                android:contentDescription="我的小组"
+                android:layout_marginEnd="12dp" />
 
+            <!-- 文字区域 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="我的小组"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:textColor="#1565C0" />
+
+            <!-- 右侧进入箭头 -->
+            <ImageView
+                android:id="@+id/my_group"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_arrow_right" />
+        </LinearLayout>
+
+
+        <!-- 进入直播按钮（主操作按钮） -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/btn_enter_all_class"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:text="进入直播"
+                android:gravity="center"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_enter_live_button"/>
+
+            <!-- 按钮上的直播图标 -->
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/live_1"
+                android:layout_gravity="top|center_horizontal"
+                android:layout_marginTop="18dp"/>
+        </FrameLayout>
+
+
+    </LinearLayout>
 </LinearLayout>

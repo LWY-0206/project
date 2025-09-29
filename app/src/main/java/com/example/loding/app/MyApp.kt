@@ -12,7 +12,8 @@ import com.jxdx.square.SquareModuleInitializer
 
 
 
-class MyApp : BaseApplication() {
+class
+MyApp : BaseApplication() {
     override fun onCreate() {
         super.onCreate()
         Log.d("---MyApp", "MyApp.onCreate() 执行了")
@@ -25,7 +26,7 @@ class MyApp : BaseApplication() {
         ClassModuleInitializer.init()
         with(HttpManager.Builder()){
             baseUrl(BASE_URL)
-            this.timeout(15)
+            this.timeout(25)
             HttpManager.init(this)
         }
     }

@@ -135,6 +135,12 @@
 
             </LinearLayout>
 
+            <ImageView
+                android:id="@+id/iv_class"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ketang" />
+
         </LinearLayout>
 
         <!-- 中间圆形课堂按钮 -->
@@ -148,12 +154,6 @@
             android:orientation="vertical"
             android:background="@drawable/bg_circle_primary"
             android:elevation="8dp">
-
-            <ImageView
-                android:id="@+id/iv_class"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:src="@drawable/ketang"/>
 
             <TextView
                 android:layout_width="wrap_content"

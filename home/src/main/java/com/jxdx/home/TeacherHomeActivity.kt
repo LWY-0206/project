@@ -5,7 +5,8 @@ import android.util.Log
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.jxdx.common.http.service.FragmentService
+import com.jxdx.common.http.service.ClassService
+import com.jxdx.common.http.service.MineService
 import com.jxdx.common.http.service.ResourceService
 import com.jxdx.common.http.service.ServiceRegistry
 import com.jxdx.common.http.service.SquareService
@@ -53,9 +54,11 @@ class TeacherHomeActivity : AppCompatActivity() {
     private fun switchFragment(position: Int) {
         currentTab = position
         resetAllTabs()
-        val fragmentService = ServiceRegistry.get(FragmentService::class.java)
+        val fragmentService = ServiceRegistry.get(MineService::class.java)
         val resourceService= ServiceRegistry.get(ResourceService::class.java)
         val squareService= ServiceRegistry.get(SquareService::class.java)
+        var ClassService=ServiceRegistry.get(ClassService::class.java)
+        var ResourceService=ServiceRegistry.get(ResourceService::class.java)
         if (fragmentService == null) {
             Log.d("--Home", "FragmentService未注册")
         }else{
@@ -64,13 +67,13 @@ class TeacherHomeActivity : AppCompatActivity() {
 
         val fragment = when (position) {
             0 -> {
-                binding.ivHome.setImageResource(R.drawable.ketang)
+                binding.ivHome.setImageResource(R.drawable.firstpage)
                 tvHome.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                fragmentService?.getFragment("my")
+                ResourceService?.getFragment("FirstFragment")
             }
 
             1 -> {
-                binding.ivSquare.setImageResource(R.drawable.ketang)
+                binding.ivSquare.setImageResource(R.drawable.ic_square)
                 tvSquare.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
                 squareService?.getSquareTopFragment {
                     squareService.navigateToSendFragment(
@@ -78,27 +81,26 @@ class TeacherHomeActivity : AppCompatActivity() {
                         R.id.fragment_container // 传入容器ID
                     )
                 }
-
             }
 
             2 -> {
                 // 设置圆形按钮的选中状态
                 binding.navClass.setBackgroundResource(R.drawable.bg_circle_primary_selected)
-                binding.ivClass.setImageResource(R.drawable.ketang)
+                binding.ivClass.setImageResource(R.drawable.ic_class_home)
                 tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
-                fragmentService?.getFragment("my")
+                ClassService?.getClassFragment("entrance")
 
             }
 
             3 -> {
-                binding.ivResource.setImageResource(R.drawable.ketang)
+                binding.ivResource.setImageResource(R.drawable.ic_resource)
                 tvResource.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
                 resourceService?.getFragment("Resource")
 
             }
 
             4 -> {
-                binding.ivProfile.setImageResource(R.drawable.ketang)
+                binding.ivProfile.setImageResource(R.drawable.ic_mine)
                 tvProfile.setTextColor(ContextCompat.getColor(this, R.color.purple_200))
                 fragmentService?.getFragment("my")
 
@@ -118,10 +120,10 @@ class TeacherHomeActivity : AppCompatActivity() {
 
     private fun resetAllTabs() {
         // 重置所有图标和文字颜色
-        binding.ivHome.setImageResource(R.drawable.ketang)
-        binding.ivSquare.setImageResource(R.drawable.ketang)
-        binding.ivResource.setImageResource(R.drawable.ketang)
-        binding.ivProfile.setImageResource(R.drawable.ketang)
+        binding.ivHome.setImageResource(R.drawable.firstpage1)
+        binding.ivSquare.setImageResource(R.drawable.ic_square1)
+        binding.ivResource.setImageResource(R.drawable.ic_resource1)
+        binding.ivProfile.setImageResource(R.drawable.ic_mine1)
 
         tvHome.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
         tvSquare.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
@@ -130,7 +132,7 @@ class TeacherHomeActivity : AppCompatActivity() {
 
         // 重置圆形按钮
         binding.navClass.setBackgroundResource(R.drawable.bg_circle_primary)
-        binding.ivClass.setImageResource(R.drawable.ketang)
+        binding.ivClass.setImageResource(R.drawable.ic_class1_home)
 
         tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.white))
     }

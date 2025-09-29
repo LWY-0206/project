@@ -6,7 +6,7 @@ plugins {
 android {
     namespace = "com.jxdx.square"
     compileSdk = 36
-
+    ndkVersion="22.1.7171670"
     defaultConfig {
         minSdk = 24
 

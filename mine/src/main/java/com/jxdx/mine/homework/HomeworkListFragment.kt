@@ -63,12 +63,23 @@ class HomeworkListFragment : Fragment() {
         val status = arguments?.getInt("status", -1) ?: -1
         Log.d("HomeworkListFragment", "Received status parameter: $status")
         
-        if (status in 0..2) {
-            Log.d("HomeworkListFragment", "Loading homework with status: $status")
-            viewModel.loadHomework(status)
-        } else {
-            Log.d("HomeworkListFragment", "Invalid status parameter, using default 0 (未提交)")
-            viewModel.loadHomework(0)
-        }
+        val finalStatus = if (status in 0..2) status else 0
+        Log.d("HomeworkListFragment", "Loading homework with status: $finalStatus")
+        viewModel.loadHomework(finalStatus)
+        
+        // 滚动监听，滑动到底部加载更多
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+                val totalItemCount = layoutManager.itemCount
+
+                if (lastVisibleItem >= totalItemCount - 1 && dy > 0) {
+                    // 加载下一页
+                    viewModel.loadHomework(finalStatus, isLoadMore = true)
+                }
+            }
+        })
     }
 }

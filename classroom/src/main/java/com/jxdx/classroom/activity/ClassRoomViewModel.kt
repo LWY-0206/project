@@ -8,8 +8,6 @@ import com.example.corekit.http.bean.ResLiveData
 import com.example.corekit.http.listener.LiveDataCallback
 import com.example.corekit.http.request
 import com.jxdx.classroom.entity.ClassLive
-import com.jxdx.classroom.entrance.Subject
-
 import com.jxdx.classroom.response.ClassEnterRepository
 
 class ClassRoomViewModel(application: Application): BaseViewModel(application) {
@@ -19,8 +17,7 @@ class ClassRoomViewModel(application: Application): BaseViewModel(application) {
     }
     val classLiveData:ResLiveData<ArrayList<ClassLive>> by lazy{
         ResLiveData() }
-    fun getClassRoom(
-    ){
+    fun getClassRoom(){
         request(
             classLiveData,
             object : LiveDataCallback<ArrayList<ClassLive>,ArrayList<ClassLive>> {

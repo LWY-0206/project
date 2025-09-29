@@ -10,8 +10,8 @@ import android.widget.Toast
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.jxdx.mine.R
-import com.jxdx.mine.homework.Homework
-import com.jxdx.mine.homework.SubjectGroup
+import com.jxdx.mine.Homework
+import com.jxdx.mine.SubjectGroup
 import com.jxdx.mine.util.HomeworkDiffCallback
 
 class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -151,15 +151,17 @@ class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     // 作业项ViewHolder
     inner class ItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvHomeworkTitle: TextView = itemView.findViewById(R.id.tv_homework_title)
-        private val tvDeadline: TextView = itemView.findViewById(R.id.tv_deadline)
+        private val tvDeadTime: TextView = itemView.findViewById(R.id.tv_dead_time)
         private val tvStatus: TextView = itemView.findViewById(R.id.tv_status)
+        private val tvSenTime: TextView = itemView.findViewById(R.id.tv_send_time)
         private val context: Context = itemView.context
 
         fun bind(homework: Homework) {
-            tvHomeworkTitle.text = homework.title
-            tvDeadline.text = "截止日期: ${homework.deadline}"
+            tvHomeworkTitle.text = homework.homeworkName
+            tvSenTime.text="发布日期：${homework.sendTime}"
+            tvDeadTime.text = "截止日期：${homework.deadTime}"
 
-            when (homework.status) {
+            when (homework.completeAndCorrect) {
                 0-> {
                     tvStatus.text = "未提交"
                     tvStatus.setTextColor(context.resources.getColor(R.color.red_600))
@@ -177,15 +179,15 @@ class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             // 作业项点击
             itemView.setOnClickListener {
                 // 不同状态触发不同逻辑
-                when (homework.status) {
+                when (homework.completeAndCorrect) {
                     0 -> {
-                        Toast.makeText(context, "提交作业: ${homework.title}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "提交作业: ${homework.homeworkName}", Toast.LENGTH_SHORT).show()
                     }
                     1 -> {
-                        Toast.makeText(context, "查看作业: ${homework.title}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "查看作业: ${homework.homeworkName}", Toast.LENGTH_SHORT).show()
                     }
                     2 -> {
-                        Toast.makeText(context, "查看详情: ${homework.title}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "查看详情: ${homework.homeworkName}", Toast.LENGTH_SHORT).show()
                     }
                 }
             }

@@ -13,13 +13,15 @@
         <color name="primary">#6200EE</color>
         <color name="primary_dark">#3700B3</color>
         <color name="accent">#03DAC5</color>
-
+    <color name="blue_500">#2196F3</color>
         <color name="background">#F5F5F5</color>
         <color name="surface">#FFFFFF</color>
 
         <color name="text_primary2">#212121</color>
         <color name="text_secondary2">#757575</color>
-
+    <color name="green_500">#4CAF50</color>
+    <color name="orange_500">#FF9800</color>
+    <color name="red_500">#F44336</color>
         <color name="divider2">#E0E0E0</color>
         <color name="success">#4CAF50</color>
         <color name="error">#F44336</color>
