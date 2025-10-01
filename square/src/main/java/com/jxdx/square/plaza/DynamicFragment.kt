@@ -1,10 +1,12 @@
 package com.jxdx.square.plaza
 
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.corekit.common.BaseFragment
 import com.example.corekit.recyclerview.CommonItemDecoration
+import com.jxdx.square.R
 import com.jxdx.square.adapter.DynamicAdapter
 import com.jxdx.square.adapter.DynamicViewModel
 
@@ -84,14 +86,16 @@ class DynamicFragment(
      * 设置SwipeRefreshLayout的属性和刷新监听器
      */
     private fun setupSwipeRefreshLayout() {
-        // 设置刷新时的颜色
-        find.swipeRefreshLayout.setColorSchemeResources(
-            android.R.color.holo_blue_light,
-            android.R.color.holo_green_light,
-            android.R.color.holo_orange_light,
-            android.R.color.holo_red_light,
+        // 设置刷新时的颜色 - 使用更现代的颜色方案
+        find.swipeRefreshLayout.setColorSchemeColors(
+            ContextCompat.getColor(requireContext(), android.R.color.holo_blue_light),
+            ContextCompat.getColor(requireContext(), android.R.color.holo_blue_dark),
+            ContextCompat.getColor(requireContext(), android.R.color.holo_blue_bright)
         )
-
+        
+        // 设置刷新进度条的大小
+        find.swipeRefreshLayout.setProgressViewOffset(false, 0, 100)
+        
         // 设置刷新监听器
         find.swipeRefreshLayout.setOnRefreshListener {
             // 执行刷新操作

@@ -9,7 +9,8 @@ xmlns:tools="http://schemas.android.com/tools">
 
     <activity
         android:name=".HomeActivity"
-        android:exported="true" />
+        android:exported="true"
+        android:windowSoftInputMode="adjustNothing" />
     <activity
         android:name=".TeacherHomeActivity"
         android:exported="true" />

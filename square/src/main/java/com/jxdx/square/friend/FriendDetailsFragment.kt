@@ -68,8 +68,14 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
 
         // 设置删除好友按钮点击事件
         find.deleteFriendButton.setOnClickListener {
-            // 创建并显示删除好友对话框
-            val deleteDialog = DeleteDialog()
+            // 获取好友ID并创建删除对话框
+            val friendIdInt = friendId?.toIntOrNull() ?: 0
+            if (friendIdInt == 0) {
+                android.widget.Toast.makeText(requireContext(), "好友ID无效", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            val deleteDialog = DeleteDialog.newInstance(friendIdInt)
             deleteDialog.show(parentFragmentManager, "DeleteFriendDialog")
         }
     }
@@ -98,5 +104,16 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
                 }
             }
         }
+    }
+
+    /**
+     * 删除好友成功后的回调方法
+     */
+    fun onFriendDeleted() {
+        // 显示删除成功提示
+        android.widget.Toast.makeText(requireContext(), "好友已删除", android.widget.Toast.LENGTH_SHORT).show()
+        
+        // 返回上一页 - 使用Activity的FragmentManager确保正确返回
+        requireActivity().supportFragmentManager.popBackStack()
     }
 }

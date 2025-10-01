@@ -19,4 +19,10 @@ class FriendRepository {
         service.addFriend(TokenManager.getToken().toString(), applicationBody)
 
     suspend fun getApplications(): BaseResp<List<ApplicationMessage>> = service.getApplications(TokenManager.getToken().toString())
+
+    suspend fun acceptFriend(applicationId: Int): BaseResp<String> = service.acceptFriend(TokenManager.getToken().toString(), applicationId)
+
+    suspend fun rejectFriend(applicationId: Int): BaseResp<String> = service.rejectFriend(TokenManager.getToken().toString(), applicationId)
+
+    suspend fun deleteFriend(friendId: Int): BaseResp<String> = service.deleteFriend(TokenManager.getToken().toString(), friendId)
 }

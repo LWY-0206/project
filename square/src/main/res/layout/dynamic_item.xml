@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="#FFFFFF"
+    android:shadowColor="#1A000000"
+    android:shadowDx="0"
+    android:shadowDy="4"
+    android:shadowRadius="8">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="20dp"
-    android:background="@drawable/card_bg"
-    android:elevation="6dp"
-    android:layout_marginHorizontal="12dp"
-    android:layout_marginVertical="6dp"
-    android:stateListAnimator="@null">
+    android:padding="24dp">
 
     <!-- 用户信息区域 -->
     <LinearLayout
@@ -19,20 +27,29 @@
         android:gravity="center_vertical">
 
         <!-- 用户头像 -->
-        <ImageView
-            android:id="@+id/civ_user_avatar"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:src="@drawable/ic_avatar"
-            android:background="@drawable/avatar_circle_bg"
-            android:scaleType="centerCrop" />
+        <androidx.cardview.widget.CardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="30dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFFFF">
+
+            <ImageView
+                android:id="@+id/civ_user_avatar"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_avatar"
+                android:background="@drawable/modern_avatar_bg"
+                android:scaleType="centerCrop"
+                android:padding="4dp" />
+        </androidx.cardview.widget.CardView>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="16dp">
+            android:layout_marginStart="20dp">
 
             <!-- 用户名 -->
             <TextView
@@ -40,10 +57,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="用户名"
-                android:textSize="17sp"
-                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textColor="#212121"
                 android:textStyle="bold"
-                android:fontFamily="sans-serif-medium" />
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.01" />
 
             <!-- 发布时间 -->
             <TextView
@@ -51,12 +69,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="2小时前"
-                android:textSize="13sp"
-                android:textColor="@color/gray_500"
-                android:layout_marginTop="6dp"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:layout_marginTop="8dp"
                 android:drawableStart="@drawable/ic_time"
-                android:drawablePadding="4dp"
-                android:drawableTint="@color/gray_500" />
+                android:drawablePadding="6dp"
+                android:drawableTint="#757575" />
         </LinearLayout>
     </LinearLayout>
 
@@ -67,9 +85,9 @@
         android:layout_height="wrap_content"
         android:text="这里是动态的文字内容，展示用户发布的信息..."
         android:textSize="16sp"
-        android:textColor="@color/text_primary"
-        android:layout_marginTop="18dp"
-        android:lineSpacingExtra="6dp"
+        android:textColor="#424242"
+        android:layout_marginTop="20dp"
+        android:lineSpacingExtra="8dp"
         android:maxLines="4"
         android:ellipsize="end"
         android:fontFamily="sans-serif"
@@ -131,39 +149,37 @@
     <!-- 互动按钮区域 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="22dp"
-        android:background="@drawable/interaction_buttons_bg"
-        android:padding="8dp"
-        android:divider="@drawable/divider_vertical"
-        android:showDividers="middle">
+        android:layout_marginTop="24dp"
+        android:padding="12dp"
+        android:background="@drawable/modern_card_background">
 
         <!-- 点赞按钮 -->
         <LinearLayout
             android:id="@+id/ll_like"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="@drawable/button_interaction_bg"
-            android:padding="8dp">
+            android:background="@drawable/modern_like_button"
+            android:padding="12dp">
 
             <ImageView
                 android:id="@+id/iv_like"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_like"
-                app:tint="@color/gray_600" />
+                app:tint="#FF6B6B" />
 
             <TextView
                 android:id="@+id/tv_like_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="点赞"
-                android:textSize="14sp"
-                android:textColor="@color/gray_600"
+                android:textSize="15sp"
+                android:textColor="#FF6B6B"
                 android:layout_marginStart="8dp"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
@@ -172,17 +188,17 @@
         <LinearLayout
             android:id="@+id/ll_reward"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="@drawable/button_interaction_bg"
-            android:padding="8dp">
+            android:background="@drawable/modern_action_button"
+            android:padding="12dp">
 
             <ImageView
                 android:id="@+id/iv_reward"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_reward"
                 app:tint="#FF9800" />
 
@@ -191,8 +207,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="打赏"
-                android:textSize="14sp"
-                android:textColor="@color/gray_600"
+                android:textSize="15sp"
+                android:textColor="#FF9800"
                 android:layout_marginStart="8dp"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
@@ -201,27 +217,27 @@
         <LinearLayout
             android:id="@+id/ll_comment"
             android:layout_width="0dp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="@drawable/button_interaction_bg"
-            android:padding="8dp">
+            android:background="@drawable/modern_action_button"
+            android:padding="12dp">
 
             <ImageView
                 android:id="@+id/iv_comment"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:src="@drawable/ic_comment"
-                app:tint="@color/gray_600" />
+                app:tint="#2196F3" />
 
             <TextView
                 android:id="@+id/tv_comment_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="评论"
-                android:textSize="14sp"
-                android:textColor="@color/gray_600"
+                android:textSize="15sp"
+                android:textColor="#2196F3"
                 android:layout_marginStart="8dp"
                 android:fontFamily="sans-serif-medium" />
         </LinearLayout>
@@ -233,30 +249,32 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="18dp"
+        android:layout_marginTop="20dp"
         android:visibility="gone"
-        android:padding="16dp"
-        android:background="@drawable/comment_preview_bg">
+        android:padding="20dp"
+        android:background="@drawable/modern_card_background">
 
         <TextView
             android:id="@+id/tv_comment_preview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="评论用户：这是第一条评论的内容预览..."
-            android:textSize="14sp"
-            android:textColor="@color/text_secondary"
-            android:lineSpacingExtra="2dp" />
+            android:textSize="15sp"
+            android:textColor="#666666"
+            android:lineSpacingExtra="4dp" />
 
         <TextView
             android:id="@+id/tv_see_all_comments"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="查看全部评论"
-            android:textSize="14sp"
-            android:textColor="#4A90E2"
-            android:layout_marginTop="8dp"
+            android:textSize="15sp"
+            android:textColor="#2196F3"
+            android:layout_marginTop="12dp"
             android:fontFamily="sans-serif-medium"
             android:drawableEnd="@drawable/ic_arrow_right"
-            android:drawablePadding="4dp" />
+            android:drawablePadding="6dp" />
     </LinearLayout>
 </LinearLayout>
+
+</androidx.cardview.widget.CardView>

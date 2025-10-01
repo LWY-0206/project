@@ -1,18 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="0dp"
+    android:layout_marginVertical="4dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="16dp"
-    android:background="#FFFFFF">
+    android:padding="20dp"
+    android:background="?android:attr/selectableItemBackground">
 
     <!-- 圆形头像 -->
     <ImageView
         android:id="@+id/avatar_view"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:background="#DDDDDD"
-        android:radius="28dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@drawable/circle_avatar_bg"
+        android:scaleType="centerCrop"
         android:contentDescription="@null"/>
 
     <!-- 信息和按钮区域 -->
@@ -21,7 +31,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:paddingLeft="16dp">
+        android:paddingStart="20dp"
+        android:gravity="center_vertical">
 
         <!-- 用户名和时间 -->
         <LinearLayout
@@ -36,17 +47,19 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="张三"
-                android:textSize="16sp"
-                android:textColor="#333333"
-                android:textStyle="bold" />
+                android:textSize="18sp"
+                android:textColor="#212121"
+                android:textStyle="bold"
+                android:letterSpacing="0.01" />
 
             <TextView
                 android:id="@+id/time_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="时间"
-                android:textSize="12sp"
-                android:textColor="#999999" />
+                android:textSize="13sp"
+                android:textColor="#757575"
+                android:alpha="0.8" />
         </LinearLayout>
 
         <!-- 申请话语 -->
@@ -55,40 +68,65 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="申请话语"
-            android:textSize="14sp"
-            android:textColor="#666666"
-            android:layout_marginTop="4dp" />
+            android:textSize="15sp"
+            android:textColor="#616161"
+            android:layout_marginTop="6dp"
+            android:lineSpacingExtra="2dp" />
 
-        <!-- 按钮容器 -->
+        <!-- 按钮容器或状态显示 -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="12dp">
+            android:layout_marginTop="16dp"
+            android:gravity="center_vertical">
 
-            <!-- 接受按钮 -->
-            <Button
-                android:id="@+id/accept_button"
-                android:layout_width="80dp"
-                android:layout_height="32dp"
-                android:text="接受"
-                android:textSize="14sp"
-                android:textColor="#2196F3"
-                android:background="#E3F2FD"
-                android:radius="16dp" />
+            <!-- 按钮容器（待确认状态时显示） -->
+            <LinearLayout
+                android:id="@+id/button_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="visible">
 
-            <!-- 拒绝按钮 -->
-            <Button
-                android:id="@+id/reject_button"
-                android:layout_width="80dp"
-                android:layout_height="32dp"
-                android:text="拒绝"
-                android:textSize="14sp"
-                android:textColor="#FF5252"
-                android:background="#FFEBEE"
-                android:radius="16dp"
-                android:layout_marginLeft="12dp" />
+                <!-- 接受按钮 -->
+                <Button
+                    android:id="@+id/accept_button"
+                    android:layout_width="88dp"
+                    android:layout_height="36dp"
+                    android:text="接受"
+                    android:textSize="14sp"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/button_accept_bg"
+                    android:stateListAnimator="@null"
+                    android:elevation="0dp" />
+
+                <!-- 拒绝按钮 -->
+                <Button
+                    android:id="@+id/reject_button"
+                    android:layout_width="88dp"
+                    android:layout_height="36dp"
+                    android:text="拒绝"
+                    android:textSize="14sp"
+                    android:textColor="#FFFFFF"
+                    android:background="@drawable/button_reject_bg"
+                    android:stateListAnimator="@null"
+                    android:elevation="0dp"
+                    android:layout_marginStart="12dp" />
+            </LinearLayout>
+
+            <!-- 状态显示（已确认或已拒绝时显示） -->
+            <TextView
+                android:id="@+id/status_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="已接收"
+                android:textSize="15sp"
+                android:textColor="#4CAF50"
+                android:textStyle="bold"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
+</androidx.cardview.widget.CardView>
