@@ -17,6 +17,9 @@ class WhiteboardRepository {
         HttpManager.instance.service(WhiteboardApi::class.java)
     }
 
+    /**
+     * 上传白板图片到通用上传接口
+     */
     suspend fun uploadWhiteboardImage(file: String): BaseResp<List<String>> {
         // 创建File对象
         val fileObj = File(file)
@@ -37,6 +40,37 @@ class WhiteboardRepository {
         val data = result.data
         if (data != null && data.isNotEmpty()) {
             Log.d(TAG, "返回的图片URL: ${data[0]}")
+        }
+        
+        return result
+    }
+    
+    /**
+     * 上传白板快照到专门的快照接口
+     * @param roomId 房间ID
+     * @param file 快照图片文件路径
+     */
+    suspend fun uploadWhiteboardSnapshot(roomId: String, file: String): BaseResp<String> {
+        // 创建File对象
+        val fileObj = File(file)
+
+        // 创建RequestBody
+        val requestBody = RequestBody.create("image/*".toMediaTypeOrNull(), fileObj)
+
+        // 创建MultipartBody.Part，参数名为"file"
+        val filePart = MultipartBody.Part.createFormData("file", fileObj.name, requestBody)
+        
+        // 发送请求到白板快照接口
+        val result = whiteboardApi.uploadWhiteboardSnapshot(
+            roomId,
+            TokenManager.getToken().toString(),
+            filePart
+        )
+        
+        // 输出返回的快照URL
+        val data = result.data
+        if (data != null) {
+            Log.d(TAG, "白板快照上传成功，返回URL: $data")
         }
         
         return result

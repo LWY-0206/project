@@ -28,6 +28,9 @@ class WhiteboardActivity : BaseActivity<ActivityWhiteboardBinding>() {
     // 当前是否为橡皮擦模式
     private var isEraserMode = false
     
+    // 房间ID
+    private var roomId: String = ""
+    
     // ViewModel
     private lateinit var viewModel: WhiteboardViewModel
 
@@ -36,6 +39,10 @@ class WhiteboardActivity : BaseActivity<ActivityWhiteboardBinding>() {
     }
 
     override fun initView() {
+        // 获取传递的roomId参数
+        roomId = intent.getStringExtra("roomId") ?: ""
+        Log.d(TAG, "接收到roomId: $roomId")
+        
         // 初始化ViewModel
         viewModel = ViewModelProvider(this)[WhiteboardViewModel::class.java]
         
@@ -50,7 +57,7 @@ class WhiteboardActivity : BaseActivity<ActivityWhiteboardBinding>() {
         view.whiteboardView.setPaintColor(currentColor)
         view.whiteboardView.setStrokeWidth(5f)
         
-        // 监听上传结果
+        // 监听通用上传结果
         viewModel.uploadLiveData.observe(this) { result ->
             result.onSuccess { imageUrls ->
                 if (imageUrls != null && imageUrls.isNotEmpty()) {
@@ -71,6 +78,29 @@ class WhiteboardActivity : BaseActivity<ActivityWhiteboardBinding>() {
             result.onError { error, _ ->
                 Log.e(TAG, "白板图片上传失败: ${error?.message}")
                 Toast.makeText(this, "上传失败: ${error?.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // 监听白板快照上传结果
+        viewModel.snapshotUploadLiveData.observe(this) { result ->
+            result.onSuccess { snapshotUrl ->
+                if (snapshotUrl != null && snapshotUrl.isNotEmpty()) {
+                    Log.d(TAG, "白板快照上传成功，URL: $snapshotUrl")
+                    Toast.makeText(this, "白板快照上传成功", Toast.LENGTH_SHORT).show()
+                    
+                    // TODO: 后续通过WebSocket发送快照URL给老师
+                    // 这里可以添加WebSocket发送逻辑
+                    
+                    // 上传成功后返回上一页
+                    finish()
+                } else {
+                    Toast.makeText(this, "快照上传失败，未获取到URL", Toast.LENGTH_SHORT).show()
+                }
+            }
+            
+            result.onError { error, _ ->
+                Log.e(TAG, "白板快照上传失败: ${error?.message}")
+                Toast.makeText(this, "快照上传失败: ${error?.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -243,14 +273,19 @@ class WhiteboardActivity : BaseActivity<ActivityWhiteboardBinding>() {
             val bitmap = view.whiteboardView.getCanvasBitmap()
             Log.d(TAG, "白板内容已获取，Bitmap尺寸: ${bitmap.width}x${bitmap.height}")
             
-            // 显示上传提示
-            Toast.makeText(this, "正在上传白板图片...", Toast.LENGTH_SHORT).show()
-            
             // 将Bitmap保存为临时文件
             val filePath = saveBitmapToFile(bitmap)
             if (filePath != null) {
-                // 调用图片上传API
-                viewModel.uploadWhiteboardImage(filePath)
+                // 优先使用白板快照上传接口
+                if (roomId.isNotEmpty()) {
+                    Log.d(TAG, "使用白板快照上传接口，roomId: $roomId")
+                    Toast.makeText(this, "正在上传白板快照...", Toast.LENGTH_SHORT).show()
+                    viewModel.uploadWhiteboardSnapshot(roomId, filePath)
+                } else {
+                    Log.d(TAG, "roomId为空，使用通用上传接口")
+                    Toast.makeText(this, "正在上传白板图片...", Toast.LENGTH_SHORT).show()
+                    viewModel.uploadWhiteboardImage(filePath)
+                }
             } else {
                 Toast.makeText(this, "保存图片失败，请重试", Toast.LENGTH_SHORT).show()
             }

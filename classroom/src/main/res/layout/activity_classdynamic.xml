@@ -6,11 +6,9 @@
     android:background="#F8F9FA">
 
     <!-- 顶部标题栏 -->
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="64dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
         android:background="#FFFFFF"
         android:elevation="4dp"
         android:paddingHorizontal="8dp">
@@ -20,6 +18,8 @@
             android:id="@+id/btn_back"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
             android:src="@drawable/ic_back_arrow"
             android:background="@drawable/button_selector"
             android:contentDescription="返回"
@@ -27,18 +27,17 @@
             android:padding="12dp"
             android:focusable="true"/>
 
-        <!-- 标题文本 -->
+        <!-- 标题文本 - 在整个屏幕宽度上居中 -->
         <TextView
             android:id="@+id/tv_title"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
+            android:layout_centerInParent="true"
             android:text="xx课"
             android:textSize="22sp"
             android:textStyle="bold"
             android:textColor="#1A1A1A"/>
-    </LinearLayout>
+    </RelativeLayout>
 
     <!-- 顶部装饰性渐变条 -->
     <View

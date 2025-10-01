@@ -266,8 +266,9 @@ class ClassActivity : BaseActivity<ClassActivityBinding>() {
         // 白板按钮
         view.btnWhiteboard.setOnClickListener {
             Log.d(TAG, "白板按钮被点击")
-            // 跳转到白板绘制界面
+            // 跳转到白板绘制界面，传递roomId
             val intent = android.content.Intent(this, WhiteboardActivity::class.java)
+            intent.putExtra("roomId", liveId.toString()) // 将liveId作为roomId传递
             startActivity(intent)
         }
         

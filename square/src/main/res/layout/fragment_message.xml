@@ -6,39 +6,6 @@
     android:orientation="vertical"
     tools:context=".plaza.MessageFragment">
 
-    <!-- 搜索框 -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:padding="8dp"
-        android:background="@color/white">
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/search_box_bg"
-            android:paddingHorizontal="12dp">
-
-            <ImageView
-                    android:id="@+id/iv_search_icon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_image_placeholder"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="8dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="请输入搜索关键字"
-                    android:textSize="14sp"
-                    android:textColor="@color/gray_400"
-                    android:gravity="center_vertical"
-                    android:layout_toRightOf="@id/iv_search_icon" />
-
-        </RelativeLayout>
-
-    </LinearLayout>
 
     <!-- 主内容区域 -->
     <LinearLayout
