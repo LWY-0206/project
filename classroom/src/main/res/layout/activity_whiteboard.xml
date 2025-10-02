@@ -198,15 +198,55 @@
         </androidx.cardview.widget.CardView>
     </LinearLayout>
 
-    <!-- 白板绘制区域 -->
-    <com.jxdx.classroom.view.WhiteboardView
-        android:id="@+id/whiteboardView"
+    <!-- 主内容区域 -->
+    <LinearLayout
+        android:id="@+id/mainContent"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="#FFFFFF"
+        android:orientation="horizontal"
         app:layout_constraintTop_toBottomOf="@+id/drawToolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- 白板绘制区域 -->
+        <com.jxdx.classroom.view.WhiteboardView
+            android:id="@+id/whiteboardView"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#FFFFFF" />
+
+        <!-- 白板快照列表（教师端使用） -->
+        <LinearLayout
+            android:id="@+id/snapshotPanel"
+            android:layout_width="300dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#F8F9FA"
+            android:visibility="gone">
+
+            <!-- 快照列表标题 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="学生白板快照"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:padding="16dp"
+                android:background="#E9ECEF" />
+
+            <!-- 快照列表 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvWhiteboardSnapshots"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:padding="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

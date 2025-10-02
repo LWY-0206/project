@@ -100,6 +100,49 @@ class WhiteboardView @JvmOverloads constructor(
         draw(canvas)
         return bitmap
     }
+    
+    /**
+     * 在画板上绘制Bitmap（教师端显示学生白板内容用）
+     */
+    fun drawBitmap(bitmap: Bitmap) {
+        // 清空当前内容
+        clearCanvas()
+        
+        // 计算缩放比例以适应画板大小
+        val scaleX = width.toFloat() / bitmap.width
+        val scaleY = height.toFloat() / bitmap.height
+        val scale = minOf(scaleX, scaleY)
+        
+        // 计算居中位置
+        val scaledWidth = bitmap.width * scale
+        val scaledHeight = bitmap.height * scale
+        val left = (width - scaledWidth) / 2f
+        val top = (height - scaledHeight) / 2f
+        
+        // 创建绘制Bitmap的路径
+        val bitmapPath = Path().apply {
+            addRect(left, top, left + scaledWidth, top + scaledHeight, Path.Direction.CW)
+        }
+        
+        // 创建Bitmap画笔
+        val bitmapPaint = Paint().apply {
+            isAntiAlias = true
+            shader = BitmapShader(bitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+        }
+        
+        // 设置变换矩阵
+        val matrix = Matrix().apply {
+            setScale(scale, scale)
+            postTranslate(left, top)
+        }
+        bitmapPaint.shader?.setLocalMatrix(matrix)
+        
+        // 添加Bitmap路径到路径列表
+        paths.add(PathInfo(bitmapPath, bitmapPaint, false))
+        
+        // 重绘
+        invalidate()
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)

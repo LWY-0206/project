@@ -6,6 +6,7 @@ import com.example.corekit.http.bean.ErrorResponse
 import com.example.corekit.http.bean.ResLiveData
 import com.example.corekit.http.listener.LiveDataCallback
 import com.example.corekit.http.request
+import com.jxdx.classroom.model.UserInfo
 import com.jxdx.classroom.repository.WhiteboardRepository
 
 class WhiteboardViewModel(application: Application) : BaseViewModel(application) {
@@ -18,10 +19,13 @@ class WhiteboardViewModel(application: Application) : BaseViewModel(application)
         ResLiveData() 
     }
     
-    // 白板快照上传接口的LiveData
-    val snapshotUploadLiveData: ResLiveData<String> by lazy { 
-        ResLiveData() 
+    // 用户信息LiveData
+    val userInfoLiveData: ResLiveData<UserInfo> by lazy {
+        ResLiveData()
     }
+    
+    // 当前用户信息缓存
+    private var currentUserInfo: UserInfo? = null
 
     /**
      * 上传白板图片到通用上传接口
@@ -62,42 +66,62 @@ class WhiteboardViewModel(application: Application) : BaseViewModel(application)
     }
     
     /**
-     * 上传白板快照到专门的快照接口
-     * @param roomId 房间ID
-     * @param file 快照图片文件路径
+     * 获取用户信息
      */
-    fun uploadWhiteboardSnapshot(roomId: String, file: String) {
+    fun getUserInfo() {
         request(
-            snapshotUploadLiveData,
-            object : LiveDataCallback<String, String> {
+            userInfoLiveData,
+            object : LiveDataCallback<UserInfo, UserInfo> {
                 override fun success(
-                    emit: ResLiveData<String>,
+                    emit: ResLiveData<UserInfo>,
                     msg: String?,
-                    data: String?
+                    data: UserInfo?
                 ) {
                     data?.let {
+                        currentUserInfo = it
                         emit.success(it)
                     }
                 }
 
                 override fun otherCode(
-                    emit: ResLiveData<String>,
+                    emit: ResLiveData<UserInfo>,
                     code: Int?,
                     msg: String?,
-                    data: String?
+                    data: UserInfo?
                 ) {
                     emit.error(ErrorResponse.otherCode(code, msg))
                 }
 
                 override fun error(
-                    emit: ResLiveData<String>,
+                    emit: ResLiveData<UserInfo>,
                     e: ErrorResponse
                 ) {
                     emit.error(e, null)
                 }
             }
         ) {
-            repository.uploadWhiteboardSnapshot(roomId, file)
+            repository.getUserInfo()
         }
     }
+    
+    /**
+     * 获取当前用户信息
+     */
+    fun getCurrentUserInfo(): UserInfo? = currentUserInfo
+    
+    /**
+     * 获取用户身份标识（用于WebSocket连接）
+     */
+    fun getUserIdentity(): Int = currentUserInfo?.identity ?: 0
+    
+    /**
+     * 获取用户ID
+     */
+    fun getUserId(): String = currentUserInfo?.id?.toString() ?: "0"
+    
+    /**
+     * 获取用户名
+     */
+    fun getUserName(): String = currentUserInfo?.userName ?: "未知用户"
+    
 }

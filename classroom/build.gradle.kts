@@ -76,4 +76,11 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+    
+    // PDF查看器依赖
+    implementation("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
+    
+    // 图片加载库
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    
 }

@@ -5,6 +5,7 @@ import com.example.corekit.http.HttpManager
 import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.classroom.http.WhiteboardApi
+import com.jxdx.classroom.model.UserInfo
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -46,33 +47,20 @@ class WhiteboardRepository {
     }
     
     /**
-     * 上传白板快照到专门的快照接口
-     * @param roomId 房间ID
-     * @param file 快照图片文件路径
+     * 获取用户信息
      */
-    suspend fun uploadWhiteboardSnapshot(roomId: String, file: String): BaseResp<String> {
-        // 创建File对象
-        val fileObj = File(file)
-
-        // 创建RequestBody
-        val requestBody = RequestBody.create("image/*".toMediaTypeOrNull(), fileObj)
-
-        // 创建MultipartBody.Part，参数名为"file"
-        val filePart = MultipartBody.Part.createFormData("file", fileObj.name, requestBody)
-        
-        // 发送请求到白板快照接口
-        val result = whiteboardApi.uploadWhiteboardSnapshot(
-            roomId,
-            TokenManager.getToken().toString(),
-            filePart
+    suspend fun getUserInfo(): BaseResp<UserInfo> {
+        val result = whiteboardApi.getUserInfo(
+            TokenManager.getToken().toString()
         )
         
-        // 输出返回的快照URL
-        val data = result.data
-        if (data != null) {
-            Log.d(TAG, "白板快照上传成功，返回URL: $data")
+        // 输出用户信息
+        val userInfo = result.data
+        if (userInfo != null) {
+            Log.d(TAG, "获取用户信息成功: ${userInfo.userName}, 身份: ${userInfo.getIdentityDescription()}")
         }
         
         return result
     }
+    
 }
