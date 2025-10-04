@@ -52,6 +52,7 @@ android {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":square"))
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -76,4 +77,5 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.6.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
+    implementation("com.airbnb.android:lottie:6.1.0")
 }

@@ -30,6 +30,18 @@
             android:name=".service.MediaProjectionService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection" />
+        <activity
+            android:name=".group.DiscussionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".group.GroupSeatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".group.TeacherViewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".group.QuestionTypeListActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

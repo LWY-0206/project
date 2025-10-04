@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_margin="8dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        app:cardCornerRadius="35dp"
+        app:cardElevation="4dp"
+        android:backgroundTint="@color/surface">
+
+        <ImageView
+            android:id="@+id/ivAvatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:padding="2dp"/>
+
+        <!-- 组长标识 -->
+        <ImageView
+            android:id="@+id/ivLeaderBadge"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_crown"
+            android:layout_gravity="top|end"
+            android:visibility="gone"/>
+
+        <!-- 在线状态 -->
+        <View
+            android:id="@+id/vOnlineStatus"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/bg_online"
+            android:layout_gravity="bottom|end"
+            android:visibility="gone"/>
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="空位"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:layout_marginTop="6dp"
+        android:maxWidth="80dp"
+        android:ellipsize="end"
+        android:singleLine="true"/>
+
+    <!-- 加载动画 -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/loadingAnimation"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+</LinearLayout>

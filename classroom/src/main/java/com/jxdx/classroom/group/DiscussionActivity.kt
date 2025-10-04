@@ -1,0 +1,908 @@
+package com.jxdx.classroom.group
+
+import android.content.Intent
+import android.graphics.Rect
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+6import android.text.Editable
+import android.text.TextWatcher
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.jxdx.classroom.R
+import com.jxdx.classroom.databinding.ActivityDiscussionBinding
+import com.jxdx.classroom.group.GroupChatApi
+import com.jxdx.classroom.http.ApiService
+import com.jxdx.classroom.http.RetrofitClient
+import com.example.corekit.http.TokenManager
+import com.example.corekit.http.bean.BaseResp
+import kotlinx.coroutines.*
+import okhttp3.ResponseBody
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
+
+// 消息项的装饰器，用于设置不同类型消息之间的间距
+class MessageItemDecoration : RecyclerView.ItemDecoration() {
+    // 设置项目偏移
+    override fun getItemOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State
+    ) {
+        // 添加消息项之间的垂直间距
+        outRect.bottom = 12
+    }
+}
+
+/**
+ * 讨论组活动类
+ * 负责显示小组讨论界面，处理消息发送和接收，以及各种用户交互操作
+ */
+class DiscussionActivity : AppCompatActivity() {
+    // 视图绑定对象，用于访问XML布局中的UI元素
+    private lateinit var binding: ActivityDiscussionBinding
+    // 当前用户ID
+    private val currentUserId = "student_1"
+    // 当前用户名
+    private val currentUserName = "组长1"
+    // 群组ID
+    private lateinit var groupId: String
+    // 群组名称
+    private lateinit var groupName: String
+    // 是否为教师模式
+    private var isTeacherMode: Boolean = false
+    // 在线人数
+    private var onlineCount = 3
+    // 消息列表
+    private val messages = mutableListOf<Message>()
+    // 消息适配器，用于RecyclerView的数据绑定
+    private lateinit var messagesAdapter: MessagesAdapter
+    // 消息处理器，用于处理延迟任务
+    private val messageHandler = Handler(Looper.getMainLooper())
+    // 模拟消息列表
+    private val simulatedMessages = mutableListOf(
+        "大家好，今天我们来讨论项目的进展情况",
+        "我已经完成了需求分析部分",
+        "设计方面我有一些想法",
+        "这个项目的时间节点是什么样的？",
+        "我们应该制定一个详细的计划",
+        "大家还有什么问题吗？"
+    )
+
+    /**
+     * Activity生命周期方法 - 创建
+     * 初始化Activity，设置布局，调用各初始化方法
+     */
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        // 初始化视图绑定
+        binding = ActivityDiscussionBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // 调用各初始化方法
+        initData()
+        initViews()
+        initRecyclerView()
+        setupClickListeners()
+
+        // 加载历史消息
+        loadHistoryMessages()
+    }
+
+    /**
+     * 初始化数据
+     * 从Intent获取groupId、groupName和isTeacher参数
+     */
+    private fun initData() {
+        // 获取从上一个Activity传递过来的数据
+        groupId = intent.getStringExtra("groupId") ?: ""
+        groupName = intent.getStringExtra("groupName") ?: "讨论组"
+        isTeacherMode = intent.getBooleanExtra("isTeacher", false)
+
+        // 添加系统消息：用户加入讨论区
+        if (!isTeacherMode) {
+            addSystemMessage("${currentUserName}加入了讨论区")
+        }
+    }
+
+    /**
+     * 初始化视图
+     * 设置标题、在线人数，配置输入框监听，处理教师模式UI
+     */
+    private fun initViews() {
+        // 设置标题
+        binding.tvGroupTitle.text = groupName
+        // 设置在线人数
+        updateOnlineCount()
+        // 配置输入框文本变化监听
+        binding.etMessage.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                updateSendButtonState()
+            }
+        })
+        //输入框开始无文字，发送按钮先透明
+        binding.ivSend.alpha = 0.5f
+        // 处理教师模式UI
+        if (isTeacherMode) {
+            //输入框
+            binding.etMessage.hint = "发布任务/评价/指导..."
+            //教师专用操作按钮
+            binding.ivTeacherJoin.visibility=View.VISIBLE
+        }else{
+            //输入框
+            binding.etMessage.hint = "此处输入消息..."
+            //教师专用操作按钮隐藏
+            binding.ivTeacherJoin.visibility=View.GONE
+        }
+    }
+
+    /**
+     * 初始化RecyclerView
+     * 初始化RecyclerView、消息适配器和分割线
+     */
+    private fun initRecyclerView() {
+        // 创建消息适配器
+        messagesAdapter = MessagesAdapter(messages, currentUserId, isTeacherMode)
+        // 设置RecyclerView的布局管理器和适配器
+        binding.rvMessages.apply {
+            layoutManager = LinearLayoutManager(this@DiscussionActivity)
+            adapter = messagesAdapter
+            // 添加消息项之间的间距
+            addItemDecoration(MessageItemDecoration())
+        }
+    }
+
+    /**
+     * 设置点击监听器
+     * 设置返回、发送、附件、更多选项等按钮的点击监听
+     */
+    private fun setupClickListeners() {
+        // 返回按钮点击事件
+        binding.ivBack.setOnClickListener {
+            finish()
+        }
+
+        // 发送按钮点击事件
+        binding.ivSend.setOnClickListener {
+            sendMessage()
+        }
+
+        // 附件按钮点击事件
+        binding.ivAddAttachment.setOnClickListener {
+            showAttachmentOptions()
+        }
+
+        // 更多选项按钮点击事件
+        binding.ivMore.setOnClickListener {
+            showMoreOptions()
+        }
+
+        // 教师操作按钮
+        binding.ivTeacherJoin.setOnClickListener {
+            showTeacherActions()
+        }
+
+
+
+
+        // 教师模式下，长按发送按钮显示教师操作
+        if (isTeacherMode) {
+            binding.ivSend.setOnLongClickListener {
+                showTeacherActions()
+                true
+            }
+        }
+    }
+
+    /**
+     * 发送消息
+     * 发送用户输入的消息到聊天列表
+     */
+    private fun sendMessage() {
+        // 获取输入框内容并去除前后空格
+        val content = binding.etMessage.text.toString().trim()
+        if (content.isNotEmpty()) {
+            // 创建消息对象
+            val message = Message(
+                id = "msg_${System.currentTimeMillis()}",
+                senderId = if (isTeacherMode) "teacher" else currentUserId,
+                senderName = if (isTeacherMode) "教师" else currentUserName,
+                content = content,
+                timestamp = System.currentTimeMillis(),
+                isFromTeacher = isTeacherMode
+            )
+            // 添加消息到列表
+            addMessage(message)
+            // 清空输入框
+            binding.etMessage.text?.clear()
+            // 更新发送按钮状态
+            updateSendButtonState()
+
+            // 通过API发送消息
+            lifecycleScope.launch { 
+                try {
+                    val request = GroupChatApi.SendMessage.RequestBody(
+                        teamId = groupId.toLongOrNull(),
+                        fromUserId = currentUserId.toLongOrNull(),
+                        content = content,
+                        messageType = GroupChatApi.Broadcast.MessageType.TEXT
+                    )
+
+                    val response = RetrofitClient.apiService.sendGroupChatMessage(
+                        request = request
+                    )
+
+                    if (response.code != 0 || response.data == null) {
+                        // 发送失败，显示提示
+                        Toast.makeText(this@DiscussionActivity, "消息发送失败: ${response.message}", Toast.LENGTH_SHORT).show()
+                    } else {
+                        // 发送成功，保存消息到服务器
+                        val saveRequest = GroupChatApi.SaveMessage.RequestBody(
+                            teamId = groupId.toLongOrNull(),
+                            fromUserId = currentUserId.toLongOrNull(),
+                            content = content,
+                            messageType = GroupChatApi.Broadcast.MessageType.TEXT
+                        )
+                        RetrofitClient.apiService.saveGroupChatMessage(
+                            request = saveRequest
+                        )
+                    }
+                } catch (e: Exception) {
+                    // 网络异常
+                    e.printStackTrace()
+                    Toast.makeText(this@DiscussionActivity, "网络连接异常，消息发送失败", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * 添加消息
+     * 添加消息到列表并更新UI
+     * @param message 要添加的消息对象
+     */
+    private fun addMessage(message: Message) {
+        // 将消息添加到列表
+        messages.add(message)
+        // 通知适配器数据变化
+        messagesAdapter.notifyItemInserted(messages.size - 1)
+        // 滚动到最新消息
+        binding.rvMessages.scrollToPosition(messages.size - 1)
+        // 为新消息添加动画效果
+        animateMessageAppearance(messages.size - 1)
+    }
+
+    /**
+     * 添加系统消息
+     * 添加系统消息（如进入/离开提示）到聊天列表
+     * @param content 系统消息内容
+     */
+    private fun addSystemMessage(content: String) {
+        // 创建系统消息对象
+        val systemMessage = Message(
+            id = "sys_${System.currentTimeMillis()}",
+            senderId = "system",
+            senderName = "系统",
+            content = content,
+            timestamp = System.currentTimeMillis(),
+            messageType = MessageType.SYSTEM
+        )
+        // 添加系统消息到列表
+        addMessage(systemMessage)
+    }
+
+    /**
+     * 为新消息添加动画效果
+     * 为新添加的消息添加进入动画
+     * @param position 消息在列表中的位置
+     */
+    private fun animateMessageAppearance(position: Int) {
+        // 延迟执行动画，确保RecyclerView已经完成了布局
+        messageHandler.postDelayed({
+            val viewHolder = binding.rvMessages.findViewHolderForAdapterPosition(position)
+            if (viewHolder != null) {
+                // 设置初始透明度和Y轴位置
+                viewHolder.itemView.alpha = 0f
+                viewHolder.itemView.translationY = 20f
+                // 执行淡入和上移动画
+                viewHolder.itemView.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setDuration(300)
+                    .start()
+            }
+        }, 100)
+    }
+
+    /**
+     * 更新发送按钮状态
+     * 根据输入框内容更新发送按钮的可用状态
+     */
+    private fun updateSendButtonState() {
+        // 根据输入框是否为空来设置发送按钮的可用状态
+        binding.ivSend.isEnabled = binding.etMessage.text?.isNotEmpty() == true
+        binding.ivSend.alpha = if (binding.etMessage.text?.isNotEmpty() == true) 1f else 0.5f
+    }
+
+    // 删除不再使用的模拟方法
+    // simulateGroupDiscussion和simulateReply方法已被移除，现在使用真实的API实现
+
+    /**
+     * 更新在线人数
+     * 更新UI上显示的在线人数
+     */
+    private fun updateOnlineCount() {
+        binding.tvOnlineCount.text = "在线 $onlineCount 人"
+    }
+
+    /**
+     * 显示附件选项
+     * 显示附件选择底部弹窗（图片、文件、拍照）
+     */
+    private fun showAttachmentOptions() {
+        // 创建底部弹窗
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_attachments, null)
+
+        // 设置图片选择点击事件
+        view.findViewById<View>(R.id.optionImage).setOnClickListener {
+            Toast.makeText(this, "选择图片", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        // 设置文件选择点击事件
+        view.findViewById<View>(R.id.optionFile).setOnClickListener {
+            Toast.makeText(this, "选择文件", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        // 设置拍照点击事件
+        view.findViewById<View>(R.id.optionCamera).setOnClickListener {
+            Toast.makeText(this, "拍照", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        // 显示弹窗
+        dialog.setContentView(view)
+        dialog.show()
+    }
+
+    /**
+     * 显示更多选项
+     * 显示更多选项底部弹窗（成员、清空、导出等）
+     */
+    private fun showMoreOptions() {
+        // 创建底部弹窗
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_more_options, null)
+
+        // 设置成员列表点击事件
+        view.findViewById<View>(R.id.optionMembers).setOnClickListener {
+            showGroupMembers()
+            dialog.dismiss()
+        }
+
+        // 设置清空聊天记录点击事件
+        view.findViewById<View>(R.id.optionClear).setOnClickListener {
+            clearChatHistory()
+            dialog.dismiss()
+        }
+
+        // 设置导出讨论点击事件
+        view.findViewById<View>(R.id.optionExport).setOnClickListener {
+            exportDiscussion()
+            dialog.dismiss()
+        }
+
+        // 教师模式下显示教师工具选项
+        if (isTeacherMode) {
+            view.findViewById<View>(R.id.optionTeacherTools).setOnClickListener {
+                Toast.makeText(this, "教师工具功能开发中", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            view.findViewById<View>(R.id.optionTeacherTools).visibility = View.VISIBLE
+        }
+
+        // 显示弹窗
+        dialog.setContentView(view)
+        dialog.show()
+    }
+
+    /**
+     * 显示教师操作
+     * 显示教师操作底部弹窗（添加任务、评价、干预）
+     */
+    private fun showTeacherActions() {
+        // 创建底部弹窗
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_teacher_actions, null)
+
+        // 设置添加任务点击事件
+        view.findViewById<View>(R.id.optionAddTask).setOnClickListener {
+            addGroupTask()
+            dialog.dismiss()
+        }
+
+        // 设置评价小组点击事件
+        view.findViewById<View>(R.id.optionEvaluate).setOnClickListener {
+            evaluateGroup()
+            dialog.dismiss()
+        }
+
+        // 设置干预讨论点击事件
+        view.findViewById<View>(R.id.optionIntervene).setOnClickListener {
+            interveneDiscussion()
+            dialog.dismiss()
+        }
+
+        // 显示弹窗
+        dialog.setContentView(view)
+        dialog.show()
+    }
+
+    /**
+     * 显示小组成员
+     * 显示小组成员列表对话框
+     */
+    private fun showGroupMembers() {
+        // 模拟小组成员列表
+        val members = listOf(
+            "组长1 (在线)",
+            "学生2 (在线)",
+            "学生3 (在线)",
+            "学生4 (离线)",
+            "学生5 (在线)"
+        )
+
+        // 创建底部弹窗
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.dialog_group_members, null)
+
+        // 动态添加成员项
+        val membersContainer = view.findViewById<ViewGroup>(R.id.membersContainer)
+        members.forEach { member ->
+            val memberView = layoutInflater.inflate(R.layout.item_member, membersContainer, false)
+            memberView.findViewById<TextView>(R.id.tvMemberName).text = member
+            membersContainer.addView(memberView)
+        }
+
+        // 显示弹窗
+        dialog.setContentView(view)
+        dialog.show()
+    }
+
+    /**
+     * 清空聊天记录
+     * 清空聊天记录并显示系统提示
+     */
+    private fun clearChatHistory() {
+        // 清空消息列表
+        messages.clear()
+        // 通知适配器数据变化
+        messagesAdapter.notifyDataSetChanged()
+        // 添加系统消息提示
+        addSystemMessage("聊天记录已清空")
+    }
+
+    /**
+     * 导出讨论内容
+     * 模拟导出讨论内容
+     */
+    private fun exportDiscussion() {
+        // 显示导出成功提示
+        Toast.makeText(this, "讨论内容已导出", Toast.LENGTH_SHORT).show()
+    }
+
+    /**
+     * 添加小组任务
+     * 添加教师布置的小组任务消息
+     */
+    private fun addGroupTask() {
+        // 创建任务消息
+        val content = "【小组任务】请在本周内完成项目原型设计，并提交设计文档"
+        val taskMessage = Message(
+            id = "task_${System.currentTimeMillis()}",
+            senderId = "teacher",
+            senderName = "教师",
+            content = content,
+            timestamp = System.currentTimeMillis(),
+            messageType = MessageType.TEXT,
+            isFromTeacher = true
+        )
+        // 添加任务消息到列表
+        addMessage(taskMessage)
+
+        // 通过API广播任务（如果是教师模式）
+        if (isTeacherMode) {
+            lifecycleScope.launch { 
+                try {
+                    val request = GroupChatApi.Broadcast.RequestBody(
+                        content = content,
+                        messageType = GroupChatApi.Broadcast.MessageType.TEXT,
+                        timestamp = System.currentTimeMillis()
+                    )
+                    RetrofitClient.apiService.broadcastGroupChatMessage(
+                        request = request
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    /**
+     * 评价小组
+     * 添加教师对小组的评价消息
+     */
+    private fun evaluateGroup() {
+        // 创建评价消息
+        val evaluationMessage = Message(
+            id = "eval_${System.currentTimeMillis()}",
+            senderId = "teacher",
+            senderName = "教师",
+            content = "【评价】小组讨论积极，分工明确，继续保持！",
+            timestamp = System.currentTimeMillis(),
+            messageType = MessageType.TEXT,
+            isFromTeacher = true
+        )
+        // 添加评价消息到列表
+        addMessage(evaluationMessage)
+    }
+
+    /**
+     * 干预讨论
+     * 添加教师对讨论的干预指导消息
+     */
+    private fun interveneDiscussion() {
+        // 创建干预消息
+        val interventionMessage = Message(
+            id = "intervene_${System.currentTimeMillis()}",
+            senderId = "teacher",
+            senderName = "教师",
+            content = "【指导建议】建议你们考虑一下用户的使用场景和需求痛点",
+            timestamp = System.currentTimeMillis(),
+            messageType = MessageType.TEXT,
+            isFromTeacher = true
+        )
+        // 添加干预消息到列表
+        addMessage(interventionMessage)
+    }
+
+    /**
+     * Activity生命周期方法 - 销毁
+     * 清理资源，移除消息处理器回调
+     */
+    override fun onDestroy() {
+        super.onDestroy()
+        // 移除所有消息处理回调
+        messageHandler.removeCallbacksAndMessages(null)
+        // 添加系统消息：用户离开讨论区
+        if (!isTeacherMode) {
+            // 创建并添加系统消息
+            val systemMessage = Message(
+                id = UUID.randomUUID().toString(),
+                senderId = "system",
+                senderName = "系统",
+                content = "${currentUserName}离开了讨论",
+                timestamp = System.currentTimeMillis(),
+                messageType = MessageType.SYSTEM,
+                isFromTeacher = false
+            )
+            addMessage(systemMessage)
+        }
+    }
+
+    /**
+     * 加载历史消息
+     * 从服务器获取历史消息记录
+     */
+    // 加载历史消息
+    private fun loadHistoryMessages() {
+        // 创建并显示加载进度条
+        val progressBar = ProgressBar(this)
+        val layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        layoutParams.gravity = Gravity.CENTER
+        progressBar.layoutParams = layoutParams
+        binding.root.addView(progressBar)
+        binding.rvMessages.visibility = View.GONE
+
+        // 获取用户token
+        val saToken = TokenManager.getToken() ?: ""
+        if (saToken.isEmpty()) {
+            Toast.makeText(this, "未登录，请先登录", Toast.LENGTH_SHORT).show()
+            binding.root.removeView(progressBar)
+            binding.rvMessages.visibility = View.VISIBLE
+            return
+        }
+
+        // 在协程中调用API获取历史消息
+        lifecycleScope.launch { 
+            try {
+                val response = RetrofitClient.apiService.getGroupChatHistory(
+                    satoken = saToken,
+                    teamId = groupId.toInt(),
+                    pageNum = 1,
+                    pageSize = 20
+                )
+                
+                if (response.code == 0) {
+                    // 清空现有消息
+                    messages.clear()
+
+                    // 添加系统欢迎消息
+                    addSystemMessage("欢迎加入小组讨论！")
+
+                    // 处理历史消息
+                    response.data?.messages?.forEach { apiMessage ->
+                        try {
+                            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+                            val timestamp = sdf.parse(apiMessage.sendTime)?.time ?: System.currentTimeMillis()
+                               
+                            val message = Message(
+                                id = apiMessage.id.toString(),
+                                senderId = apiMessage.fromUserId.toString(),
+                                senderName = "用户", // API中没有fromUserName字段，使用默认值
+                                content = apiMessage.content,
+                                timestamp = timestamp,
+                                messageType = if (apiMessage.messageType == GroupChatApi.Broadcast.MessageType.TEXT) MessageType.TEXT else MessageType.SYSTEM,
+                                isFromTeacher = apiMessage.fromUserId.toString() == "teacher"
+                            )
+                            messages.add(message)
+                        } catch (e: ParseException) {
+                            e.printStackTrace()
+                        }
+                    }
+
+                    // 更新RecyclerView
+                    messagesAdapter.notifyDataSetChanged()
+                    if (messages.isNotEmpty()) {
+                        binding.rvMessages.scrollToPosition(messages.size - 1)
+                    }
+                } else {
+                    // 加载失败，显示提示
+                    Toast.makeText(this@DiscussionActivity, "加载历史消息失败: ${response.message}", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                // 网络异常
+                e.printStackTrace()
+                Toast.makeText(this@DiscussionActivity, "网络连接异常，请检查网络设置", Toast.LENGTH_SHORT).show()
+            } finally {
+                // 隐藏加载状态
+                binding.root.removeView(progressBar)
+                binding.rvMessages.visibility = View.VISIBLE
+            }
+        }
+    }
+}
+
+/**
+ * 消息适配器
+ * 用于RecyclerView中显示不同类型的消息
+ * @param messages 消息列表
+ * @param currentUserId 当前用户ID
+ * @param isTeacherMode 是否为教师模式
+ */
+class MessagesAdapter(
+    private val messages: List<Message>,
+    private val currentUserId: String,
+    private val isTeacherMode: Boolean
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    // 消息类型常量
+    companion object {
+        private const val TYPE_MY_MESSAGE = 0      // 我的消息
+        private const val TYPE_OTHER_MESSAGE = 1   // 他人消息
+        private const val TYPE_SYSTEM_MESSAGE = 2  // 系统消息
+        private const val TYPE_TEACHER_MESSAGE = 3 // 教师消息
+    }
+
+    /**
+     * 获取项目视图类型
+     * 根据消息类型返回不同的视图类型
+     * @param position 消息在列表中的位置
+     * @return 视图类型
+     */
+    override fun getItemViewType(position: Int): Int {
+        val message = messages[position]
+        return when {
+            message.messageType == MessageType.SYSTEM -> TYPE_SYSTEM_MESSAGE
+            message.isFromTeacher -> TYPE_TEACHER_MESSAGE
+            message.senderId == currentUserId -> TYPE_MY_MESSAGE
+            else -> TYPE_OTHER_MESSAGE
+        }
+    }
+
+    /**
+     * 创建ViewHolder
+     * 根据视图类型创建不同的ViewHolder
+     * @param parent 父视图
+     * @param viewType 视图类型
+     * @return RecyclerView.ViewHolder 对象
+     */
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            TYPE_MY_MESSAGE -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_message, parent, false)
+                MyMessageViewHolder(view)
+            }
+            TYPE_OTHER_MESSAGE -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_message, parent, false)
+                OtherMessageViewHolder(view)
+            }
+            TYPE_SYSTEM_MESSAGE -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_message, parent, false)
+                SystemMessageViewHolder(view)
+            }
+            TYPE_TEACHER_MESSAGE -> {
+                val view = LayoutInflater.from(parent.context)
+                    .inflate(R.layout.item_message, parent, false)
+                TeacherMessageViewHolder(view)
+            }
+            else -> throw IllegalArgumentException("Unknown view type")
+        }
+    }
+
+    /**
+     * 绑定ViewHolder数据
+     * 将消息数据绑定到对应的ViewHolder
+     * @param holder ViewHolder对象
+     * @param position 消息在列表中的位置
+     */
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val message = messages[position]
+        when (holder) {
+            is MyMessageViewHolder -> holder.bind(message)
+            is OtherMessageViewHolder -> holder.bind(message)
+            is SystemMessageViewHolder -> holder.bind(message)
+            is TeacherMessageViewHolder -> holder.bind(message)
+        }
+    }
+
+    /**
+     * 获取消息总数
+     * @return 消息总数
+     */
+    override fun getItemCount() = messages.size
+
+    /**
+     * 我的消息ViewHolder
+     * 用于显示当前用户发送的消息
+     */
+    inner class MyMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val layoutMyMessage = itemView.findViewById<View>(R.id.layoutMyMessage)
+        private val tvMyMessageContent = itemView.findViewById<TextView>(R.id.tvMyMessageContent)
+        private val tvMyMessageTime = itemView.findViewById<TextView>(R.id.tvMyMessageTime)
+
+        init {
+            // 设置视图可见性
+            layoutMyMessage.visibility = View.VISIBLE
+            itemView.findViewById<View>(R.id.layoutOtherMessage).visibility = View.GONE
+            itemView.findViewById<View>(R.id.layoutSystemMessage).visibility = View.GONE
+        }
+
+        /**
+         * 绑定消息数据
+         * @param message 消息对象
+         */
+        fun bind(message: Message) {
+            tvMyMessageContent.text = message.content
+            tvMyMessageTime.text = formatTime(message.timestamp)
+        }
+    }
+
+    /**
+     * 他人消息ViewHolder
+     * 用于显示其他成员发送的消息
+     */
+    inner class OtherMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val layoutOtherMessage = itemView.findViewById<View>(R.id.layoutOtherMessage)
+        private val tvOtherSender = itemView.findViewById<TextView>(R.id.tvOtherSender)
+        private val tvOtherMessageContent = itemView.findViewById<TextView>(R.id.tvOtherMessageContent)
+        private val tvOtherMessageTime = itemView.findViewById<TextView>(R.id.tvOtherMessageTime)
+
+        init {
+            // 设置视图可见性
+            layoutOtherMessage.visibility = View.VISIBLE
+            itemView.findViewById<View>(R.id.layoutMyMessage).visibility = View.GONE
+            itemView.findViewById<View>(R.id.layoutSystemMessage).visibility = View.GONE
+        }
+
+        /**
+         * 绑定消息数据
+         * @param message 消息对象
+         */
+        fun bind(message: Message) {
+            tvOtherSender.text = message.senderName
+            tvOtherMessageContent.text = message.content
+            tvOtherMessageTime.text = formatTime(message.timestamp)
+        }
+    }
+
+    /**
+     * 系统消息ViewHolder
+     * 用于显示系统消息
+     */
+    inner class SystemMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val layoutSystemMessage = itemView.findViewById<View>(R.id.layoutSystemMessage)
+        private val tvSystemMessage = itemView.findViewById<TextView>(R.id.tvSystemMessage)
+
+        init {
+            // 设置视图可见性
+            layoutSystemMessage.visibility = View.VISIBLE
+            itemView.findViewById<View>(R.id.layoutMyMessage).visibility = View.GONE
+            itemView.findViewById<View>(R.id.layoutOtherMessage).visibility = View.GONE
+        }
+
+        /**
+         * 绑定消息数据
+         * @param message 消息对象
+         */
+        fun bind(message: Message) {
+            tvSystemMessage.text = message.content
+        }
+    }
+
+    /**
+     * 教师消息ViewHolder
+     * 用于显示教师发送的消息
+     */
+    inner class TeacherMessageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val layoutOtherMessage = itemView.findViewById<View>(R.id.layoutOtherMessage)
+        private val tvOtherSender = itemView.findViewById<TextView>(R.id.tvOtherSender)
+        private val tvOtherMessageContent = itemView.findViewById<TextView>(R.id.tvOtherMessageContent)
+        private val tvOtherMessageTime = itemView.findViewById<TextView>(R.id.tvOtherMessageTime)
+
+        init {
+            // 设置视图可见性
+            layoutOtherMessage.visibility = View.VISIBLE
+            itemView.findViewById<View>(R.id.layoutMyMessage).visibility = View.GONE
+            itemView.findViewById<View>(R.id.layoutSystemMessage).visibility = View.GONE
+        }
+
+        /**
+         * 绑定消息数据
+         * @param message 消息对象
+         */
+        fun bind(message: Message) {
+            tvOtherSender.text = "👨‍🏫 ${message.senderName}"
+            tvOtherMessageContent.text = message.content
+            tvOtherMessageTime.text = formatTime(message.timestamp)
+
+            // 教师消息特殊样式
+            tvOtherSender.setTextColor(ContextCompat.getColor(itemView.context, R.color.warning))
+        }
+    }
+
+    /**
+     * 格式化时间戳
+     * 将时间戳转换为可读的时间格式
+     * @param timestamp 时间戳
+     * @return 格式化后的时间字符串
+     */
+    private fun formatTime(timestamp: Long): String {
+        return SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(timestamp))
+    }
+}

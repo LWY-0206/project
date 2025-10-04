@@ -8,6 +8,10 @@ import com.jxdx.classroom.activity.ClassActivity
 import com.jxdx.classroom.activity.ClassEnterFragment
 
 import com.jxdx.classroom.databinding.ClassroomFragmentBinding
+import com.jxdx.classroom.http.ApiService
+import com.jxdx.classroom.http.RetrofitClient
+import com.jxdx.common.http.service.ClassService
+import com.jxdx.common.http.service.ServiceRegistry
 import com.luck.picture.lib.utils.ToastUtils.showToast
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable.isActive
@@ -83,12 +87,6 @@ class ClassRoomFragment : BaseFragment<ClassroomFragmentBinding>() {
         // 参与投票点击事件
         find.btnVote.setOnClickListener { // 需要给LinearLayout添加id
             showToast(context,"点击参与投票")
-            //
-        }
-
-        // 我的小组区域点击事件
-        find.myGroup.setOnClickListener { // 需要给LinearLayout添加id
-            showToast(context,"进入我的小组")
             //
         }
 

@@ -220,18 +220,18 @@
                     android:orientation="vertical">
 
                     <ImageView
-                        android:id="@+id/iv_explore"
+                        android:id="@+id/iv_group"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:layout_gravity="top|start"
                         android:background="@drawable/ic_explore"
-                        android:contentDescription="探索" />
+                        android:contentDescription="小组" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_horizontal"
-                        android:text="探索"
+                        android:text="小组"
                         android:textSize="18dp" />
                 </LinearLayout>
             </FrameLayout>
