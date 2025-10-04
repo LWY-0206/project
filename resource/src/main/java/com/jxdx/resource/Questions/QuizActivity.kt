@@ -262,7 +262,9 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
             // 在当前题目列表中查找下一题
             val nextQuestionIndex = currentQuestions.indexOfFirst { it.questionId == response.nextQuestion }
             if (nextQuestionIndex != -1) {
-                displayQuestion(nextQuestionIndex)
+                view.root.postDelayed({
+                    displayQuestion(nextQuestionIndex)
+                }, 1500) // 延时1.5秒
             } else {
                 // 如果下一题不在当前列表中，重新获取练习会话
                 resumePractice()

@@ -1,6 +1,4 @@
-package com.jxdx.resource.FirstPage
-
-import com.google.gson.annotations.SerializedName
+package Schedule.FirstPage
 
 data class ScheduleItem(
     val week: String,           // 第几周

@@ -1,4 +1,4 @@
-package com.jxdx.resource.FirstPage
+package Schedule.FirstPage
 
 import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp

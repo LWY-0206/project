@@ -1,15 +1,12 @@
 package com.jxdx.resource.News
 
 data class NewsItem(
-    val id: String,
+    val id: Int,
     val title: String,
-    val summary: String,
     val coverUrl: String,
     val source: String,
     val publishTime: String,
     val viewCount: Int,
-    val content: String = "",
-    val category: String = "校园新闻"
 ) {
     // 格式化时间显示
     fun getFormattedTime(): String {

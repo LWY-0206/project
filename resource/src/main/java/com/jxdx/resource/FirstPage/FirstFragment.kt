@@ -1,13 +1,13 @@
 package com.jxdx.resource.FirstPage
 
+import Schedule.FirstPage.ScheduleAdapter
+import Schedule.FirstPage.ScheduleItem
+import Schedule.ScheduleViewModel
 import android.content.Intent
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,39 +15,40 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.corekit.common.BaseFragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
-import com.jxdx.resource.Famous.FamousViewModel
 import com.jxdx.resource.News.NewsAdapter
 import com.jxdx.resource.News.NewsItem
-import com.jxdx.resource.R
+import com.jxdx.resource.News.NewVIewModel
+import com.jxdx.resource.Recommendation.RecommendationItem
+import com.jxdx.resource.Recommendation.RecommendationResponse
+import com.jxdx.resource.Recommendation.RecommendationViewModel
 import com.jxdx.resource.Recommendation.WaterfallAdapter
 import com.jxdx.resource.StudySuggestions.StudySuggestionActivity
 import com.jxdx.resource.databinding.FragmentFirstBinding
-import com.jxdx.resource.databinding.ItemScheduleBinding
 import com.jxdx.resource.databinding.LayoutNewsSectionBinding
 import com.jxdx.resource.resource.GlideImageLoader
+import com.youth.banner.Banner
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 class FirstFragment : BaseFragment<FragmentFirstBinding>() {
     private lateinit var scheduleViewModel: ScheduleViewModel
+    private lateinit var newsViewModel: NewVIewModel
     private lateinit var fab: FloatingActionButton
     private var dX = 0f
     private var dY = 0f
     private var isDragging = false
     private val newsList = mutableListOf<NewsItem>()
     private lateinit var newsAdapter: NewsAdapter
-    private var topBanner: com.youth.banner.Banner? = null
+    private var topBanner: Banner? = null
     private lateinit var waterfallRecyclerView: RecyclerView
     private lateinit var waterfallAdapter: WaterfallAdapter
     private val recommendationList = mutableListOf<RecommendationItem>()
-
+    private lateinit var recommendationViewModel: RecommendationViewModel
     // 新增课表相关的变量
     private lateinit var scheduleRecyclerView: RecyclerView
     private lateinit var scheduleAdapter: ScheduleAdapter
@@ -63,6 +64,9 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
 
     override fun initView() {
         scheduleViewModel = ViewModelProvider(this)[ScheduleViewModel::class.java]
+        newsViewModel = ViewModelProvider(this)[NewVIewModel::class.java]
+        recommendationViewModel = ViewModelProvider(this)[RecommendationViewModel::class.java]
+
         // 初始化Banner
         topBanner = find.topBanner
         val imageUrls: MutableList<String?> = ArrayList<String?>()
@@ -100,6 +104,16 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
     }
 
     override fun subscribeUi() {
+        recommendationViewModel.recommendationLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    recommendationList.clear()
+                    recommendationList.addAll(data)
+                    waterfallAdapter.updateData(recommendationList)
+                    Log.d("RecommendationViewModel", "Data loaded successfully, size: ${data}")
+                } else {}
+            }
+        }
         scheduleViewModel.scheduleLiveData.observe(this) { result ->
             result.onSuccess { data ->
                 if (data != null) {
@@ -116,6 +130,24 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
             result.onError { error, _ ->
                 Log.d("ScheduleViewModel", "Error loading data: $error")
                 updateScheduleUI(emptyList())
+            }
+        }
+
+        // 观察新闻数据
+        newsViewModel.newsLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    updateNewsUI(data, find.newsSection)
+                    Log.d("NewsViewModel", "News data loaded successfully, size: ${data.size}")
+                } else {
+                    updateNewsUI(emptyList(), find.newsSection)
+                    Log.d("NewsViewModel", "News data is null")
+                }
+            }
+            result.onError { error, _ ->
+                Log.d("NewsViewModel", "Error loading news data: $error")
+                updateNewsUI(emptyList(), find.newsSection)
+                showMessage("加载新闻失败")
             }
         }
     }
@@ -165,7 +197,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
      */
     private fun loadScheduleWithFixedValue() {
         currentWeek = "第三周"
-        currentWeekday = "周三"
+        currentWeekday = "星期三"
 
         Log.d("Schedule", "使用固定值加载课表: 第${currentWeek}周 星期${currentWeekday}")
         scheduleViewModel.getScheduleList(currentWeek, currentWeekday)
@@ -369,8 +401,6 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
 
     private fun setupWaterfallRecyclerView() {
         waterfallRecyclerView = find.waterfallRecyclerView
-        updataRecommendationUI(recommendationList)
-        Log.d("更新数据推荐数据列表", "recommendationList: $recommendationList")
 
         // 设置瀑布流布局管理器，2列
         val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -384,12 +414,6 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         waterfallAdapter.onItemClickListener = { item ->
             handleItemClick(item)
         }
-
-        // 设置收藏点击事件
-        waterfallAdapter.onFavoriteClickListener = { item ->
-            handleFavoriteClick(item)
-        }
-
         // 添加滚动监听实现加载更多
         waterfallRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -400,8 +424,14 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
                 }
             }
         })
-    }
 
+        // 加载推荐数据
+        loadRecommendationData()
+    }
+    private fun loadRecommendationData() {
+        Log.d("Recommendation", "开始加载推荐数据")
+        recommendationViewModel.getRecommendationList()
+    }
     private fun handleItemClick(item: RecommendationItem) {
         // 根据类型处理点击事件
         if (item.isVideo()) {
@@ -480,7 +510,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         // 设置布局管理器 - 使用LinearLayoutManager垂直排列
         val layoutManager = LinearLayoutManager(requireContext())
         newsBinding.rvNews.layoutManager = layoutManager
-        Log.d("设置新闻适配器","success")
+        Log.d("News", "设置新闻适配器成功")
 
         //允许rvNews单独滚动
         newsBinding.rvNews.isNestedScrollingEnabled = true
@@ -496,56 +526,20 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         newsBinding.pbNewsLoading.visibility = View.VISIBLE
         newsBinding.rvNews.visibility = View.GONE
         newsBinding.tvEmptyNews.visibility = View.GONE
-        // 模拟新闻数据（实际开发中应该从API获取）
-        Log.d("创建模拟数据","success")
-        val mockNews = listOf(
-            NewsItem(
-                id = "1",
-                title = "学校举办春季运动会，各学院积极备战",
-                summary = "为丰富校园文化生活，学校将于下月举办春季运动会，各学院已经开始积极备战...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/d9a280aa-15c5-42b1-a0d9-c5a962bcd8b2.jpg",
-                source = "校园新闻",
-                publishTime = "2小时",
-                viewCount = 1250
-            ),
-            NewsItem(
-                id = "2",
-                title = "计算机学院学生在编程大赛中荣获一等奖",
-                summary = "在刚刚结束的全国大学生程序设计大赛中，我校计算机学院代表队表现出色...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/451278d3-c571-406d-8a57-276a71efe710.jpg",
-                source = "学术动态",
-                publishTime = "5小时",
-                viewCount = 890
-            ),
-            NewsItem(
-                id = "3",
-                title = "图书馆新增电子资源，助力学术研究",
-                summary = "为满足师生学术研究需求，图书馆近期引进了多个知名数据库和电子期刊...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/c9338d44-4517-45dd-bc86-763f6c1eac03.jpg",
-                source = "资源更新",
-                publishTime = "1天",
-                viewCount = 567
-            ),
-            NewsItem(
-                id = "4",
-                title = "学校开展心理健康教育周活动",
-                summary = "为关注学生心理健康，学校将于本周举办系列心理健康教育活动...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/4588f1e9-9b03-4033-a6c6-b73355a51b3d.jpg",
-                source = "学生工作",
-                publishTime = "3小时",
-                viewCount = 432
-            )
-        )
-        updateNewsUI(mockNews,newsBinding)
-        Log.d("设置模拟数据","${mockNews}")
+
+        Log.d("News", "开始从API加载新闻数据")
+
+        // 从API加载新闻数据
+        newsViewModel.getNewsList()
     }
 
-    private fun updateNewsUI(newsItems: List<NewsItem>,newsBinding: LayoutNewsSectionBinding) {
+    private fun updateNewsUI(newsItems: List<NewsItem>, newsBinding: LayoutNewsSectionBinding) {
         newsBinding.pbNewsLoading.visibility = View.GONE
 
         if (newsItems.isEmpty()) {
             newsBinding.tvEmptyNews.visibility = View.VISIBLE
             newsBinding.rvNews.visibility = View.GONE
+            Log.d("News", "新闻数据为空")
             return
         }
 
@@ -554,25 +548,20 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
 
         // 更新适配器数据
         newsAdapter.updateData(newsItems)
-        Log.d("更新适配器数据","success, ${newsItems}")
-        newsAdapter.notifyDataSetChanged()
+        Log.d("News", "更新新闻适配器数据，数量: ${newsItems.size}")
+
+        // 显示第一条新闻的标题用于调试
+        if (newsItems.isNotEmpty()) {
+            Log.d("News", "第一条新闻标题: ${newsItems[0].title}")
+            Log.d("News", "第一条新闻来源: ${newsItems[0].source}")
+            Log.d("News", "第一条新闻图片: ${newsItems[0].coverUrl}")
+        }
     }
 
     // 加载更多新闻（如果需要分页）
     private fun loadMoreNews() {
-        val moreNews = listOf(
-            NewsItem(
-                id = "5",
-                title = "新增的新闻条目",
-                summary = "这是加载更多的新闻内容...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/news/more.jpg",
-                source = "最新动态",
-                publishTime = "刚刚",
-                viewCount = 100
-            )
-        )
-
-        newsAdapter.addData(moreNews)
+        // 如果需要分页加载更多新闻，可以在这里实现
+        // 目前API没有分页参数，暂时不实现
     }
 
     private fun openNewsList() {
