@@ -1,5 +1,4 @@
 package com.jxdx.resource.Questions
-
 import android.os.Parcel
 import android.os.Parcelable
 
@@ -16,6 +15,27 @@ data class ErrorQuizData(
     val current: Int,
     val pages: Int
 )
+// 练习会话
+data class PracticeSession(
+    val sessionId: Int,
+    val subjectId: Int,
+    val currentBatch: Int,
+    val totalBatches: Int,
+    val completed: Boolean,
+    val nextQuestion: Int,
+    val remainingCount: Int,
+    val pendingQueue: List<ErrorQuizItem>
+)
+
+// 提交答案响应
+data class SubmitResponse(
+    val sessionId: Int,
+    val nextQuestion: Int,
+    val remainingCount: Int,
+    val batchCompleted: Boolean,
+    val allCompleted: Boolean
+)
+
 
 data class ErrorQuizItem(
     val questionId: Int,
