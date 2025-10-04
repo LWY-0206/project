@@ -54,6 +54,12 @@ class ActivityClassDynamic: BaseActivity<ActivityClassdynamicBinding>() {
             )
         }
         
+        // 课件预览按钮点击事件
+        view.btnPdfPreview.setOnClickListener {
+            val intent = Intent(this, PdfPreviewActivity::class.java)
+            startActivity(intent)
+        }
+        
         // 初始化RecyclerView和适配器
         initRecyclerView()
         

@@ -44,8 +44,25 @@ class HomeActivity : AppCompatActivity() {
         initViews()
         setupClickListeners()
 
-        // 默认显示首页
-        switchFragment(currentTab)
+        // 检查是否有指定的目标页面
+        val targetTab = intent.getIntExtra("target_tab", -1)
+        val targetSubTab = intent.getIntExtra("target_sub_tab", -1)
+        
+        if (targetTab != -1) {
+            // 跳转到指定的主页面
+            switchFragment(targetTab)
+            
+            // 如果有子页面指定，延迟执行子页面切换
+            if (targetSubTab != -1) {
+                // 延迟执行，确保Fragment已经创建
+                fragmentContainer.post {
+                    switchToSubTab(targetSubTab)
+                }
+            }
+        } else {
+            // 默认显示首页
+            switchFragment(currentTab)
+        }
     }
 
     private fun initViews() {
@@ -163,5 +180,25 @@ class HomeActivity : AppCompatActivity() {
         ivClass.setImageResource(R.drawable.ic_class1_home)
 
         tvClassTextView.setTextColor(ContextCompat.getColor(this, R.color.white))
+    }
+    
+    /**
+     * 切换到指定的子页面
+     * @param subTabIndex 子页面索引
+     */
+    private fun switchToSubTab(subTabIndex: Int) {
+        // 获取当前显示的Fragment
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+        
+        // 通过反射来切换ViewPager2的页面，避免直接依赖square模块
+        try {
+            // 查找mViewPager字段
+            val viewPagerField = currentFragment?.javaClass?.getDeclaredField("mViewPager")
+            viewPagerField?.isAccessible = true
+            val viewPager = viewPagerField?.get(currentFragment) as? androidx.viewpager2.widget.ViewPager2
+            viewPager?.currentItem = subTabIndex
+        } catch (e: Exception) {
+            android.util.Log.e("HomeActivity", "切换子页面失败", e)
+        }
     }
 }

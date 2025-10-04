@@ -10,6 +10,7 @@ import com.jxdx.square.databinding.AddDialogBinding
 
 class AddDialog : BaseDialog<AddDialogBinding>() {
     private lateinit var sendApplicationViewmodel: SendApplicationViewmodel
+    private lateinit var friendViewModel: FriendViewModel
 
     init {
         alpha = 0.5f
@@ -20,6 +21,7 @@ class AddDialog : BaseDialog<AddDialogBinding>() {
     override fun initView(view: AddDialogBinding) {
         // 初始化ViewModel
         sendApplicationViewmodel = ViewModelProvider(requireActivity())[SendApplicationViewmodel::class.java]
+        friendViewModel = ViewModelProvider(requireActivity())[FriendViewModel::class.java]
 
         // 获取从AddFriendActivity传递过来的userId参数
         val userId = arguments?.getString("userId") ?: ""
@@ -54,6 +56,8 @@ class AddDialog : BaseDialog<AddDialogBinding>() {
                         context?.let { ctx ->
                             Toast.makeText(ctx, "添加成功", Toast.LENGTH_SHORT).show()
                         }
+                        // 刷新好友列表
+                        friendViewModel.getFriends()
                         dismiss()
                     }
                     it.status == Resource.Status.ERROR -> {

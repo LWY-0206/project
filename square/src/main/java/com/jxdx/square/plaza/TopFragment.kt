@@ -48,5 +48,8 @@ class TopFragment(private val callback: () -> Unit, ) : Fragment() {
             // 从适配器获取标签文本并设置
             tab.setText(mTopAdapter!!.getTabTitle(position))
         }.attach()
+
+        // 设置默认选中"动态"标签页（位置1）
+        mViewPager!!.currentItem = 1
     }
 }

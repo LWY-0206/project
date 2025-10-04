@@ -21,7 +21,11 @@ class TeacherClassRoomFragment:BaseFragment<TeacherClassRoomFragmentBinding>() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
 
-
+        // 设置返回按钮点击事件
+        find.TeacherBtnBack.setOnClickListener {
+            // 返回上一页
+            requireActivity().onBackPressed()
+        }
     }
 
     override fun subscribeUi() {

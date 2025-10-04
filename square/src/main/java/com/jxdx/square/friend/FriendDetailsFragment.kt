@@ -68,9 +68,35 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
 
         // 设置删除好友按钮点击事件
         find.deleteFriendButton.setOnClickListener {
-            // 创建并显示删除好友对话框
-            val deleteDialog = DeleteDialog()
+            // 获取好友ID并创建删除对话框
+            val friendIdInt = friendId?.toIntOrNull() ?: 0
+            if (friendIdInt == 0) {
+                android.widget.Toast.makeText(requireContext(), "好友ID无效", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            val deleteDialog = DeleteDialog.newInstance(friendIdInt)
             deleteDialog.show(parentFragmentManager, "DeleteFriendDialog")
+        }
+
+        // 设置前往聊天按钮点击事件
+        find.goChatButton.setOnClickListener {
+            // 检查好友信息是否有效
+            if (friendName.isNullOrEmpty() || friendId.isNullOrEmpty()) {
+                android.widget.Toast.makeText(requireContext(), "好友信息无效", android.widget.Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            
+            // 使用SharedPreferences保存联系人信息
+            val sharedPref = requireContext().getSharedPreferences("friend_chat", android.content.Context.MODE_PRIVATE)
+            val editor = sharedPref.edit()
+            editor.putString("friend_name", friendName)
+            editor.putString("friend_id", friendId)
+            editor.apply()
+            
+            // 模拟页面向左滑动，切换到消息页面
+            // 通过回调函数通知父Fragment切换到消息页面
+            switchToMessagePage()
         }
     }
 
@@ -97,6 +123,101 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
                     find.classText.text = it.className
                 }
             }
+        }
+    }
+
+    /**
+     * 删除好友成功后的回调方法
+     */
+    fun onFriendDeleted() {
+        // 显示删除成功提示
+        android.widget.Toast.makeText(requireContext(), "好友已删除", android.widget.Toast.LENGTH_SHORT).show()
+        
+        // 返回上一页 - 使用Activity的FragmentManager确保正确返回
+        requireActivity().supportFragmentManager.popBackStack()
+    }
+    
+    /**
+     * 切换到消息页面
+     */
+    private fun switchToMessagePage() {
+        // 先保存Activity引用，避免Fragment销毁后无法访问
+        val activity = activity
+        if (activity == null) {
+            android.util.Log.e("FriendDetailsFragment", "Activity为null，无法切换页面")
+            return
+        }
+        
+        // 返回到联系人页面
+        parentFragmentManager.popBackStack()
+        
+        // 延迟执行，确保Fragment已经返回
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+            // 检查Activity是否还存在
+            if (activity.isFinishing || activity.isDestroyed) {
+                android.util.Log.e("FriendDetailsFragment", "Activity已销毁，无法切换页面")
+                return@postDelayed
+            }
+            
+            // 通过多种方式查找TopFragment并切换到消息页面
+            try {
+                val fragmentManager = activity.supportFragmentManager
+                
+                // 方法1：遍历所有Fragment
+                val fragments = fragmentManager.fragments
+                android.util.Log.d("FriendDetailsFragment", "开始查找TopFragment，当前Fragment数量: ${fragments.size}")
+                
+                for (fragment in fragments) {
+                    android.util.Log.d("FriendDetailsFragment", "检查Fragment: ${fragment.javaClass.simpleName}")
+                    if (fragment.javaClass.simpleName == "TopFragment") {
+                        android.util.Log.d("FriendDetailsFragment", "找到TopFragment，准备切换到消息页面")
+                        switchViewPagerToMessage(fragment)
+                        return@postDelayed
+                    }
+                }
+                
+                // 方法2：通过FragmentManager查找
+                val topFragment = fragmentManager.findFragmentByTag("TopFragment")
+                if (topFragment != null) {
+                    android.util.Log.d("FriendDetailsFragment", "通过Tag找到TopFragment")
+                    switchViewPagerToMessage(topFragment)
+                    return@postDelayed
+                }
+                
+                // 方法3：通过容器ID查找
+                val containerFragment = fragmentManager.findFragmentById(android.R.id.content)
+                if (containerFragment != null) {
+                    android.util.Log.d("FriendDetailsFragment", "通过容器ID找到Fragment: ${containerFragment.javaClass.simpleName}")
+                    if (containerFragment.javaClass.simpleName == "TopFragment") {
+                        switchViewPagerToMessage(containerFragment)
+                        return@postDelayed
+                    }
+                }
+                
+                android.util.Log.e("FriendDetailsFragment", "未找到TopFragment")
+                
+            } catch (e: Exception) {
+                android.util.Log.e("FriendDetailsFragment", "切换到消息页面失败", e)
+            }
+        }, 500) // 延迟500ms执行
+    }
+    
+    /**
+     * 切换ViewPager到消息页面
+     */
+    private fun switchViewPagerToMessage(fragment: androidx.fragment.app.Fragment) {
+        try {
+            val viewPagerField = fragment.javaClass.getDeclaredField("mViewPager")
+            viewPagerField.isAccessible = true
+            val viewPager = viewPagerField.get(fragment) as? androidx.viewpager2.widget.ViewPager2
+            if (viewPager != null) {
+                viewPager.currentItem = 2 // 切换到消息页面（索引2）
+                android.util.Log.d("FriendDetailsFragment", "成功切换到消息页面")
+            } else {
+                android.util.Log.e("FriendDetailsFragment", "ViewPager2为null")
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FriendDetailsFragment", "切换ViewPager失败", e)
         }
     }
 }

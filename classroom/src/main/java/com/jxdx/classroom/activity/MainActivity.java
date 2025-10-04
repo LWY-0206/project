@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.jxdx.classroom.service.MediaProjectionService;
 import com.jxdx.classroom.R;
+import com.jxdx.classroom.widget.FloatingBallManager;
 
 public class MainActivity extends AppCompatActivity implements MediaProjectionService.ServiceCallbacks {
 
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
     private boolean isStreamKeyReady = false; // 推流码是否已获取
     private StreamKeyHelper streamKeyHelper; // 推流码获取助手
     private int liveId = 0; // 接收传递的liveId
+    private FloatingBallManager floatingBallManager; // 悬浮球管理器
 
     private final int REQUEST_CODE_SCREEN_CAPTURE = 100;
 
@@ -84,13 +86,6 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
             titleView.setText(subjectName);
         }
 
-        // 显示RTMP服务器地址
-        TextView tvUrl = findViewById(R.id.tv_url);
-        if (subjectName != null && !subjectName.isEmpty()) {
-            tvUrl.setText(subjectName + " - RTMP服务器地址：" + url);
-        } else {
-            tvUrl.setText("RTMP服务器地址：" + url);
-        }
 
         // 设置推流方式选择监听
         RadioGroup radioGroup = findViewById(R.id.radio_group_stream_type);
@@ -130,6 +125,9 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
         streamKeyHelper = new StreamKeyHelper(this);
         streamKeyHelper.init();
         
+        // 初始化悬浮球管理器
+        floatingBallManager = new FloatingBallManager(this);
+        
         // 绑定按钮点击事件
         findViewById(R.id.btn_start_screen_capture).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,6 +140,21 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
             @Override
             public void onClick(View v) {
                 stopLive(v);
+            }
+        });
+        
+        // 悬浮球控制按钮
+        findViewById(R.id.btn_show_floating_ball).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showFloatingBall();
+            }
+        });
+        
+        findViewById(R.id.btn_hide_floating_ball).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideFloatingBall();
             }
         });
     }
@@ -199,8 +212,8 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
                     mFFmpegScreenLive.setStreamParameters(1280, 720, 30, 2000000);
                     boolean started = mFFmpegScreenLive.startLive(url, mediaProjection);
                     if (started) {
-                        Log.i(TAG, "开始FFmpeg推流到地址：" + url);
-                        updateStreamStatus("FFmpeg推流已开始");
+                    Log.i(TAG, "开始FFmpeg推流到地址：" + url);
+                    updateStreamStatus("FFmpeg推流已开始");
                     } else {
                         Log.e(TAG, "FFmpeg推流启动失败");
                         updateStreamStatus("FFmpeg推流启动失败");
@@ -270,9 +283,6 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
                         url = baseUrl + streamKey;
                         Log.d(TAG, "更新推流地址: " + url);
                         
-                        // 更新UI显示的RTMP地址
-                        updateRtmpUrlDisplay();
-                        
                         updateStreamStatus("推流地址已更新，准备开始推流");
                         
                         // 推流地址更新后，开始屏幕捕获
@@ -303,30 +313,6 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
         }
     }
     
-    /**
-     * 更新RTMP地址显示
-     */
-    private void updateRtmpUrlDisplay() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                TextView tvUrl = findViewById(R.id.tv_url);
-                if (tvUrl != null) {
-                    // 获取subjectName（如果有的话）
-                    String subjectName = "";
-                    if (getIntent() != null) {
-                        subjectName = getIntent().getStringExtra("subjectName");
-                    }
-                    
-                    if (subjectName != null && !subjectName.isEmpty()) {
-                        tvUrl.setText(subjectName + " - RTMP服务器地址：" + url);
-                    } else {
-                        tvUrl.setText("RTMP服务器地址：" + url);
-                    }
-                }
-            }
-        });
-    }
     
     /**
      * 检查当前是否正在推流
@@ -386,5 +372,28 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
         }
         
         screenCaptureData = null;
+        
+        // 隐藏悬浮球
+        hideFloatingBall();
+    }
+    
+    /**
+     * 显示悬浮球
+     */
+    private void showFloatingBall() {
+        if (floatingBallManager != null) {
+            // 使用liveId作为roomId
+            String roomId = String.valueOf(this.liveId);
+            floatingBallManager.showFloatingBall(roomId);
+        }
+    }
+    
+    /**
+     * 隐藏悬浮球
+     */
+    private void hideFloatingBall() {
+        if (floatingBallManager != null) {
+            floatingBallManager.hideFloatingBall();
+        }
     }
 }

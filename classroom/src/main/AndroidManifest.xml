@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 2. 声明媒体投影专属前台服务权限（Android 10+ 必需，关键！） -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application>
         <activity
@@ -20,12 +22,23 @@
             android:exported="false" />
         <activity
             android:name=".activity.ClassActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <activity
+            android:name=".activity.WhiteboardActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
             android:name=".activity.MainActivity"
             android:exported="false" /> <!-- 注册媒体投影前台服务 -->
         <activity android:name=".activity.ActivityClassDynamic"
             android:exported="false"/>
+        <activity
+            android:name=".activity.PdfPreviewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <service
             android:name=".service.MediaProjectionService"
             android:exported="false"

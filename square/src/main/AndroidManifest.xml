@@ -12,6 +12,8 @@
             android:exported="false" />
         <activity android:name=".friend.AddFriendActivity"
             android:exported="false" />
+        <activity android:name=".friend.FriendMessageActivity"
+            android:exported="false" />
         <activity android:name=".chat.ChatActivity"
             android:exported="false" />
     </application>

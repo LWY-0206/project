@@ -52,7 +52,6 @@ android {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":square"))
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -78,4 +77,11 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.2")
     implementation("com.airbnb.android:lottie:6.1.0")
+
+    // PDF查看器依赖
+    implementation("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
+
+    // 图片加载库
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
 }

@@ -38,6 +38,11 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+    
+    packagingOptions {
+        pickFirst("**/libc++_shared.so")
+        pickFirst("**/libjsc.so")
+    }
 }
 
 dependencies {

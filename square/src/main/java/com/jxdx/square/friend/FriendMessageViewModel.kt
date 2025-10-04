@@ -18,6 +18,8 @@ class FriendMessageViewModel(
     }
 
     val applicationLiveData: ResLiveData<List<ApplicationMessage>> by lazy { ResLiveData() }
+    val acceptFriendLiveData: ResLiveData<String> by lazy { ResLiveData() }
+    val rejectFriendLiveData: ResLiveData<String> by lazy { ResLiveData() }
 
     fun getApplications() {
         request(
@@ -53,5 +55,71 @@ class FriendMessageViewModel(
                 repository.getApplications()
             },
         )
+    }
+
+    fun acceptFriend(applicationId: Int) {
+        request(
+            acceptFriendLiveData,
+            object : LiveDataCallback<String, String> {
+                override fun success(
+                    emit: ResLiveData<String>,
+                    msg: String?,
+                    data: String?,
+                ) {
+                    emit.success(data ?: "接受成功")
+                }
+
+                override fun otherCode(
+                    emit: ResLiveData<String>,
+                    code: Int?,
+                    msg: String?,
+                    data: String?,
+                ) {
+                    emit.error(ErrorResponse.otherCode(code, msg))
+                }
+
+                override fun error(
+                    emit: ResLiveData<String>,
+                    e: ErrorResponse,
+                ) {
+                    emit.error(e, null)
+                }
+            },
+        ) {
+            repository.acceptFriend(applicationId)
+        }
+    }
+
+    fun rejectFriend(applicationId: Int) {
+        request(
+            rejectFriendLiveData,
+            object : LiveDataCallback<String, String> {
+                override fun success(
+                    emit: ResLiveData<String>,
+                    msg: String?,
+                    data: String?,
+                ) {
+                    emit.success(data ?: "拒绝成功")
+                }
+
+                override fun otherCode(
+                    emit: ResLiveData<String>,
+                    code: Int?,
+                    msg: String?,
+                    data: String?,
+                ) {
+                    emit.error(ErrorResponse.otherCode(code, msg))
+                }
+
+                override fun error(
+                    emit: ResLiveData<String>,
+                    e: ErrorResponse,
+                ) {
+                    emit.error(e, null)
+                }
+            },
+        ) {
+            repository.rejectFriend(applicationId)
+        }
     }
 }
