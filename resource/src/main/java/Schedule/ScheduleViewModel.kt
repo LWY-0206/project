@@ -1,4 +1,4 @@
-package com.jxdx.resource.FirstPage
+package Schedule
 
 import android.app.Application
 import android.util.Log
@@ -7,6 +7,8 @@ import com.example.corekit.http.bean.ErrorResponse
 import com.example.corekit.http.bean.ResLiveData
 import com.example.corekit.http.listener.LiveDataCallback
 import com.example.corekit.http.request
+import Schedule.FirstPage.ScheduleItem
+import Schedule.FirstPage.ScheduleRepository
 
 class ScheduleViewModel(application: Application): BaseViewModel(application) {
     private val repository: ScheduleRepository by lazy{
