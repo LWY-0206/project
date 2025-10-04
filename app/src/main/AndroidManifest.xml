@@ -46,9 +46,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Square模块的Activity -->
-        <activity android:name="com.jxdx.square.friend.FriendMessageActivity"
-            android:exported="false" />
 
     </application>
 
