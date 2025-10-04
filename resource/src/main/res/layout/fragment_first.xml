@@ -76,17 +76,12 @@
 
                 </LinearLayout>
 
-                <!-- 课表内容区域 -->
-                <LinearLayout
-                    android:id="@+id/schedule_container"
+                <!-- 课表内容区域 - 改为 RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/schedule_recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
-                    android:orientation="vertical">
-
-                    <!-- 这里会动态添加课表条目 -->
-                    <include layout="@layout/item_schedule" />
-
-                </LinearLayout>
+                    />
 
                 <!-- 没有课程时的提示 -->
                 <TextView
@@ -105,6 +100,7 @@
             <include
                 android:id="@+id/news_section"
                 layout="@layout/layout_news_section" />
+
             <!-- 瀑布流区域 -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/waterfall_recycler_view"
@@ -113,7 +109,6 @@
                 android:layout_margin="8dp"
                 android:padding="4dp"
                 android:nestedScrollingEnabled="false" />
-
 
         </LinearLayout>
 
