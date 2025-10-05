@@ -1,4 +1,4 @@
-package com.jxdx.resource.FirstPage
+package com.jxdx.resource.Recommendation
 data class RecommendationResponse(
     val code: Int,
     val message: String,

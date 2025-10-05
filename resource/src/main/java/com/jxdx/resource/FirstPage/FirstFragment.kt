@@ -1,12 +1,15 @@
 package com.jxdx.resource.FirstPage
+
+import Schedule.FirstPage.ScheduleAdapter
+import Schedule.FirstPage.ScheduleItem
+import Schedule.ScheduleViewModel
 import android.content.Intent
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.corekit.common.BaseFragment
@@ -14,37 +17,56 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.gson.Gson
 import com.jxdx.resource.News.NewsAdapter
 import com.jxdx.resource.News.NewsItem
-import com.jxdx.resource.R
+import com.jxdx.resource.News.NewVIewModel
+import com.jxdx.resource.Recommendation.RecommendationItem
+import com.jxdx.resource.Recommendation.RecommendationResponse
+import com.jxdx.resource.Recommendation.RecommendationViewModel
 import com.jxdx.resource.Recommendation.WaterfallAdapter
 import com.jxdx.resource.StudySuggestions.StudySuggestionActivity
 import com.jxdx.resource.databinding.FragmentFirstBinding
-import com.jxdx.resource.databinding.ItemScheduleBinding
 import com.jxdx.resource.databinding.LayoutNewsSectionBinding
 import com.jxdx.resource.resource.GlideImageLoader
+import com.youth.banner.Banner
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
-
+import java.util.Calendar
 
 class FirstFragment : BaseFragment<FragmentFirstBinding>() {
+    private lateinit var scheduleViewModel: ScheduleViewModel
+    private lateinit var newsViewModel: NewVIewModel
     private lateinit var fab: FloatingActionButton
     private var dX = 0f
     private var dY = 0f
     private var isDragging = false
     private val newsList = mutableListOf<NewsItem>()
     private lateinit var newsAdapter: NewsAdapter
-    private var topBanner: com.youth.banner.Banner? = null
+    private var topBanner: Banner? = null
     private lateinit var waterfallRecyclerView: RecyclerView
     private lateinit var waterfallAdapter: WaterfallAdapter
     private val recommendationList = mutableListOf<RecommendationItem>()
+    private lateinit var recommendationViewModel: RecommendationViewModel
+    // 新增课表相关的变量
+    private lateinit var scheduleRecyclerView: RecyclerView
+    private lateinit var scheduleAdapter: ScheduleAdapter
+    private val scheduleList = mutableListOf<ScheduleItem>()
+
+    // 当前选择的周次和星期
+    private var currentWeek = "3" // 默认为第三周
+    private var currentWeekday = "2" // 默认为星期二
+
     override fun bindLayout(): FragmentFirstBinding {
         return FragmentFirstBinding.inflate(layoutInflater)
     }
 
     override fun initView() {
+        scheduleViewModel = ViewModelProvider(this)[ScheduleViewModel::class.java]
+        newsViewModel = ViewModelProvider(this)[NewVIewModel::class.java]
+        recommendationViewModel = ViewModelProvider(this)[RecommendationViewModel::class.java]
+
         // 初始化Banner
         topBanner = find.topBanner
         val imageUrls: MutableList<String?> = ArrayList<String?>()
@@ -57,10 +79,13 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
             ?.isAutoPlay(true)
             ?.setDelayTime(3000)
             ?.start()
-        // 初始化课表数据
+
+        // 初始化课表数据 - 现在使用RecyclerView
         initSchedule()
+
         // 设置瀑布流RecyclerView
         setupWaterfallRecyclerView()
+
         // 添加数据
         val newsBinding = find.newsSection
 
@@ -77,67 +102,270 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         loadNewsData(newsBinding)
         setUpFloatingActionButton()
     }
+
     override fun subscribeUi() {
-        // 可以在这里添加数据观察或UI更新逻辑
-    }
-
-
-private fun setUpFloatingActionButton() {
-    fab= find.fabDraggable
-    fab.setOnTouchListener { view, event ->
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                // 记录触摸点相对于 FAB 左上角的偏移
-                dX = view.x - event.rawX
-                dY = view.y - event.rawY
-                isDragging = false
+        recommendationViewModel.recommendationLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    recommendationList.clear()
+                    recommendationList.addAll(data)
+                    waterfallAdapter.updateData(recommendationList)
+                    Log.d("RecommendationViewModel", "Data loaded successfully, size: ${data}")
+                } else {}
             }
-
-            MotionEvent.ACTION_MOVE -> {
-                // 计算新的位置
-                var newX = event.rawX + dX
-                var newY = event.rawY + dY
-
-                // 限制在屏幕范围内
-                val displayMetrics = resources.displayMetrics
-                val screenWidth = displayMetrics.widthPixels
-                val screenHeight = displayMetrics.heightPixels
-
-                // 确保不超出屏幕边界
-                newX = newX.coerceIn(0f, (screenWidth - view.width).toFloat())
-                newY = newY.coerceIn(0f, (screenHeight - view.height).toFloat())
-
-                // 更新位置
-                view.animate()
-                    .x(newX)
-                    .y(newY)
-                    .setDuration(0)
-                    .start()
-
-                isDragging = true
-            }
-
-            MotionEvent.ACTION_UP -> {
-                if (isDragging) {
-                    // 手指抬起时的逻辑 - 吸附到边缘
-                    snapToEdge(view)
+        }
+        scheduleViewModel.scheduleLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    scheduleList.clear()
+                    scheduleList.addAll(data)
+                    scheduleAdapter.updateData(scheduleList)
+                    updateScheduleUI(scheduleList)
+                    Log.d("ScheduleViewModel", "Data loaded successfully, size: ${data.size}")
                 } else {
-                    // 点击事件 - 执行 FAB 的原有功能
-                    performFabClick()
+                    updateScheduleUI(emptyList())
+                    Log.d("ScheduleViewModel", "Data is null")
                 }
             }
+            result.onError { error, _ ->
+                Log.d("ScheduleViewModel", "Error loading data: $error")
+                updateScheduleUI(emptyList())
+            }
         }
-        true
+
+        // 观察新闻数据
+        newsViewModel.newsLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    updateNewsUI(data, find.newsSection)
+                    Log.d("NewsViewModel", "News data loaded successfully, size: ${data.size}")
+                } else {
+                    updateNewsUI(emptyList(), find.newsSection)
+                    Log.d("NewsViewModel", "News data is null")
+                }
+            }
+            result.onError { error, _ ->
+                Log.d("NewsViewModel", "Error loading news data: $error")
+                updateNewsUI(emptyList(), find.newsSection)
+                showMessage("加载新闻失败")
+            }
+        }
     }
 
-    // 原有的点击监听器（如果需要）
-    fab.setOnClickListener {
-        // 只有没有拖动时才执行点击
-        if (!isDragging) {
-            performFabClick()
+    private fun initSchedule() {
+        // 设置刷新按钮点击事件
+        find.ivRefresh.setOnClickListener {
+            refreshSchedule()
+        }
+
+        // 设置课表RecyclerView
+        setupScheduleRecyclerView()
+
+        // 加载课表数据
+        loadScheduleData()
+    }
+
+    private fun setupScheduleRecyclerView() {
+        scheduleRecyclerView = find.scheduleRecyclerView
+        scheduleAdapter = ScheduleAdapter(scheduleList)
+
+        // 使用线性布局管理器
+        val layoutManager = LinearLayoutManager(requireContext())
+        scheduleRecyclerView.layoutManager = layoutManager
+        scheduleRecyclerView.adapter = scheduleAdapter
+
+        // 设置点击事件
+        scheduleAdapter.onItemClickListener = { scheduleItem ->
+            // 跳转到课表详情页面
+            showMessage("查看课程: ${scheduleItem.courseName}")
+            // val intent = Intent(requireContext(), ScheduleDetailActivity::class.java)
+            // intent.putExtra("schedule_item", scheduleItem)
+            // startActivity(intent)
         }
     }
-}
+
+    private fun loadScheduleData() {
+        // 方法1: 使用固定值（第三周星期二）
+        loadScheduleWithFixedValue()
+
+        // 方法2: 也可以使用系统时间（注释掉上面那行，取消下面这行的注释）
+        // loadScheduleWithSystemTime()
+    }
+
+    /**
+     * 使用固定值加载课表数据（第三周星期二）
+     */
+    private fun loadScheduleWithFixedValue() {
+        currentWeek = "第三周"
+        currentWeekday = "星期三"
+
+        Log.d("Schedule", "使用固定值加载课表: 第${currentWeek}周 星期${currentWeekday}")
+        scheduleViewModel.getScheduleList(currentWeek, currentWeekday)
+    }
+
+    /**
+     * 使用系统时间加载课表数据
+     */
+    private fun loadScheduleWithSystemTime() {
+        val (week, weekday) = getCurrentWeekAndWeekday()
+        currentWeek = week
+        currentWeekday = weekday
+
+        Log.d("Schedule", "使用系统时间加载课表: 第${currentWeek}周 星期${getChineseWeekday(currentWeekday)}")
+        scheduleViewModel.getScheduleList(currentWeek, currentWeekday)
+    }
+
+    /**
+     * 获取当前周次和星期几
+     * @return Pair<周次, 星期几> 星期几: 1=星期一, 2=星期二, ..., 7=星期日
+     */
+    private fun getCurrentWeekAndWeekday(): Pair<String, String> {
+        val calendar = Calendar.getInstance()
+
+        // 计算当前是第几周（这里需要根据学期开始日期计算，暂时使用简单逻辑）
+        // 实际项目中应该根据学期开始日期计算准确的周次
+        val currentWeek = calculateCurrentWeek(calendar)
+
+        // 获取星期几 (Calendar中: 1=星期日, 2=星期一, ..., 7=星期六)
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+        // 转换为我们的格式: 1=星期一, 2=星期二, ..., 7=星期日
+        val weekday = when (dayOfWeek) {
+            Calendar.MONDAY -> "1"
+            Calendar.TUESDAY -> "2"
+            Calendar.WEDNESDAY -> "3"
+            Calendar.THURSDAY -> "4"
+            Calendar.FRIDAY -> "5"
+            Calendar.SATURDAY -> "6"
+            Calendar.SUNDAY -> "7"
+            else -> "1"
+        }
+
+        return Pair(currentWeek.toString(), weekday)
+    }
+
+    /**
+     * 计算当前周次
+     * 这里需要根据学期开始日期计算，暂时使用简单逻辑
+     * 实际项目中应该从服务器获取学期开始日期或使用固定值
+     */
+    private fun calculateCurrentWeek(calendar: Calendar): Int {
+        // 假设学期从2024年2月26日开始（第三周）
+        val semesterStart = Calendar.getInstance().apply {
+            set(2024, Calendar.FEBRUARY, 26) // 月份从0开始，所以2月是Calendar.FEBRUARY
+        }
+
+        val diffInMillis = calendar.timeInMillis - semesterStart.timeInMillis
+        val diffInWeeks = (diffInMillis / (1000 * 60 * 60 * 24 * 7)).toInt()
+
+        // 学期开始是第三周
+        return 3 + diffInWeeks
+    }
+
+    /**
+     * 将数字星期转换为中文
+     */
+    private fun getChineseWeekday(weekday: String): String {
+        return when (weekday) {
+            "1" -> "一"
+            "2" -> "二"
+            "3" -> "三"
+            "4" -> "四"
+            "5" -> "五"
+            "6" -> "六"
+            "7" -> "日"
+            else -> "未知"
+        }
+    }
+
+    /**
+     * 手动选择周次和星期
+     */
+    private fun loadScheduleWithCustomSelection(week: String, weekday: String) {
+        currentWeek = week
+        currentWeekday = weekday
+        Log.d("Schedule", "手动选择加载课表: 第${currentWeek}周 星期${getChineseWeekday(currentWeekday)}")
+        scheduleViewModel.getScheduleList(currentWeek, currentWeekday)
+    }
+
+    private fun updateScheduleUI(scheduleItems: List<ScheduleItem>) {
+        if (scheduleItems.isEmpty()) {
+            // 显示空状态
+            find.tvEmptySchedule.visibility = View.VISIBLE
+            scheduleRecyclerView.visibility = View.GONE
+        } else {
+            // 显示课表
+            find.tvEmptySchedule.visibility = View.GONE
+            scheduleRecyclerView.visibility = View.VISIBLE
+
+            // 更新适配器数据
+            scheduleAdapter.updateData(scheduleItems)
+        }
+    }
+
+    private fun refreshSchedule() {
+        showMessage("刷新课表")
+        // 重新加载当前选择的周次和星期的数据
+        scheduleViewModel.getScheduleList(currentWeek, currentWeekday)
+    }
+
+    // 以下方法保持不变...
+    private fun setUpFloatingActionButton() {
+        fab = find.fabDraggable
+        fab.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    // 记录触摸点相对于 FAB 左上角的偏移
+                    dX = view.x - event.rawX
+                    dY = view.y - event.rawY
+                    isDragging = false
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+                    // 计算新的位置
+                    var newX = event.rawX + dX
+                    var newY = event.rawY + dY
+
+                    // 限制在屏幕范围内
+                    val displayMetrics = resources.displayMetrics
+                    val screenWidth = displayMetrics.widthPixels
+                    val screenHeight = displayMetrics.heightPixels
+
+                    // 确保不超出屏幕边界
+                    newX = newX.coerceIn(0f, (screenWidth - view.width).toFloat())
+                    newY = newY.coerceIn(0f, (screenHeight - view.height).toFloat())
+
+                    // 更新位置
+                    view.animate()
+                        .x(newX)
+                        .y(newY)
+                        .setDuration(0)
+                        .start()
+
+                    isDragging = true
+                }
+
+                MotionEvent.ACTION_UP -> {
+                    if (isDragging) {
+                        // 手指抬起时的逻辑 - 吸附到边缘
+                        snapToEdge(view)
+                    } else {
+                        // 点击事件 - 执行 FAB 的原有功能
+                        performFabClick()
+                    }
+                }
+            }
+            true
+        }
+
+        // 原有的点击监听器（如果需要）
+        fab.setOnClickListener {
+            // 只有没有拖动时才执行点击
+            if (!isDragging) {
+                performFabClick()
+            }
+        }
+    }
+
     private fun snapToEdge(view: View) {
         val displayMetrics = resources.displayMetrics
         val screenWidth = displayMetrics.widthPixels
@@ -170,10 +398,9 @@ private fun setUpFloatingActionButton() {
             startActivity(intent)
         }
     }
+
     private fun setupWaterfallRecyclerView() {
         waterfallRecyclerView = find.waterfallRecyclerView
-        updataRecommendationUI(recommendationList)
-        Log.d("更新数据推荐数据列表", "recommendationList: $recommendationList")
 
         // 设置瀑布流布局管理器，2列
         val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
@@ -187,12 +414,6 @@ private fun setUpFloatingActionButton() {
         waterfallAdapter.onItemClickListener = { item ->
             handleItemClick(item)
         }
-
-        // 设置收藏点击事件
-        waterfallAdapter.onFavoriteClickListener = { item ->
-            handleFavoriteClick(item)
-        }
-
         // 添加滚动监听实现加载更多
         waterfallRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -203,8 +424,14 @@ private fun setUpFloatingActionButton() {
                 }
             }
         })
-    }
 
+        // 加载推荐数据
+        loadRecommendationData()
+    }
+    private fun loadRecommendationData() {
+        Log.d("Recommendation", "开始加载推荐数据")
+        recommendationViewModel.getRecommendationList()
+    }
     private fun handleItemClick(item: RecommendationItem) {
         // 根据类型处理点击事件
         if (item.isVideo()) {
@@ -271,72 +498,9 @@ private fun setUpFloatingActionButton() {
     }
 
     private fun showMessage(message: String) {
-        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_SHORT).show()
-    }
-    private fun initSchedule() {
-        // 设置刷新按钮点击事件
-        find.ivRefresh.setOnClickListener {
-            refreshSchedule()
-        }
-
-        // 设置课表点击事件
-        find.scheduleContainer.setOnClickListener {
-            // 跳转到课表详情页面
-            showMessage("查看完整课表")
-        }
-
-        // 加载课表数据
-        loadScheduleData()
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 
-    private fun loadScheduleData() {
-        // 模拟课表数据
-        val scheduleItems = listOf(
-            ScheduleItem(
-                id = "1",
-                week = "第2周",
-                weekday = "周二",
-                currentTime = "08:10",
-                courseName = "线性代数B◆",
-                courseTime = "15:15-17:25",
-                location = "梁林校区 兴礼楼 (14号楼) 512",
-                courseType = "门课",
-                isCurrent = true
-            )
-            // 可以添加更多课程...
-        )
-
-        updateScheduleUI(scheduleItems)
-    }
-
-    private fun updateScheduleUI(scheduleItems: List<ScheduleItem>) {
-        if (scheduleItems.isEmpty()) {
-            // 显示空状态
-            find.tvEmptySchedule.visibility = View.VISIBLE
-            find.scheduleContainer.visibility = View.GONE
-        } else {
-            // 显示课表
-            find.tvEmptySchedule.visibility = View.GONE
-            find.scheduleContainer.visibility = View.VISIBLE
-
-            // 更新课表数据（这里简化处理，实际可以使用RecyclerView）
-            val scheduleItem = scheduleItems.first() // 取第一个课程
-            val Sch_binding= ItemScheduleBinding.inflate(layoutInflater)
-            // 更新UI
-            Sch_binding.tvWeek.text = scheduleItem.week
-            Sch_binding.tvWeekday.text = scheduleItem.weekday
-            Sch_binding.tvCurrentTime.text = scheduleItem.currentTime
-            Sch_binding.tvCourseName.text = scheduleItem.courseName
-            Sch_binding.tvCourseTime.text = scheduleItem.courseTime
-            Sch_binding.tvLocation.text = scheduleItem.location
-            Sch_binding.tvCourseType.text = scheduleItem.courseType
-
-            // 如果是当前课程，可以添加特殊样式
-            if (scheduleItem.isCurrent) {
-                Sch_binding.tvCurrentTime.setTextColor(ContextCompat.getColor(requireContext(), R.color.blue_500))
-            }
-        }
-    }
     private fun setupNewsRecyclerView(newsBinding: LayoutNewsSectionBinding) {
         // 创建适配器
         newsAdapter = NewsAdapter(newsList)
@@ -344,12 +508,10 @@ private fun setUpFloatingActionButton() {
         // 设置适配器
         newsBinding.rvNews.adapter = newsAdapter
         // 设置布局管理器 - 使用LinearLayoutManager垂直排列
-        val layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        val layoutManager = LinearLayoutManager(requireContext())
         newsBinding.rvNews.layoutManager = layoutManager
-        Log.d("设置新闻适配器","success")
+        Log.d("News", "设置新闻适配器成功")
 
-//        // 禁用嵌套滚动（因为已经在NestedScrollView中）
-//        newsBinding.rvNews.isNestedScrollingEnabled = false
         //允许rvNews单独滚动
         newsBinding.rvNews.isNestedScrollingEnabled = true
 
@@ -364,60 +526,20 @@ private fun setUpFloatingActionButton() {
         newsBinding.pbNewsLoading.visibility = View.VISIBLE
         newsBinding.rvNews.visibility = View.GONE
         newsBinding.tvEmptyNews.visibility = View.GONE
-        // 模拟新闻数据（实际开发中应该从API获取）
-        Log.d("创建模拟数据","success")
-        val mockNews = listOf(
-            NewsItem(
-                id = "1",
-                title = "学校举办春季运动会，各学院积极备战",
-                summary = "为丰富校园文化生活，学校将于下月举办春季运动会，各学院已经开始积极备战...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/d9a280aa-15c5-42b1-a0d9-c5a962bcd8b2.jpg",
-                source = "校园新闻",
-                publishTime = "2小时",
-                viewCount = 1250
-            ),
-            NewsItem(
-                id = "2",
-                title = "计算机学院学生在编程大赛中荣获一等奖",
-                summary = "在刚刚结束的全国大学生程序设计大赛中，我校计算机学院代表队表现出色...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/451278d3-c571-406d-8a57-276a71efe710.jpg",
-                source = "学术动态",
-                publishTime = "5小时",
-                viewCount = 890
-            ),
-            NewsItem(
-                id = "3",
-                title = "图书馆新增电子资源，助力学术研究",
-                summary = "为满足师生学术研究需求，图书馆近期引进了多个知名数据库和电子期刊...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/c9338d44-4517-45dd-bc86-763f6c1eac03.jpg",
-                source = "资源更新",
-                publishTime = "1天",
-                viewCount = 567
-            ),
-            NewsItem(
-                id = "4",
-                title = "学校开展心理健康教育周活动",
-                summary = "为关注学生心理健康，学校将于本周举办系列心理健康教育活动...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/4588f1e9-9b03-4033-a6c6-b73355a51b3d.jpg",
-                source = "学生工作",
-                publishTime = "3小时",
-                viewCount = 432
-            )
-        )
-        updateNewsUI(mockNews,newsBinding)
-        Log.d("设置模拟数据","${mockNews}")
-        // 模拟网络延迟
-//        Handler(Looper.getMainLooper()).postDelayed({
-//            updateNewsUI(mockNews)
-//        }, 1000)
+
+        Log.d("News", "开始从API加载新闻数据")
+
+        // 从API加载新闻数据
+        newsViewModel.getNewsList()
     }
 
-    private fun updateNewsUI(newsItems: List<NewsItem>,newsBinding: LayoutNewsSectionBinding) {
+    private fun updateNewsUI(newsItems: List<NewsItem>, newsBinding: LayoutNewsSectionBinding) {
         newsBinding.pbNewsLoading.visibility = View.GONE
 
         if (newsItems.isEmpty()) {
             newsBinding.tvEmptyNews.visibility = View.VISIBLE
             newsBinding.rvNews.visibility = View.GONE
+            Log.d("News", "新闻数据为空")
             return
         }
 
@@ -426,27 +548,20 @@ private fun setUpFloatingActionButton() {
 
         // 更新适配器数据
         newsAdapter.updateData(newsItems)
-        Log.d("更新适配器数据","success, ${newsItems}")
-        newsAdapter.notifyDataSetChanged()
-    }
+        Log.d("News", "更新新闻适配器数据，数量: ${newsItems.size}")
 
-    // 刷新新闻
+        // 显示第一条新闻的标题用于调试
+        if (newsItems.isNotEmpty()) {
+            Log.d("News", "第一条新闻标题: ${newsItems[0].title}")
+            Log.d("News", "第一条新闻来源: ${newsItems[0].source}")
+            Log.d("News", "第一条新闻图片: ${newsItems[0].coverUrl}")
+        }
+    }
 
     // 加载更多新闻（如果需要分页）
     private fun loadMoreNews() {
-        val moreNews = listOf(
-            NewsItem(
-                id = "5",
-                title = "新增的新闻条目",
-                summary = "这是加载更多的新闻内容...",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/news/more.jpg",
-                source = "最新动态",
-                publishTime = "刚刚",
-                viewCount = 100
-            )
-        )
-
-        newsAdapter.addData(moreNews)
+        // 如果需要分页加载更多新闻，可以在这里实现
+        // 目前API没有分页参数，暂时不实现
     }
 
     private fun openNewsList() {
@@ -463,17 +578,14 @@ private fun setUpFloatingActionButton() {
         // intent.putExtra("news_id", newsItem.id)
         // startActivity(intent)
     }
-    private fun refreshSchedule() {
-        showMessage("刷新课表")
-        // 这里可以调用API刷新课表数据
-        loadScheduleData()
-    }
+
     // 清理资源
     override fun onDestroyView() {
         super.onDestroyView()
         waterfallRecyclerView.clearOnScrollListeners()
         topBanner?.stopAutoPlay()
     }
+
     private fun updataRecommendationUI(recommendationItems: List<RecommendationItem>) {
         val client = OkHttpClient()
         val request = Request.Builder()
