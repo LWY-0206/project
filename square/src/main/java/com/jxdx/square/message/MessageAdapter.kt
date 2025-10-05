@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.corekit.recyclerview.ItemSelectListener
 import com.example.corekit.recyclerview.MultipleTypeAdapter
 import com.example.corekit.recyclerview.ViewHolderTag
+import com.example.corekit.util.load
 import com.jxdx.square.databinding.ItemMessageFriendBinding
 import com.jxdx.square.entity.MessageItem
 
@@ -50,7 +51,18 @@ class MessageAdapter : MultipleTypeAdapter() {
         ViewHolderTag<MessageItem> {
         override fun setHolder(entity: MessageItem) {
             // 绑定头像
-            binding.ivAvatar.setImageResource(entity.avatarResId)
+            if (!entity.avatarUrl.isNullOrEmpty()) {
+                // 使用网络图片
+                binding.ivAvatar.load(entity.avatarUrl, isCircle = true)
+            } else {
+                // 使用本地资源图片，如果avatarResId为0则使用默认头像
+                val resId = if (entity.avatarResId == 0) {
+                    com.jxdx.square.R.drawable.ic_default_avatar
+                } else {
+                    entity.avatarResId
+                }
+                binding.ivAvatar.setImageResource(resId)
+            }
 
             // 绑定名称
             binding.tvName.text = entity.name

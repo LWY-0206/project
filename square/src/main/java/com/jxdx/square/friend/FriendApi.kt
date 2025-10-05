@@ -52,4 +52,9 @@ interface FriendApi {
         @Header("satoken") source: String,
         @Path("friendId") friendId: Int,
     ): BaseResp<String>
+
+    @GET("/api/userChat/friends")
+    suspend fun getChatFriends(
+        @Header("satoken") source: String,
+    ): BaseResp<List<Int>>
 }

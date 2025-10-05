@@ -12,6 +12,10 @@ data class MessageItem(
     val time: String,
     // 最近一条消息
     val message: String,
+    // 好友ID
+    val friendId: Int? = null,
+    // 头像URL（网络图片）
+    val avatarUrl: String? = null,
 ) : MultipleType {
     override fun viewType(): Int = 3
 }
