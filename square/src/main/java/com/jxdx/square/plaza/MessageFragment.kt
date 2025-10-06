@@ -46,8 +46,12 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                     // 传递用户名参数
                     intent.putExtra("USER_NAME", messageItem.name)
                     // 传递好友ID参数
-                    messageItem.friendId?.let { friendId ->
-                        intent.putExtra("FRIEND_ID", friendId)
+                    messageItem.friendId?.let {
+                        intent.putExtra("FRIEND_ID", it)
+                    }
+                    // 传递好友头像URL参数
+                    messageItem.avatarUrl?.let {
+                        intent.putExtra("FRIEND_AVATAR", it)
                     }
                     startActivity(intent)
 

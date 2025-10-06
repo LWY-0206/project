@@ -25,8 +25,8 @@ class ChatAdapter : MultipleTypeAdapter() {
         parent: ViewGroup,
     ): RecyclerView.ViewHolder? =
         when (viewType) {
-            TYPE_SEND -> ReceiveMessageViewHolder(ItemMessageReceiveBinding.inflate(inflater, parent, false))
-            TYPE_RECEIVE -> SendMessageViewHolder(ItemMessageSendBinding.inflate(inflater, parent, false))
+            TYPE_SEND -> SendMessageViewHolder(ItemMessageSendBinding.inflate(inflater, parent, false))
+            TYPE_RECEIVE -> ReceiveMessageViewHolder(ItemMessageReceiveBinding.inflate(inflater, parent, false))
             else -> null
         }
 

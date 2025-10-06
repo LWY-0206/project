@@ -1,28 +1,49 @@
 package com.jxdx.classroom.activity;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.database.Cursor;
+import android.graphics.Color;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.github.barteksc.pdfviewer.PDFView;
+import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
+import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
+import com.github.barteksc.pdfviewer.listener.OnPageErrorListener;
+import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
+import com.github.barteksc.pdfviewer.util.FitPolicy;
 import com.jxdx.classroom.service.MediaProjectionService;
 import com.jxdx.classroom.R;
 import com.jxdx.classroom.widget.FloatingBallManager;
 
-public class MainActivity extends AppCompatActivity implements MediaProjectionService.ServiceCallbacks {
+public class MainActivity extends AppCompatActivity implements MediaProjectionService.ServiceCallbacks, OnPageChangeListener, OnLoadCompleteListener, OnPageErrorListener {
 
     // 建议使用本地测试服务器地址或已知可用的RTMP服务器
     // 本地测试推荐使用SRS、nginx-rtmp等搭建本地服务器
@@ -47,7 +68,46 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
     private int liveId = 0; // 接收传递的liveId
     private FloatingBallManager floatingBallManager; // 悬浮球管理器
 
+    // PDF相关变量
+    private PDFView pdfView;
+    private TextView tvPdfPlaceholder;
+    private LinearLayout loadingLayout;
+    private LinearLayout errorLayout;
+    private TextView tvLoadingText;
+    private TextView tvErrorMessage;
+    private Button btnRetry;
+    private Uri pdfUri;
+    private String pdfFileName = "未选择文件";
+    private int currentPage = 0;
+    private int totalPages = 0;
+
     private final int REQUEST_CODE_SCREEN_CAPTURE = 100;
+
+    // 文件选择结果处理
+    private final ActivityResultLauncher<Intent> filePickerLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        result -> {
+            if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                Uri uri = result.getData().getData();
+                if (uri != null) {
+                    pdfUri = uri;
+                    displayPdfFromUri(uri);
+                }
+            }
+        }
+    );
+
+    // 权限请求处理
+    private final ActivityResultLauncher<String> permissionLauncher = registerForActivityResult(
+        new ActivityResultContracts.RequestPermission(),
+        isGranted -> {
+            if (isGranted) {
+                launchFilePicker();
+            } else {
+                Toast.makeText(this, "需要存储权限来选择PDF文件", Toast.LENGTH_SHORT).show();
+            }
+        }
+    );
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -80,11 +140,18 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
             Log.d(TAG, "接收到subjectName: " + subjectName + ", liveId: " + this.liveId);
         }
 
+        // 初始化PDF相关组件
+        initPdfViews();
+        
         // 更新标题显示subjectName
         TextView titleView = findViewById(R.id.title);
         if (subjectName != null && !subjectName.isEmpty()) {
             titleView.setText(subjectName);
         }
+        
+        // 记录当前屏幕方向
+        Log.d(TAG, "MainActivity创建完成 - 屏幕方向: " + 
+            (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? "横屏" : "竖屏"));
 
 
         // 设置推流方式选择监听
@@ -129,32 +196,57 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
         floatingBallManager = new FloatingBallManager(this);
         
         // 绑定按钮点击事件
-        findViewById(R.id.btn_start_screen_capture).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_back).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+        
+        findViewById(R.id.btn_select_file).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkPermissionAndPickFile();
+            }
+        });
+        
+        findViewById(R.id.btn_start_live).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startScreenCapture(v);
             }
         });
         
-        findViewById(R.id.btn_stop_live).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_end).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 stopLive(v);
             }
         });
         
-        // 悬浮球控制按钮
-        findViewById(R.id.btn_show_floating_ball).setOnClickListener(new View.OnClickListener() {
+        // 功能按钮
+        findViewById(R.id.btn_function).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showFloatingBall();
             }
         });
         
-        findViewById(R.id.btn_hide_floating_ball).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_close).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 hideFloatingBall();
+            }
+        });
+        
+        btnRetry.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (pdfUri != null) {
+                    displayPdfFromUri(pdfUri);
+                } else {
+                    checkPermissionAndPickFile();
+                }
             }
         });
     }
@@ -335,8 +427,12 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                TextView tvStatus = findViewById(R.id.tv_stream_status);
-                tvStatus.setText("推流状态：" + status);
+                // 状态信息通过日志输出，不再显示在界面上
+                Log.i(TAG, "推流状态：" + status);
+                // 可以通过Toast显示重要状态信息
+                if (status.contains("失败") || status.contains("错误")) {
+                    Toast.makeText(MainActivity.this, "推流状态：" + status, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -394,6 +490,231 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
     private void hideFloatingBall() {
         if (floatingBallManager != null) {
             floatingBallManager.hideFloatingBall();
+        }
+    }
+    
+    /**
+     * 初始化PDF相关视图
+     */
+    private void initPdfViews() {
+        pdfView = findViewById(R.id.pdfView);
+        tvPdfPlaceholder = findViewById(R.id.tv_pdf_placeholder);
+        loadingLayout = findViewById(R.id.loading_layout);
+        errorLayout = findViewById(R.id.error_layout);
+        tvLoadingText = findViewById(R.id.tv_loading_text);
+        tvErrorMessage = findViewById(R.id.tv_error_message);
+        btnRetry = findViewById(R.id.btn_retry);
+        
+        // 设置PDFView背景色
+        pdfView.setBackgroundColor(Color.LTGRAY);
+        
+        // 为横屏模式优化PDFView设置
+        setupPdfViewForLandscape();
+        
+        // 显示默认提示
+        showPdfPlaceholder();
+    }
+    
+    /**
+     * 为横屏模式优化PDFView设置
+     */
+    private void setupPdfViewForLandscape() {
+        // 确保PDFView能够正确处理横屏布局
+        pdfView.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
+            android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+            android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+        ));
+        
+        // 设置最小尺寸，确保在横屏模式下有足够的显示空间
+        pdfView.setMinimumWidth(400);
+        pdfView.setMinimumHeight(300);
+        
+        // 添加调试信息
+        Log.d(TAG, "PDFView设置完成 - 当前屏幕方向: " + 
+            (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? "横屏" : "竖屏"));
+    }
+    
+    /**
+     * 检查权限并选择文件
+     */
+    private void checkPermissionAndPickFile() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) 
+                == PackageManager.PERMISSION_GRANTED) {
+            launchFilePicker();
+        } else {
+            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+        }
+    }
+    
+    /**
+     * 启动文件选择器
+     */
+    private void launchFilePicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/pdf");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        try {
+            filePickerLauncher.launch(intent);
+        } catch (ActivityNotFoundException e) {
+            Toast.makeText(this, "未找到文件管理器", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    /**
+     * 从URI显示PDF
+     */
+    private void displayPdfFromUri(Uri uri) {
+        showLoading(true);
+        hideError();
+        
+        pdfFileName = getFileName(uri);
+        
+        Log.d(TAG, "开始加载PDF文件: " + pdfFileName + ", URI: " + uri);
+        
+        try {
+            // 确保PDFView可见
+            pdfView.setVisibility(View.VISIBLE);
+            
+            // 在横屏模式下，使用更适合的页面适配策略
+            FitPolicy fitPolicy = getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE 
+                ? FitPolicy.WIDTH : FitPolicy.BOTH;
+            
+            pdfView.fromUri(uri)
+                .defaultPage(currentPage)
+                .onPageChange(this)
+                .enableAnnotationRendering(true)
+                .onLoad(this)
+                .scrollHandle(new DefaultScrollHandle(this))
+                .spacing(10)
+                .onPageError(this)
+                .pageFitPolicy(fitPolicy)
+                .load();
+            Log.d(TAG, "PDF加载请求已发送，适配策略: " + fitPolicy);
+        } catch (Exception e) {
+            Log.e(TAG, "PDF加载失败", e);
+            showError("PDF加载失败: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * 获取文件名
+     */
+    private String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (nameIndex >= 0) {
+                        result = cursor.getString(nameIndex);
+                    }
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.getLastPathSegment();
+        }
+        return result != null ? result : "未知文件";
+    }
+    
+    /**
+     * 显示加载状态
+     */
+    private void showLoading(boolean show) {
+        loadingLayout.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+    
+    /**
+     * 显示错误信息
+     */
+    private void showError(String message) {
+        errorLayout.setVisibility(View.VISIBLE);
+        tvErrorMessage.setText(message);
+        showLoading(false);
+    }
+    
+    /**
+     * 隐藏错误信息
+     */
+    private void hideError() {
+        errorLayout.setVisibility(View.GONE);
+    }
+    
+    /**
+     * 显示PDF占位符
+     */
+    private void showPdfPlaceholder() {
+        tvPdfPlaceholder.setVisibility(View.VISIBLE);
+        pdfView.setVisibility(View.GONE);
+        loadingLayout.setVisibility(View.GONE);
+        errorLayout.setVisibility(View.GONE);
+    }
+    
+    // OnPageChangeListener
+    @Override
+    public void onPageChanged(int page, int pageCount) {
+        currentPage = page;
+        totalPages = pageCount;
+        Log.d(TAG, "页面改变: " + page + " / " + pageCount);
+    }
+    
+    // OnLoadCompleteListener
+    @Override
+    public void loadComplete(int nbPages) {
+        totalPages = nbPages;
+        currentPage = 0;
+        showLoading(false);
+        hideError();
+        tvPdfPlaceholder.setVisibility(View.GONE);
+        pdfView.setVisibility(View.VISIBLE);
+        
+        Log.d(TAG, "PDF加载完成，总页数: " + nbPages);
+        
+        // 在横屏模式下，确保PDF正确显示
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Log.d(TAG, "横屏模式下PDF加载完成，确保正确显示");
+            // 延迟一帧确保布局完成
+            pdfView.post(new Runnable() {
+                @Override
+                public void run() {
+                    // 强制重新绘制PDFView
+                    pdfView.invalidate();
+                }
+            });
+        }
+    }
+    
+    // OnPageErrorListener
+    @Override
+    public void onPageError(int page, Throwable t) {
+        Log.e(TAG, "无法加载第 " + page + " 页", t);
+        showError("无法加载第 " + (page + 1) + " 页");
+    }
+    
+    /**
+     * 处理屏幕方向变化
+     * 当屏幕方向改变时，重新加载PDF以确保正确显示
+     */
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "屏幕方向发生变化");
+        
+        // 如果当前有PDF正在显示，重新加载以确保在横屏模式下正确渲染
+        if (pdfUri != null && pdfView.getVisibility() == View.VISIBLE) {
+            Log.d(TAG, "重新加载PDF以适应新的屏幕方向");
+            // 延迟重新加载，确保布局已经完成
+            pdfView.post(new Runnable() {
+                @Override
+                public void run() {
+                    displayPdfFromUri(pdfUri);
+                }
+            });
         }
     }
 }

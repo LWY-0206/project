@@ -1,8 +1,10 @@
 package com.jxdx.square.friend
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.example.corekit.common.BaseFragment
+import com.example.corekit.http.bean.Resource
 import com.example.corekit.util.load
 import com.jxdx.square.databinding.FragmentFriendDetailsBinding
 
@@ -13,6 +15,13 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
             this,
             ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application),
         )[SearchFriendViewModel::class.java]
+    }
+    
+    private val addFriendToChatViewModel: AddFriendToChatViewModel by lazy {
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application),
+        )[AddFriendToChatViewModel::class.java]
     }
 
     // 定义参数键
@@ -40,6 +49,7 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
     private var friendName: String? = null
     private var friendAvatar: String? = null
     private var friendId: String? = null
+    private var userInfoId: Int? = null // 存储从API获取的用户真实ID
 
     override fun bindLayout(): FragmentFriendDetailsBinding = FragmentFriendDetailsBinding.inflate(layoutInflater)
 
@@ -82,21 +92,17 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
         // 设置前往聊天按钮点击事件
         find.goChatButton.setOnClickListener {
             // 检查好友信息是否有效
-            if (friendName.isNullOrEmpty() || friendId.isNullOrEmpty()) {
-                android.widget.Toast.makeText(requireContext(), "好友信息无效", android.widget.Toast.LENGTH_SHORT).show()
+            if (friendName.isNullOrEmpty() || userInfoId == null) {
+                Toast.makeText(requireContext(), "好友信息无效，请等待用户信息加载完成", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             
-            // 使用SharedPreferences保存联系人信息
-            val sharedPref = requireContext().getSharedPreferences("friend_chat", android.content.Context.MODE_PRIVATE)
-            val editor = sharedPref.edit()
-            editor.putString("friend_name", friendName)
-            editor.putString("friend_id", friendId)
-            editor.apply()
+            // 使用从API获取的用户真实ID
+            val userId = userInfoId!!
+            android.util.Log.d("FriendDetailsFragment", "使用用户真实ID: $userId")
             
-            // 模拟页面向左滑动，切换到消息页面
-            // 通过回调函数通知父Fragment切换到消息页面
-            switchToMessagePage()
+            // 先调用添加好友到聊天的接口
+            addFriendToChatAndSwitchToMessage(userId)
         }
     }
 
@@ -109,6 +115,9 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
         viewModel.friendDetailsLiveData.observe(this) {
             it.onSuccess { userInfo ->
                 userInfo?.let {
+                    // 保存用户真实ID，用于API调用
+                    userInfoId = it.id
+                    
                     find.bioText.text = it.profile
                     find.avatarImage.load(it.avatarUrl)
                     find.userIdText.text = it.id.toString()
@@ -124,6 +133,48 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
                 }
             }
         }
+        
+        // 监听添加好友到聊天的结果
+        addFriendToChatViewModel.addFriendToChatLiveData.observe(this) { resource ->
+            when (resource.status) {
+                Resource.Status.SUCCESS -> {
+                    // 添加成功，保存联系人信息并切换到消息页面
+                    saveFriendInfoAndSwitchToMessage()
+                }
+                Resource.Status.ERROR -> {
+                    // 添加失败，显示错误信息
+                    Toast.makeText(requireContext(), "添加好友到聊天失败: ${resource.error?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    /**
+     * 添加好友到聊天并切换到消息页面
+     */
+    private fun addFriendToChatAndSwitchToMessage(friendIdInt: Int) {
+        android.util.Log.d("FriendDetailsFragment", "开始添加好友到聊天，friendId: $friendIdInt")
+        addFriendToChatViewModel.addFriendToChat(friendIdInt)
+    }
+    
+    /**
+     * 保存好友信息并切换到消息页面
+     */
+    private fun saveFriendInfoAndSwitchToMessage() {
+        android.util.Log.d("FriendDetailsFragment", "添加好友到聊天成功，开始保存好友信息并切换页面")
+        
+        // 使用SharedPreferences保存联系人信息
+        val sharedPref = requireContext().getSharedPreferences("friend_chat", android.content.Context.MODE_PRIVATE)
+        val editor = sharedPref.edit()
+        editor.putString("friend_name", friendName)
+        // 保存用户真实ID（Int类型）
+        userInfoId?.let { userId ->
+            editor.putInt("friend_id", userId)
+        }
+        editor.apply()
+        
+        // 切换到消息页面
+        switchToMessagePage()
     }
 
     /**
@@ -131,7 +182,7 @@ FriendDetailsFragment : BaseFragment<FragmentFriendDetailsBinding>() {
      */
     fun onFriendDeleted() {
         // 显示删除成功提示
-        android.widget.Toast.makeText(requireContext(), "好友已删除", android.widget.Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "好友已删除", Toast.LENGTH_SHORT).show()
         
         // 返回上一页 - 使用Activity的FragmentManager确保正确返回
         requireActivity().supportFragmentManager.popBackStack()

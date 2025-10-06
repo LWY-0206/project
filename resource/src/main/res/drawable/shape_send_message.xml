@@ -5,10 +5,7 @@
         android:width="1dp"
         android:color="@android:color/darker_gray" />
     <corners
-        android:bottomLeftRadius="4dp"
-        android:bottomRightRadius="12dp"
-        android:topLeftRadius="12dp"
-        android:topRightRadius="12dp" />
+        android:radius="20dp" />
     <padding
         android:bottom="4dp"
         android:left="8dp"

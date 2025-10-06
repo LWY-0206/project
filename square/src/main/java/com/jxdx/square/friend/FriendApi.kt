@@ -11,6 +11,7 @@ import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface FriendApi {
     @GET("/friend/list")
@@ -57,4 +58,10 @@ interface FriendApi {
     suspend fun getChatFriends(
         @Header("satoken") source: String,
     ): BaseResp<List<Int>>
+
+    @POST("/api/userChat/addFriend")
+    suspend fun addFriendToChat(
+        @Header("satoken") source: String,
+        @Query("friendId") friendId: Int,
+    ): BaseResp<String>
 }

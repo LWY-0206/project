@@ -32,7 +32,9 @@
             android:configChanges="orientation|screenSize|keyboardHidden" />
         <activity
             android:name=".activity.MainActivity"
-            android:exported="false" /> <!-- 注册媒体投影前台服务 -->
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" /> <!-- 注册媒体投影前台服务 -->
         <activity android:name=".activity.ActivityClassDynamic"
             android:exported="false"/>
         <activity
