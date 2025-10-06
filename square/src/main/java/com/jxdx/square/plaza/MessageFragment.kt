@@ -70,14 +70,14 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
             it.onSuccess { messages ->
                 messageList.clear()
                 messages?.let { messageList.addAll(it) }
-                messageAdapter.add(messageList)
+                messageAdapter.clearAndAdd(messageList)
             }
             it.onError { error, data ->
                 // 处理错误，可以显示错误提示
                 android.util.Log.e("MessageFragment", "加载好友消息失败: ${error?.message}")
                 // 如果加载失败，显示空列表
                 messageList.clear()
-                messageAdapter.add(messageList)
+                messageAdapter.clearAndAdd(messageList)
             }
         }
     }

@@ -99,7 +99,7 @@
                 android:layout_marginLeft="12dp"
                 android:layout_marginRight="12dp" />
 
-            <!-- 益智PK消息 -->
+            <!-- 名言佳句消息 -->
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
@@ -130,7 +130,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="益智pk内消息"
+                            android:text="名言佳句"
                             android:textSize="15sp"
                             android:textColor="@color/black" />
 

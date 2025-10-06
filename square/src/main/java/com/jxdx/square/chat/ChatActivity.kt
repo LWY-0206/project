@@ -92,8 +92,6 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
 
         // 初始化标题栏
         view.tvFriendName.text = friendName
-        view.tvOnlineStatus.text = "连接状态：未连接"
-        view.tvOnlineStatus.setTextColor(Color.GRAY)
         view.ivBack.setOnClickListener { finish() }
 
         // 初始化消息列表
@@ -102,14 +100,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
         loadChatHistory()
         // 初始禁用发送按钮
         view.ivSend.isEnabled = false
-        // 连接按钮点击事件
-        view.btnTest.setOnClickListener {
-            if (wsManager.isConnected) {
-                disconnect()
-            } else {
-                connect()
-            }
-        }
+        
         // 发送按钮点击事件
         view.ivSend.setOnClickListener {
             val msg =
@@ -122,13 +113,14 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
             }
             sendMessage(msg)
         }
+        
+        // 自动连接WebSocket
+        connect()
     }
 
     private fun disconnect() {
         wsManager.disconnect()
-        updateConnectionStatus("连接状态：已断开", Color.GRAY)
         view.ivSend.isEnabled = false
-        view.btnTest.text = "连接"
     }
 
     private fun connect() {
@@ -138,7 +130,6 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
             return
         }
         // 更新UI状态
-        updateConnectionStatus("连接状态：正在连接...", Color.BLUE)
         view.ivSend.isEnabled = false
         // 构建完整连接地址（基础地址 + 目标用户ID）
         val fullWsUrl = "$wsBaseUrl$targetUserId"
@@ -153,9 +144,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
                 ) {
                     super.onOpen(webSocket, response)
                     mainHandler.post {
-                        updateConnectionStatus("连接状态：已连接（与用户 $targetUserId 聊天中）", Color.GREEN)
                         view.ivSend.isEnabled = true
-                        view.btnTest.text = "断开连接"
                     }
                 }
 
@@ -196,7 +185,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
                                 updateMessageDisplay()
                                 
                             } catch (jsonException: Exception) {
-                                // 如果JSON解析失败，尝试解析简单文本格式："{senderId} {content}"
+                                // 如果JSON解析失败，尝试解析简单文本格式
                                 android.util.Log.d("ChatActivity", "JSON解析失败，尝试文本格式解析")
                                 val parts = text.split(" ", limit = 2)
                                 if (parts.size >= 2) {
@@ -235,17 +224,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
                 ) {
                     super.onFailure(webSocket, t, response)
                     mainHandler.post {
-                        var errorMsg = "连接失败："
-                        errorMsg += t.message ?: "未知错误"
-                        response?.let {
-                            errorMsg += "，响应码：${it.code}"
-                            if (it.code == 401) {
-                                errorMsg += "（Token无效或已过期）"
-                            }
-                        }
-                        updateConnectionStatus(errorMsg, Color.RED)
                         view.ivSend.isEnabled = false
-                        view.btnTest.text = "连接"
                     }
                 }
 
@@ -256,9 +235,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
                 ) {
                     super.onClosed(webSocket, code, reason)
                     mainHandler.post {
-                        updateConnectionStatus("连接状态：已关闭（原因：$reason）", Color.GRAY)
                         view.ivSend.isEnabled = false
-                        view.btnTest.text = "连接"
                     }
                 }
             },
@@ -277,8 +254,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
         // 根据WebSocket接口格式发送消息
         // 格式："{currentUserId} {content}"
         val messageText = "$currentUserId $content"
-        
-        android.util.Log.d("ChatActivity", "发送消息: $messageText")
+
 
         // 创建消息ID（使用UUID确保唯一性）
         val messageId = UUID.randomUUID().toString()
@@ -300,7 +276,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
         updateMessageDisplay()
         view.etMessage.setText("")
 
-        // 通过WebSocket发送消息（使用文本格式）
+        // 通过WebSocket发送消息
         val success = wsManager.sendTextMessage(messageText)
         if (!success) {
             Toast.makeText(this, "消息发送失败，请稍后重试", Toast.LENGTH_SHORT).show()
@@ -406,14 +382,7 @@ class ChatActivity : BaseActivity<ActivityChatBinding>() {
         }
     }
 
-    // 更新连接状态
-    private fun updateConnectionStatus(
-        status: String,
-        color: Int,
-    ) {
-        view.tvOnlineStatus.text = status
-        view.tvOnlineStatus.setTextColor(color)
-    }
+
 
     override fun onDestroy() {
         super.onDestroy()

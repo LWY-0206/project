@@ -57,24 +57,20 @@
             android:orientation="horizontal"
             android:padding="16dp">
 
-            <ImageView
-                android:id="@+id/civ_user_avatar"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_avatar" />
-
             <EditText
                 android:id="@+id/et_content"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="12dp"
                 android:hint="分享你的想法..."
                 android:textSize="16sp"
                 android:background="@null"
                 android:minLines="3"
                 android:maxLines="10"
-                android:gravity="top" />
+                android:gravity="top"
+                android:drawableLeft="@null"
+                android:drawableStart="@null"
+                android:drawableRight="@null"
+                android:drawableEnd="@null" />
         </LinearLayout>
 
         <!-- 图片预览区域 -->

@@ -44,14 +44,6 @@
                     android:text="好友名称"
                     android:textSize="18sp"
                     android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tv_online_status"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="在线"
-                    android:textColor="@android:color/holo_green_dark"
-                    android:textSize="12sp" />
             </LinearLayout>
 
             <ImageView
@@ -103,16 +95,6 @@
             android:hint="输入消息..."
             android:paddingHorizontal="16dp"
             android:textSize="16sp" />
-
-        <Button
-            android:id="@+id/btn_test"
-            android:layout_width="80dp"
-            android:layout_height="40dp"
-            android:layout_marginRight="5dp"
-            android:background="@android:color/holo_blue_light"
-            android:text="连接"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
 
         <ImageView
             android:id="@+id/iv_send"

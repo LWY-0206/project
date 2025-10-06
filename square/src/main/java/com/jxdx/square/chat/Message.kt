@@ -26,9 +26,12 @@ data class Message(
          * 从ChatHistoryMessage转换为Message
          */
         fun fromHistoryMessage(historyMessage: ChatHistoryMessage): Message {
+            // 解析历史消息内容，如果包含ID前缀则去除
+            val actualContent = parseMessageContent(historyMessage.content)
+            
             return Message(
                 id = historyMessage.id.toString(),
-                content = historyMessage.content,
+                content = actualContent,
                 type = if (historyMessage.isSentByCurrentUser) TYPE_SEND else TYPE_RECEIVE,
                 time = parseTimeString(historyMessage.sendTime),
                 senderId = historyMessage.fromUserId,
@@ -39,6 +42,20 @@ data class Message(
                     historyMessage.fromUserAvatar
                 }
             )
+        }
+        
+        /**
+         * 解析消息内容，去除可能存在的ID前缀
+         */
+        private fun parseMessageContent(content: String): String {
+            // 检查内容是否包含ID前缀格式：数字+空格+内容
+            val parts = content.split(" ", limit = 2)
+            if (parts.size >= 2 && parts[0].toIntOrNull() != null) {
+                // 如果第一个部分是数字，返回第二部分作为实际内容
+                return parts[1]
+            }
+            // 否则返回原始内容
+            return content
         }
         
         /**

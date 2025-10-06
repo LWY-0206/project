@@ -38,6 +38,16 @@ class AddFriendActivity : BaseActivity<ActivityAddfriendBinding>() {
             dialog.show(supportFragmentManager)
         }
 
+        // 为我的二维码按钮添加点击事件
+        view.myQrcodeButton.setOnClickListener {
+            // 切换二维码显示区域的可见性
+            if (view.qrcodeContainer.visibility == View.GONE) {
+                view.qrcodeContainer.visibility = View.VISIBLE
+            } else {
+                view.qrcodeContainer.visibility = View.GONE
+            }
+        }
+
         // 允许按回车键执行搜索
         view.searchEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {

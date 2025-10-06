@@ -556,6 +556,62 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- 二维码显示区域 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/qrcode_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        app:cardBackgroundColor="#FFFFFF"
+        android:shadowColor="#1A000000"
+        android:shadowDx="0"
+        android:shadowDy="3"
+        android:shadowRadius="6"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:gravity="center"
+            android:background="@drawable/qrcode_card_gradient">
+
+            <!-- 假数据二维码图片 -->
+            <ImageView
+                android:id="@+id/qrcode_image"
+                android:layout_width="240dp"
+                android:layout_height="240dp"
+                android:src="@drawable/ic_qrcode_sample"
+                android:contentDescription="二维码"
+                android:scaleType="centerInside"
+                android:background="@drawable/qrcode_background" />
+
+            <!-- 二维码下方文字说明 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="我的用户ID: 888888"
+                android:textSize="16sp"
+                android:textColor="#424242"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:paddingTop="16dp" />
+                
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="扫描此二维码快速添加我为好友"
+                android:textSize="14sp"
+                android:textColor="#757575"
+                android:gravity="center"
+                android:paddingTop="8dp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
     <!-- 占位，确保底部有空间 -->
     <View
         android:layout_width="match_parent"
