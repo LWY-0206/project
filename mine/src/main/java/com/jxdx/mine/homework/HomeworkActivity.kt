@@ -47,6 +47,3 @@ class HomeworkActivity : AppCompatActivity() {
         return fragment
     }
 }
-
-
-// 数据模型已移至 com.jxdx.mine.data.kt 中统一管理

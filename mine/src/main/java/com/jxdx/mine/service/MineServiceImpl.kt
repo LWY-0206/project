@@ -9,6 +9,7 @@ import com.jxdx.common.http.service.ServiceRegistry
 import com.jxdx.mine.course.CourseActivity
 import com.jxdx.mine.grade.GradeActivity
 import com.jxdx.mine.homework.HomeworkActivity
+import com.jxdx.mine.teacherhomework.CourseListActivity
 
 class MineServiceImpl : MineService{
     override fun getFragment(fragmentName: String): Fragment? {
@@ -28,8 +29,14 @@ class MineServiceImpl : MineService{
         context.startActivity(intent)
     }
 
-    override fun navigationToCourseActivity(context: Context) {
+    override fun navigationToCourseActivity(context: Context,identity:Int) {
         var intent=Intent(context, CourseActivity::class.java)
+        intent.putExtra("identity",identity)
+        context.startActivity(intent)
+    }
+
+    override fun navigationToCourseListActivity(context: Context) {
+        var intent=Intent(context, CourseListActivity::class.java)
         context.startActivity(intent)
     }
 

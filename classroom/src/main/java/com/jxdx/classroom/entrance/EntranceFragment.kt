@@ -26,6 +26,8 @@ import retrofit2.Callback
 import retrofit2.Response
 import kotlin.getValue
 import androidx.fragment.app.viewModels
+import com.jxdx.common.http.service.ClassService
+import com.jxdx.common.http.service.LoginService
 
 class EntranceFragment : Fragment() {
 
@@ -83,7 +85,7 @@ class EntranceFragment : Fragment() {
                 var adapter = SubjectAdapter(
                     subjects,
                     onSubjectClick = {
-                        ServiceRegistry.get(MineService::class.java)?.navigationToCourseActivity(requireContext())
+                        ServiceRegistry.get(MineService::class.java)?.navigationToCourseActivity(requireContext(),identity)
                     }
                 )
                 viewPager.adapter = adapter
@@ -106,12 +108,16 @@ class EntranceFragment : Fragment() {
 
         // 退出按钮
         binding.exit.setOnClickListener {
-            Toast.makeText(requireContext(), "退出登录", Toast.LENGTH_SHORT).show()
+            ServiceRegistry.get(LoginService::class.java)?.navigateToLogin(requireContext())
         }
 
         //作业按钮
         binding.ivHomework.setOnClickListener {
-            ServiceRegistry.get(MineService::class.java)?.navigationToHomeworkActivity(requireContext())
+            if(identity==1) {
+                ServiceRegistry.get(MineService::class.java)?.navigationToCourseListActivity(requireContext())
+            }else{
+                ServiceRegistry.get(MineService::class.java)?.navigationToHomeworkActivity(requireContext())
+            }
         }
 
         //班级按钮
@@ -128,6 +134,15 @@ class EntranceFragment : Fragment() {
                 startActivity(Intent(requireContext(), ActivityToTeacherClassRoomFragment::class.java))//老师
             }
         }
+        binding.ivGroup.setOnClickListener {
+            if(identity==0) {
+                //学生
+                ServiceRegistry.get(ClassService::class.java)?.navigateToGroupSeatActivity(requireContext())
+            }else{
+                //老师
+                ServiceRegistry.get(ClassService::class.java)?.navigateToTeacherViewActivity(requireContext())
+            }
+        }
         updateEntranceUseInfo()
     }
 
@@ -139,10 +154,10 @@ class EntranceFragment : Fragment() {
             override fun run() {
                 currentPage++
                 viewPager.setCurrentItem(currentPage, true)
-                handler.postDelayed(this, 2000) // 每2秒切换一次
+                handler.postDelayed(this, 5000) // 每5秒切换一次
             }
         }
-        handler.postDelayed(autoScrollRunnable, 2000)
+        handler.postDelayed(autoScrollRunnable, 5000)
     }
 
     /**
@@ -168,27 +183,32 @@ class EntranceFragment : Fragment() {
         RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
             override fun onResponse(
                 call: Call<BaseResp<UserInfo>?>,
-                response: Response<BaseResp<UserInfo>?>
+                response: Response<BaseResp<UserInfo>?>?
             ) {
-                if (response.isSuccessful) {
+                // 检查Fragment是否仍然附加到Activity并且视图有效
+                if (!isAdded || _binding == null) {
+                    return
+                }
+                
+                if (response != null && response.isSuccessful) {
                     response.body()?.let {
-                        if (it.code==0) {
-                            if(it.data?.identity ==0) {
-                                identity=0
+                        if (it.code == 0) {
+                            if(it.data?.identity == 0) {
+                                identity = 0
                                 binding.tvUserName.text = "欢迎" + it.data?.userName + "同学！"
                                 Glide.with(requireContext())
                                     .load(it.data?.avatarUrl)
                                     .circleCrop()
                                     .into(binding.ivAvatar)
-                            }else{
-                                identity=1
-                                binding.tvUserName.text = "欢迎" + it.data?.userName + "老师！"
+                            } else {
+                                identity = 1
+                                binding.tvUserName.text = "欢迎" + it.data?.userName + "！"
                                 Glide.with(requireContext())
                                     .load(it.data?.avatarUrl)
                                     .circleCrop()
                                     .into(binding.ivAvatar)
                             }
-                        }else{
+                        } else {
                             Toast.makeText(requireContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -199,7 +219,10 @@ class EntranceFragment : Fragment() {
                 call: Call<BaseResp<UserInfo>?>,
                 t: Throwable
             ) {
-                Toast.makeText(requireContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show()
+                // 检查Fragment是否仍然附加到Activity
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show()
+                }
             }
         })
     }

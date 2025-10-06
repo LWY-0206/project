@@ -7,7 +7,7 @@ import com.jxdx.classroom.R
 class EntranceActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_entrance_fragment)
+        setContentView(R.layout.activity_entrance)
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, EntranceFragment())

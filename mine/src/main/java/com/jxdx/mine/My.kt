@@ -310,33 +310,45 @@ class My : Fragment() {
         RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
             override fun onResponse(
                 call: Call<BaseResp<UserInfo>?>,
-                response: Response<BaseResp<UserInfo>?>
+                response: Response<BaseResp<UserInfo>?>?
             ) {
+                // 添加空值检查，确保视图仍然存在
+                if (response == null || _binding == null || !isAdded) {
+                    return
+                }
+                
                 if (response.isSuccessful) {
                     response.body()?.let {
                         if (it.code == 0) {
-                            binding.navName.text=it.data?.userName//更新侧边栏名字
-                            binding.userName.text=it.data?.userName//更新我的 名字
-                            binding.userGrade.text=it.data?.className//更新我的 班级
-                            binding.userProfile.text=it.data?.profile//更新我的 个人简介
-                            currentAvater=it.data?.avatarUrl
-                            if(currentAvater != null){
-                                loadImageIntoTarget(currentAvater, binding.userAvatar)
-                                loadImageIntoTarget(currentAvater, binding.navAvatar)
-                                loadImageIntoTarget(currentAvater, binding.menuIcon)
+                            // 再次检查binding不为null
+                            if (_binding != null && isAdded) {
+                                binding.navName.text=it.data?.userName//更新侧边栏名字
+                                binding.userName.text=it.data?.userName//更新我的 名字
+                                binding.userGrade.text=it.data?.className//更新我的 班级
+                                binding.userProfile.text=it.data?.profile//更新我的 个人简介
+                                currentAvater=it.data?.avatarUrl
+                                if(currentAvater != null){
+                                    loadImageIntoTarget(currentAvater, binding.userAvatar)
+                                    loadImageIntoTarget(currentAvater, binding.navAvatar)
+                                    loadImageIntoTarget(currentAvater, binding.menuIcon)
+                                }
                             }
                         } else {
-                            Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                            if (isAdded) {
+                                Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+                            }
                         }
 
                     }
                 }
                 else{
-                    Toast.makeText(
-                        requireContext(),
-                        "获取用户信息失败，错误: ${response.message()}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    if (isAdded) {
+                        Toast.makeText(
+                            requireContext(),
+                            "获取用户信息失败，错误: ${response.message()}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
             }
 
@@ -344,8 +356,9 @@ class My : Fragment() {
                 call: Call<BaseResp<UserInfo>?>,
                 t: Throwable
             ) {
-                Toast.makeText(requireContext(), "网络连接失败，请检查网络设置", Toast.LENGTH_SHORT).show()
-
+                if (isAdded) {
+                    Toast.makeText(requireContext(), "网络连接失败，请检查网络设置", Toast.LENGTH_SHORT).show()
+                }
             }
         })
     }

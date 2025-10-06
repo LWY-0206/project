@@ -9,5 +9,6 @@ interface MineService {
     fun getFragment(fragmentName: String): Fragment?
     fun navigationToHomeworkActivity(context: Context)
     fun navigationToGradeActivity(context: Context)
-    fun navigationToCourseActivity(context: Context)
+    fun navigationToCourseActivity(context: Context,identity:Int)
+    fun navigationToCourseListActivity(context: Context)
 }
