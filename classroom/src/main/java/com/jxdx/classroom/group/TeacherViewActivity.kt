@@ -353,24 +353,16 @@ class TeacherViewActivity : AppCompatActivity() {
      * 连接WebSocket
      */
     private fun connectWebSocket() {
-        // 确定要使用的Token：首次连接时获取并保存，重连时使用保存的Token
-        val tokenToUse: String
-        if (initialToken.isNullOrEmpty()) {
-            // 首次连接，获取最新的Token并保存
-            tokenToUse = TokenManager.getToken() ?: ""
-            if (tokenToUse.isEmpty()) {
-                Log.e("TeacherViewActivity", "Token为空，无法连接WebSocket")
-                Toast.makeText(this, "Token获取失败，无法建立WebSocket连接", Toast.LENGTH_SHORT).show()
-                return
-            }
-            initialToken = tokenToUse
-            Log.d("TeacherViewActivity", "首次连接，保存初始Token")
-        } else {
-            // 重连，使用保存的Token
-            tokenToUse = initialToken!!
-            Log.d("TeacherViewActivity", "重连中，使用保存的Token")
+        // 获取最新的Token
+        val tokenToUse = TokenManager.getToken() ?: ""
+        if (tokenToUse.isEmpty()) {
+            Log.e("TeacherViewActivity", "Token为空，无法连接WebSocket")
+            Toast.makeText(this, "Token获取失败，无法建立WebSocket连接", Toast.LENGTH_SHORT).show()
+            return
         }
         
+        Log.d("TeacherViewActivity", "连接WebSocket，Token长度: ${tokenToUse.length}")
+
         // 构建完整的WebSocket连接地址
         // 优化teamId获取逻辑，确保URL格式正确
         val teamId = if (groups.isNotEmpty()) {
@@ -378,7 +370,10 @@ class TeacherViewActivity : AppCompatActivity() {
         } else {
             "default" // 使用"default"作为默认teamId，避免空字符串导致URL格式问题
         }
-        val wsUrl = "${wsBaseUrl}${teamId}?satoken=$tokenToUse"
+        
+        // 构建基础URL，不包含token
+        val wsUrl = "${wsBaseUrl}${teamId}"
+        Log.d("TeacherViewActivity", "WebSocket连接URL: $wsUrl")
         
         try {
             // 创建OkHttpClient
@@ -386,9 +381,10 @@ class TeacherViewActivity : AppCompatActivity() {
                 .readTimeout(0, TimeUnit.MILLISECONDS)
                 .build()
             
-            // 创建WebSocket请求
+            // 创建WebSocket请求，将token放在请求头中而不是URL参数
             val request = Request.Builder()
                 .url(wsUrl)
+                .addHeader("satoken", tokenToUse)
                 .build()
             
             // 建立WebSocket连接
@@ -409,9 +405,15 @@ class TeacherViewActivity : AppCompatActivity() {
                         // 处理收到的消息
                         // 检查是否收到未登录异常消息
                         if (text.contains("当前用户未登录") || text.contains("Token is empty")) {
-                            Log.e("TeacherViewActivity", "WebSocket认证失败")
-                            // 仅断开连接，不自动重连
+                            Log.e("TeacherViewActivity", "WebSocket认证失败: $text")
+                            // 断开当前连接
                             disconnectWebSocket()
+                            
+                            // 延迟1秒后尝试使用新的token重连
+                            mainHandler.postDelayed({
+                                Log.d("TeacherViewActivity", "尝试使用新Token重连WebSocket")
+                                connectWebSocket()
+                            }, 1000)
                         }
                     }
                 }
@@ -666,15 +668,24 @@ class TeacherViewActivity : AppCompatActivity() {
     }
 
     private fun setupGroupsList() {
-        binding.rvGroups.layoutManager = LinearLayoutManager(this)
-        binding.rvGroups.adapter = GroupsAdapter(groups) { group ->
-            val intent = Intent(this, DiscussionActivity::class.java)
-            intent.putExtra("groupId", group.id)
-            intent.putExtra("groupName", group.name)
-            intent.putExtra("isTeacher", true)
-            startActivity(intent)
-        }
-    }
+         binding.rvGroups.layoutManager = LinearLayoutManager(this)
+         binding.rvGroups.adapter = GroupsAdapter(groups) { group ->
+             val intent = Intent(this, DiscussionActivity::class.java)
+             intent.putExtra("groupId", group.id)
+             intent.putExtra("groupName", group.name)
+             intent.putExtra("isTeacher", true)
+             // 将students集合转换为JSON字符串后传递
+             try {
+                 val gson = com.google.gson.Gson()
+                 val studentsJson = gson.toJson(group.students)
+                 Log.d("TeacherViewActivity", "Failed to convert students to JSON: ${studentsJson}")
+                 intent.putExtra("groupStudentsJson", studentsJson)
+             } catch (e: Exception) {
+                 Log.e("TeacherViewActivity", "Failed to convert students to JSON: ${e.message}")
+             }
+             startActivity(intent)
+         }
+     }
 
     private fun getTotalStudents(): Int {
         return groups.sumOf { group ->

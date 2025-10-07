@@ -27,6 +27,8 @@ import com.airbnb.lottie.LottieAnimationView
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
+import com.jxdx.classroom.group.Member
+import com.google.gson.Gson
 
 class GroupSeatActivity : AppCompatActivity() {
     private var subjectId: Int = 1
@@ -96,7 +98,28 @@ class GroupSeatActivity : AppCompatActivity() {
         }
         
         btnStartDiscussion.setOnClickListener {
-            startActivity(Intent(this, DiscussionActivity::class.java))
+            // 查找当前学生所在的小组
+            val currentPosition = findCurrentStudentPosition()
+            if (currentPosition != null) {
+                val (group, _) = currentPosition
+                if (group != null) {
+                    val intent = Intent(this, DiscussionActivity::class.java)
+                    // 传递小组ID（作为整数传递）
+                    intent.putExtra("groupId", group.id)
+                    intent.putExtra("groupName", group.name)
+                    
+                    // 将小组成员信息转换为JSON字符串并传递
+                    val gson = Gson()
+                    intent.putExtra("groupStudentsJson", gson.toJson(group.students))
+                    
+                    // 跳转到讨论页面
+                    startActivity(intent)
+                    return@setOnClickListener
+                }
+            }
+            
+            // 如果未找到小组或未分配位置，显示提示
+            Toast.makeText(this, "请先加入小组后再开始讨论", Toast.LENGTH_SHORT).show()
         }
     }
 
