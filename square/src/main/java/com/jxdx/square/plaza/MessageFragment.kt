@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.corekit.common.BaseFragment
 import com.example.corekit.recyclerview.ItemSelectListener
 import com.jxdx.square.R
+import com.jxdx.square.activity.DynamicMassageActivity
 import com.jxdx.square.chat.ChatActivity
 import com.jxdx.square.databinding.FragmentMessageBinding
 import com.jxdx.square.entity.MessageItem
@@ -29,6 +30,12 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         // 初始化RecyclerView
         find.rvFriendMessages.layoutManager = LinearLayoutManager(context)
         find.rvFriendMessages.setHasFixedSize(true)
+        find.dynamicMessage.setOnClickListener {
+            val intent = Intent(context, DynamicMassageActivity::class.java)
+            startActivity(intent)
+        }
+
+
 
         // 初始化适配器
         messageAdapter = MessageAdapter()
