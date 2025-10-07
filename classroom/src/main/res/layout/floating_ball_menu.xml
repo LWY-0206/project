@@ -58,9 +58,9 @@
 
     </LinearLayout>
 
-    <!-- 设置 -->
+    <!-- 答题 -->
     <LinearLayout
-        android:id="@+id/menu_settings"
+        android:id="@+id/menu_quiz"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -71,14 +71,40 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_settings"
+            android:src="@drawable/ic_quiz"
             android:layout_marginEnd="12dp"
-            android:contentDescription="设置" />
+            android:contentDescription="答题" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="设置"
+            android:text="答题"
+            android:textSize="14sp"
+            android:textColor="@android:color/black" />
+
+    </LinearLayout>
+
+    <!-- 签到 -->
+    <LinearLayout
+        android:id="@+id/menu_attendance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_attendance"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="签到" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="签到"
             android:textSize="14sp"
             android:textColor="@android:color/black" />
 

@@ -25,4 +25,9 @@ class FriendRepository {
     suspend fun rejectFriend(applicationId: Int): BaseResp<String> = service.rejectFriend(TokenManager.getToken().toString(), applicationId)
 
     suspend fun deleteFriend(friendId: Int): BaseResp<String> = service.deleteFriend(TokenManager.getToken().toString(), friendId)
+
+    suspend fun getChatFriends(): BaseResp<List<Int>> = service.getChatFriends(TokenManager.getToken().toString())
+
+    suspend fun addFriendToChat(friendId: Int): BaseResp<String> = 
+        service.addFriendToChat(TokenManager.getToken().toString(), friendId)
 }

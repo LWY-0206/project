@@ -5,14 +5,14 @@ import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.jxdx.square.plaza.ContactFragment
 import com.jxdx.square.plaza.DynamicFragment
-import com.jxdx.square.plaza.GameFragement
+import com.jxdx.square.plaza.GameFragment
 import com.jxdx.square.plaza.MessageFragment
 
 class TopAdapter(fragmentActivity: FragmentActivity, private val callback: () -> Unit, ) : FragmentStateAdapter(fragmentActivity) {
     // 存储所有子页面Fragment的列表，用于ViewPager2的顶部跳转
     private val mFragmentList =
         listOf(
-            GameFragement(), // 益智PK页面
+            GameFragment(), // 名言佳句页面
             DynamicFragment(callback), // 动态页面
             MessageFragment(), // 消息页面
             ContactFragment(), // 联系人页面
@@ -21,7 +21,7 @@ class TopAdapter(fragmentActivity: FragmentActivity, private val callback: () ->
     // 存储所有标签文本的列表
     private val mTabTitles =
         listOf(
-            "益智PK",
+            "名言佳句",
             "动态",
             "消息",
             "联系人",

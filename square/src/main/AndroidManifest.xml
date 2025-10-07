@@ -16,5 +16,7 @@
             android:exported="false" />
         <activity android:name=".chat.ChatActivity"
             android:exported="false" />
+        <activity android:name=".activity.DynamicMassageActivity"
+            android:exported="false" />
     </application>
 </manifest>

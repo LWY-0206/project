@@ -25,8 +25,8 @@ class ChatAdapter : MultipleTypeAdapter() {
         parent: ViewGroup,
     ): RecyclerView.ViewHolder? =
         when (viewType) {
-            TYPE_SEND -> ReceiveMessageViewHolder(ItemMessageReceiveBinding.inflate(inflater, parent, false))
-            TYPE_RECEIVE -> SendMessageViewHolder(ItemMessageSendBinding.inflate(inflater, parent, false))
+            TYPE_SEND -> SendMessageViewHolder(ItemMessageSendBinding.inflate(inflater, parent, false))
+            TYPE_RECEIVE -> ReceiveMessageViewHolder(ItemMessageReceiveBinding.inflate(inflater, parent, false))
             else -> null
         }
 
@@ -46,11 +46,22 @@ class ChatAdapter : MultipleTypeAdapter() {
             // 绑定发送者头像
             binding.ivSenderAvatar.load(entity.avatarUrl, 1)
 
-            // 绑定发送消息内容
-            binding.tvSendContent.text = entity.content
+            // 绑定发送消息内容，去除可能存在的ID前缀
+            binding.tvSendContent.text = removeIdPrefix(entity.content)
 
             // 绑定发送时间
             binding.tvSendTime.text = formatTime(entity.time)
+        }
+        
+        // 去除消息内容中可能存在的ID前缀
+        private fun removeIdPrefix(content: String): String {
+            val parts = content.split(" ", limit = 2)
+            if (parts.size >= 2 && parts[0].toIntOrNull() != null) {
+                // 如果第一个部分是数字，返回第二部分作为实际内容
+                return parts[1]
+            }
+            // 否则返回原始内容
+            return content
         }
 
         // 时间格式化工具方法
@@ -67,11 +78,22 @@ class ChatAdapter : MultipleTypeAdapter() {
             // 绑定接收者头像
             binding.ivReceiverAvatar.load(entity.avatarUrl, 1)
 
-            // 绑定接收消息内容
-            binding.tvReceiveContent.text = entity.content
+            // 绑定接收消息内容，去除可能存在的ID前缀
+            binding.tvReceiveContent.text = removeIdPrefix(entity.content)
 
             // 绑定接收时间
             binding.tvReceiveTime.text = formatTime(entity.time)
+        }
+        
+        // 去除消息内容中可能存在的ID前缀
+        private fun removeIdPrefix(content: String): String {
+            val parts = content.split(" ", limit = 2)
+            if (parts.size >= 2 && parts[0].toIntOrNull() != null) {
+                // 如果第一个部分是数字，返回第二部分作为实际内容
+                return parts[1]
+            }
+            // 否则返回原始内容
+            return content
         }
 
         // 时间格式化工具方法

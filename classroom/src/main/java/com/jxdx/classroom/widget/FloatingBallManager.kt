@@ -149,8 +149,13 @@ class FloatingBallManager(private val context: Context) {
             popupWindow?.dismiss()
         }
         
-        menuView.findViewById<LinearLayout>(R.id.menu_settings).setOnClickListener {
-            Toast.makeText(context, "设置", Toast.LENGTH_SHORT).show()
+        menuView.findViewById<LinearLayout>(R.id.menu_quiz).setOnClickListener {
+            openQuizActivity()
+            popupWindow?.dismiss()
+        }
+        
+        menuView.findViewById<LinearLayout>(R.id.menu_attendance).setOnClickListener {
+            openAttendanceActivity()
             popupWindow?.dismiss()
         }
         
@@ -174,6 +179,24 @@ class FloatingBallManager(private val context: Context) {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         context.startActivity(intent)
+    }
+    
+    /**
+     * 打开答题界面
+     */
+    private fun openQuizActivity() {
+        // TODO: 实现答题功能
+        Toast.makeText(context, "答题功能开发中...", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "打开答题界面，房间ID: $roomId")
+    }
+    
+    /**
+     * 打开签到界面
+     */
+    private fun openAttendanceActivity() {
+        // TODO: 实现签到功能
+        Toast.makeText(context, "签到功能开发中...", Toast.LENGTH_SHORT).show()
+        Log.d(TAG, "打开签到界面，房间ID: $roomId")
     }
     
     /**

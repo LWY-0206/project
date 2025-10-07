@@ -162,6 +162,16 @@ class WebChatSocketManager {
     }
 
     /**
+     * 发送文本消息
+     * @param text 文本内容
+     * @return 是否发送成功
+     */
+    fun sendTextMessage(text: String): Boolean {
+        if (webSocket == null) return false
+        return webSocket!!.send(text)
+    }
+
+    /**
      * 断开连接
      */
     fun disconnect(

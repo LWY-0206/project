@@ -1,18 +1,28 @@
 package com.jxdx.square.plaza
 
 import android.content.Intent
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.corekit.common.BaseFragment
 import com.example.corekit.recyclerview.ItemSelectListener
 import com.jxdx.square.R
+import com.jxdx.square.activity.DynamicMassageActivity
 import com.jxdx.square.chat.ChatActivity
 import com.jxdx.square.databinding.FragmentMessageBinding
 import com.jxdx.square.entity.MessageItem
 import com.jxdx.square.message.MessageAdapter
+import com.jxdx.square.message.MessageViewModel
 
 class MessageFragment : BaseFragment<FragmentMessageBinding>() {
     private lateinit var messageAdapter: MessageAdapter
     private val messageList = mutableListOf<MessageItem>()
+    
+    private val viewModel: MessageViewModel by lazy {
+        ViewModelProvider(
+            requireActivity(),
+            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
+        )[MessageViewModel::class.java]
+    }
 
     override fun bindLayout(): FragmentMessageBinding = FragmentMessageBinding.inflate(layoutInflater)
 
@@ -20,6 +30,12 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
         // 初始化RecyclerView
         find.rvFriendMessages.layoutManager = LinearLayoutManager(context)
         find.rvFriendMessages.setHasFixedSize(true)
+        find.dynamicMessage.setOnClickListener {
+            val intent = Intent(context, DynamicMassageActivity::class.java)
+            startActivity(intent)
+        }
+
+
 
         // 初始化适配器
         messageAdapter = MessageAdapter()
@@ -36,6 +52,14 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
                     val intent = Intent(context, ChatActivity::class.java)
                     // 传递用户名参数
                     intent.putExtra("USER_NAME", messageItem.name)
+                    // 传递好友ID参数
+                    messageItem.friendId?.let {
+                        intent.putExtra("FRIEND_ID", it)
+                    }
+                    // 传递好友头像URL参数
+                    messageItem.avatarUrl?.let {
+                        intent.putExtra("FRIEND_AVATAR", it)
+                    }
                     startActivity(intent)
 
                     return true
@@ -45,40 +69,27 @@ class MessageFragment : BaseFragment<FragmentMessageBinding>() {
     }
 
     override fun subscribeUi() {
-        // 初始化模拟数据
-        initMockData()
-
-        // 将模拟数据添加到适配器
-        messageAdapter.add(messageList)
+        // 加载聊天好友数据
+        loadChatFriends()
+        
+        // 监听数据变化
+        viewModel.messageListLiveData.observe(this) {
+            it.onSuccess { messages ->
+                messageList.clear()
+                messages?.let { messageList.addAll(it) }
+                messageAdapter.clearAndAdd(messageList)
+            }
+            it.onError { error, data ->
+                // 处理错误，可以显示错误提示
+                android.util.Log.e("MessageFragment", "加载好友消息失败: ${error?.message}")
+                // 如果加载失败，显示空列表
+                messageList.clear()
+                messageAdapter.clearAndAdd(messageList)
+            }
+        }
     }
 
-    private fun initMockData() {
-        // 添加3个模拟消息数据
-        messageList.add(
-            MessageItem(
-                avatarResId = R.drawable.ic_default_avatar,
-                name = "张三",
-                time = "12:30",
-                message = "最近在忙什么呢？好久没联系了",
-            ),
-        )
-
-        messageList.add(
-            MessageItem(
-                avatarResId = R.drawable.ic_default_avatar,
-                name = "李四",
-                time = "昨天",
-                message = "明天一起去看电影吧，有部新片上映了",
-            ),
-        )
-
-        messageList.add(
-            MessageItem(
-                avatarResId = R.drawable.ic_default_avatar,
-                name = "王五",
-                time = "前天",
-                message = "谢谢你的帮助，问题已经解决了",
-            ),
-        )
+    private fun loadChatFriends() {
+        viewModel.loadChatFriends()
     }
 }

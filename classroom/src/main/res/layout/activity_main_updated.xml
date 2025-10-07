@@ -4,65 +4,168 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:background="#FFFFFF"
     tools:context=".activity.MainActivity">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="数学课"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp" />
-
-    <!-- 中间大的图片展示框 -->
-    <ImageView
-        android:id="@+id/iv_preview"
+    <!-- 顶部标题栏 -->
+    <LinearLayout
+        android:id="@+id/header_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/control_panel"
-        android:layout_below="@id/title"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/ic_class2"
-        android:contentDescription="推流预览画面"
-        android:scaleType="centerInside" />
+        android:layout_height="56dp"
+        android:background="#FFFFFF"
+        android:elevation="4dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp">
+
+        <!-- 返回按钮 -->
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_back_arrow"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="返回"
+            android:scaleType="centerInside"
+            android:padding="8dp" />
+
+        <!-- 标题 -->
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="高等数学"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#212121"
+            android:gravity="center" />
+
+        <!-- 选择文件按钮 -->
+        <Button
+            android:id="@+id/btn_select_file"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="选择pdf"
+            android:textSize="12sp"
+            android:textColor="#1976D2"
+            android:background="@drawable/button_outline_background"
+            android:paddingHorizontal="16dp"
+            android:minWidth="60dp" />
+    </LinearLayout>
+
+    <!-- 中央PDF展示区域 -->
+    <FrameLayout
+        android:id="@+id/pdf_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_below="@id/header_layout"
+        android:layout_above="@id/bottom_control_layout"
+        android:layout_margin="16dp"
+        android:background="#F5F5F5">
+
+        <!-- PDF查看器 -->
+        <com.github.barteksc.pdfviewer.PDFView
+            android:id="@+id/pdfView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#FFFFFF"
+            android:visibility="gone" />
+
+        <!-- 默认提示文本 -->
+        <TextView
+            android:id="@+id/tv_pdf_placeholder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="pdf展示"
+            android:textSize="18sp"
+            android:textColor="#666666"
+            android:visibility="visible" />
+
+        <!-- 加载提示 -->
+        <LinearLayout
+            android:id="@+id/loading_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ProgressBar
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:indeterminateTint="#2196F3" />
+
+            <TextView
+                android:id="@+id/tv_loading_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="正在加载PDF..."
+                android:textSize="16sp"
+                android:textColor="#666666" />
+        </LinearLayout>
+
+        <!-- 错误提示 -->
+        <LinearLayout
+            android:id="@+id/error_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_error_message"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="加载PDF失败"
+                android:textSize="16sp"
+                android:textColor="#666666" />
+
+            <Button
+                android:id="@+id/btn_retry"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="重试"
+                android:textColor="#2196F3"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+    </FrameLayout>
 
     <!-- 底部控制区域 -->
     <LinearLayout
-        android:id="@+id/control_panel"
+        android:id="@+id/bottom_control_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:elevation="8dp"
+        android:padding="12dp">
 
-
-        <!-- 推流方式选择 -->
-
-        <!-- 推流控制按钮 -->
-
-        <!-- 推流状态显示 -->
+        <!-- 左侧推流设置 -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:background="#f0f0f0"
-            android:orientation="vertical"
-            android:padding="12dp">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:text="选择推流方式："
-                android:textSize="16sp"
-                android:textStyle="bold" />
+                android:text="推流设置:"
+                android:textSize="12sp"
+                android:textColor="#666666"
+                android:layout_marginEnd="8dp" />
 
             <RadioGroup
                 android:id="@+id/radio_group_stream_type"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
@@ -70,78 +173,76 @@
                     android:id="@+id/radio_native_stream"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="16dp"
+                    android:layout_marginEnd="12dp"
                     android:checked="true"
-                    android:text="Native推流" />
+                    android:text="Native"
+                    android:textSize="10sp" />
 
                 <RadioButton
                     android:id="@+id/radio_ffmpeg_stream"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="FFmpeg推流" />
-
+                    android:text="FFMepg"
+                    android:textSize="10sp" />
             </RadioGroup>
         </LinearLayout>
 
+        <!-- 中间开始直播按钮 -->
         <Button
-            android:id="@+id/btn_start_screen_capture"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:background="@color/colorPrimary"
-            android:text="开始屏幕捕获"
+            android:id="@+id/btn_start_live"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="2"
+            android:layout_marginHorizontal="12dp"
+            android:background="@drawable/button_blue_background"
+            android:text="开始直播"
             android:textColor="@android:color/white"
-            android:textSize="16sp" />
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/btn_stop_live"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:background="@color/colorAccent"
-            android:text="停止推流"
-            android:textColor="@android:color/white"
-            android:textSize="16sp" />
-
-        <!-- 悬浮球控制按钮 -->
+        <!-- 右侧控制按钮组 -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:gravity="end">
 
             <Button
-                android:id="@+id/btn_show_floating_ball"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/button_primary_background"
-                android:text="显示悬浮球"
+                android:id="@+id/btn_end"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/button_red_background"
+                android:text="结束"
                 android:textColor="@android:color/white"
-                android:textSize="14sp" />
+                android:textSize="12sp"
+                android:minWidth="50dp"
+                android:paddingHorizontal="16dp" />
 
             <Button
-                android:id="@+id/btn_hide_floating_ball"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/button_secondary_background"
-                android:text="隐藏悬浮球"
+                android:id="@+id/btn_function"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/button_gray_background"
+                android:text="功能"
                 android:textColor="@android:color/black"
-                android:textSize="14sp" />
+                android:textSize="12sp"
+                android:minWidth="50dp"
+                android:paddingHorizontal="16dp" />
 
+            <Button
+                android:id="@+id/btn_close"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:background="@drawable/button_gray_background"
+                android:text="关闭"
+                android:textColor="@android:color/black"
+                android:textSize="12sp"
+                android:minWidth="50dp"
+                android:paddingHorizontal="16dp" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/tv_stream_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="推流状态：未开始"
-            android:textColor="#666666"
-            android:textSize="14sp" />
     </LinearLayout>
 
 </RelativeLayout>
