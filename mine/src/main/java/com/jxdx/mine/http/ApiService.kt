@@ -7,6 +7,7 @@ import com.jxdx.mine.CourseDetail
 import com.jxdx.mine.Homework
 import com.jxdx.mine.PageData
 import com.jxdx.mine.StuHomeWorkDetailVO
+import com.jxdx.mine.SubjectsVO
 import com.jxdx.mine.UserInfo
 import retrofit2.Call
 import retrofit2.http.Body
@@ -51,6 +52,9 @@ interface ApiService {
         @Query("subjectId") subjectId: Int,
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<CourseDetail>>
+
+
+
 
     //获取作业详情
     @GET("/api/stu/homework/detail")
@@ -97,6 +101,12 @@ interface ApiService {
         @Query("comment") comment: String,
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<Any>>
+    
+    //获取老师对应的学科列表
+    @GET("/api/teacher/subject")
+    fun getTeacherSubject(
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<List<SubjectsVO>>>
 }
 
 //作业提交请求类

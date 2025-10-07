@@ -6,14 +6,15 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.corekit.http.bean.BaseResp
-import com.jxdx.classroom.SubjectsVO
-import com.jxdx.classroom.http.RetrofitClient
+import com.jxdx.mine.SubjectsVO
+import com.jxdx.mine.http.RetrofitClient
 import com.jxdx.mine.CourseDetail
 import com.jxdx.mine.databinding.ActivityCourseListBinding
 import com.jxdx.mine.teacherhomework.adapter.CourseAdapter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
 
 class CourseListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCourseListBinding
@@ -91,9 +92,9 @@ class CourseListActivity : AppCompatActivity() {
                     }
                 }
                 
-                override fun onFailure(call: Call<BaseResp<List<SubjectsVO>>>?, t: Throwable?) {
+                override fun onFailure(call: Call<BaseResp<List<SubjectsVO>>>, t: Throwable) {
                     binding.loadingLayout.visibility = android.view.View.GONE
-                    showError("网络请求失败：${t?.message ?: "未知错误"}")
+                    showError("网络请求失败：${t.message ?: "未知错误"}")
                     Log.e("CourseListActivity", "Load courses failed", t)
                     
                     // 显示模拟数据作为备选

@@ -88,7 +88,6 @@ class GroupSeatActivity : AppCompatActivity() {
         
         // 设置点击事件
         ivBack.setOnClickListener {
-            // 使用onBackPressedDispatcher替代已弃用的onBackPressed()方法
             onBackPressedDispatcher.onBackPressed()
         }
         

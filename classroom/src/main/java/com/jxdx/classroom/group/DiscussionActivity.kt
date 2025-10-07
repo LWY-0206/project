@@ -524,12 +524,6 @@ class DiscussionActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
-        // 设置干预讨论点击事件
-        view.findViewById<View>(R.id.optionIntervene).setOnClickListener {
-            interveneDiscussion()
-            dialog.dismiss()
-        }
-
         // 显示弹窗
         dialog.setContentView(view)
         dialog.show()

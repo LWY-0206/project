@@ -75,6 +75,7 @@ data class ApiMember(
     val role: String?,
     val type: Int // 1=老师, 2=学生
 )
+
 //查看所有课程
 data class Course(
     val subjectId: Int,
@@ -125,4 +126,9 @@ data class StudentSubmission(
     var score: Int?,     // 老师评分
     var comment: String?,// 老师评语
     var isReviewed: Boolean // 是否批改
+)
+
+data class SubjectsVO(
+    val subjectId: Int,
+    val subjectName: String,
 )
