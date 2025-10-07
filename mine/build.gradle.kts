@@ -38,6 +38,8 @@ android {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":classroom"))
+    implementation(project(":corekit"))
 
     implementation(libs.core.ktx)
     implementation(libs.appcompat)

@@ -1,4 +1,4 @@
-package com.jxdx.classroom.com.jxdx.classroom.http.DTO
+package com.jxdx.classroom.http.DTO
 
 /**
  * 生成小组请求体数据类

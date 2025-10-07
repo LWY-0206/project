@@ -20,6 +20,22 @@ data class Homework(
     val sendTime: String = ""
 )
 
+// 学生作业详情VO
+data class StuHomeWorkDetailVO(
+    val homeworkId: Long,               // 作业ID
+    val subject: String,                // 所属科目
+    val homeworkName: String,           // 作业名称
+    val homeworkContent: String,        // 作业内容
+    val deadTime: String,               // 截止时间
+    val completeAndCorrect: Int,        // 1-未完成，2-已提交未批改，3-已批改
+    val imageUrls: List<String>? = null, // 图片URL列表
+    val studentContent: String? = null, // 提交内容（仅 status >= 2 时有）
+    val submitTime: String? = null,     // 提交时间（仅 status >= 2 时有）
+    val score: Double? = null,          // 分数（仅 status == 3 时有）
+    val teacherComment: String? = null, // 教师评语（仅 status == 3 时有）
+    val correctTime: String? = null     // 批改时间（仅 status == 3 时有）
+)
+
 // 科目分组
 class SubjectGroup(
     val subjectName: String,             // 科目名，如 数学、语文

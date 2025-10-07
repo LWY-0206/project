@@ -23,6 +23,14 @@ class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var groupList: MutableList<SubjectGroup> = mutableListOf()
     private var flatList: MutableList<Any> = mutableListOf()
+    
+    // 点击事件回调接口
+    private var itemClickListener: ((Homework) -> Unit)? = null
+    
+    // 设置点击事件监听器
+    fun setOnItemClickListener(listener: (Homework) -> Unit) {
+        this.itemClickListener = listener
+    }
 
     override fun getItemViewType(position: Int): Int {
         return when (flatList[position]) {
@@ -178,18 +186,8 @@ class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
             // 作业项点击
             itemView.setOnClickListener {
-                // 不同状态触发不同逻辑
-                when (homework.completeAndCorrect) {
-                    0 -> {
-                        Toast.makeText(context, "提交作业: ${homework.homeworkName}", Toast.LENGTH_SHORT).show()
-                    }
-                    1 -> {
-                        Toast.makeText(context, "查看作业: ${homework.homeworkName}", Toast.LENGTH_SHORT).show()
-                    }
-                    2 -> {
-                        Toast.makeText(context, "查看详情: ${homework.homeworkName}", Toast.LENGTH_SHORT).show()
-                    }
-                }
+                // 调用外部设置的点击事件监听器
+                itemClickListener?.invoke(homework)
             }
         }
     }

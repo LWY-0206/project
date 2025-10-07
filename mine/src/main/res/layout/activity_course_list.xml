@@ -14,8 +14,58 @@
         app:backText="返回"
         app:if_back="true"
         app:dark_theme="true"/>
+    
+    <!-- 加载状态视图 -->
+    <LinearLayout
+        android:id="@+id/loadingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+        
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true" />
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="加载中..."
+            android:layout_marginTop="16dp"
+            android:textSize="16sp" />
+    </LinearLayout>
+    
+    <!-- 错误状态视图 -->
+    <LinearLayout
+        android:id="@+id/errorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+        
+        <TextView
+            android:id="@+id/errorMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="加载失败，请重试"
+            android:textSize="16sp"
+            android:padding="16dp" />
+        
+        <Button
+            android:id="@+id/retryButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="重试"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+    
+    <!-- 课程列表视图 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewCourses"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:visibility="visible"/>
 </LinearLayout>

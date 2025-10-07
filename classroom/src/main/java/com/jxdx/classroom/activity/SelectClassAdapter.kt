@@ -9,18 +9,19 @@ import com.example.corekit.recyclerview.SingleViewHolder
 import com.jxdx.classroom.databinding.ItemSelectclassBinding
 import com.jxdx.classroom.entity.SelectClass
 
-class SelectClassAdapter: SingleTypeAdapter<SelectClass>() {
+class SelectClassAdapter(private val teacherId: Int = 0): SingleTypeAdapter<SelectClass>() {
     override fun createViewHolder(
         viewType: Int,
         inflater: LayoutInflater,
         parent: ViewGroup
     ): SingleViewHolder<ViewBinding, Any>? {
         return SelectClassHolder(
-            ItemSelectclassBinding.inflate(inflater, parent, false)
+            ItemSelectclassBinding.inflate(inflater, parent, false),
+            teacherId
         ) as? SingleViewHolder<ViewBinding, Any>
     }
 
-    class SelectClassHolder(view: ItemSelectclassBinding):SingleViewHolder<ItemSelectclassBinding, SelectClass>(view) {
+    class SelectClassHolder(view: ItemSelectclassBinding, private val teacherId: Int):SingleViewHolder<ItemSelectclassBinding, SelectClass>(view) {
         override fun setHolder(entity: SelectClass) {
             view.tvCourseIdValue.text = entity.subjectId.toString()
             view.tvCourseNameValue.text = entity.subjectName
@@ -30,6 +31,7 @@ class SelectClassAdapter: SingleTypeAdapter<SelectClass>() {
                 val intent = Intent(context, ActivityClassDynamic::class.java)
                 intent.putExtra("subjectId", entity.subjectId)
                 intent.putExtra("subjectName", entity.subjectName)
+                intent.putExtra("teacherId", teacherId)
                 context.startActivity(intent)
             }
         }

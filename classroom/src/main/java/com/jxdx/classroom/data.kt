@@ -6,7 +6,7 @@ data class Subject(
     val iconRes: Int
 )
 data class UserInfo (
-    val userId: Int,             //用户ID
+    val id: Int,             //用户ID
     val userName: String,           //用户名
     val avatarUrl: String? = null,  //头像
     val phone: String,              //手机号
@@ -23,4 +23,12 @@ data class AllCourse(
     val teacherName: String,   // 任课老师
     val avatarUrl: String,          //老师头像
     val status:Int,
+)
+
+
+
+//老师对应的学科
+data class SubjectsVO(
+    val subjectId:Int,
+    val subjectName:String,
 )

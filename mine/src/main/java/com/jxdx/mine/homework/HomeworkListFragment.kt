@@ -1,5 +1,6 @@
 package com.jxdx.mine.homework
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +13,7 @@ import com.jxdx.mine.R
 import com.jxdx.mine.adapter.HomeworkAdapter
 import com.jxdx.mine.adapter.HomeworkRepository
 import com.jxdx.mine.adapter.HomeworkViewModel
+import com.jxdx.mine.homework.HomeworkDetailActivity
 
 class HomeworkListFragment : Fragment() {
 
@@ -40,6 +42,14 @@ class HomeworkListFragment : Fragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         Log.d("HomeworkListFragment", "RecyclerView configured")
+
+        // 设置作业项点击事件
+        adapter.setOnItemClickListener {
+            val homeworkId = it.homeworkId.toIntOrNull() ?: return@setOnItemClickListener
+            val intent = Intent(requireContext(), HomeworkDetailActivity::class.java)
+            intent.putExtra("homeworkId", homeworkId)
+            startActivity(intent)
+        }
 
         // 初始化ViewModel并传入HomeworkRepository
         viewModel = HomeworkViewModel(HomeworkRepository())

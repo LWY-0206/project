@@ -1,12 +1,12 @@
 package com.jxdx.classroom.group
 
-import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -21,18 +21,29 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.jxdx.classroom.R
 import com.jxdx.classroom.databinding.ActivityDiscussionBinding
-import com.jxdx.classroom.group.GroupChatApi
-import com.jxdx.classroom.http.ApiService
 import com.jxdx.classroom.http.RetrofitClient
 import com.example.corekit.http.TokenManager
-import com.example.corekit.http.bean.BaseResp
 import kotlinx.coroutines.*
-import okhttp3.ResponseBody
+import okhttp3.WebSocket
+import okhttp3.WebSocketListener
+import okhttp3.Request
+import okhttp3.OkHttpClient
+import okhttp3.Response
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
+
+// 小组讨论成员类
+data class Member(
+    val id: String,
+    val name: String,
+    val isOnline: Boolean
+)
 
 // 消息项的装饰器，用于设置不同类型消息之间的间距
 class MessageItemDecoration : RecyclerView.ItemDecoration() {
@@ -82,6 +93,18 @@ class DiscussionActivity : AppCompatActivity() {
         "我们应该制定一个详细的计划",
         "大家还有什么问题吗？"
     )
+    
+    // WebSocket相关
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val gson = Gson()
+    private val wsBaseUrl = "ws://121.41.176.238:8080/group/chat/"
+    private var isConnected = false
+    private var webSocket: WebSocket? = null
+    private var reconnectionAttempts = 0
+    private val maxReconnectionAttempts = 5
+    private val reconnectionDelay = 3000L // 3秒重连间隔
+    // 存储初始连接时的Token，用于重连时使用
+    private var initialToken: String? = null
 
     /**
      * Activity生命周期方法 - 创建
@@ -101,6 +124,9 @@ class DiscussionActivity : AppCompatActivity() {
 
         // 加载历史消息
         loadHistoryMessages()
+        
+        // 连接WebSocket以接收广播消息
+        connectWebSocket()
     }
 
     /**
@@ -238,8 +264,8 @@ class DiscussionActivity : AppCompatActivity() {
             lifecycleScope.launch { 
                 try {
                     val request = GroupChatApi.SendMessage.RequestBody(
-                        teamId = groupId.toLongOrNull(),
-                        fromUserId = currentUserId.toLongOrNull(),
+                        teamId = groupId.toIntOrNull()?.toInt(),
+                        fromUserId = currentUserId.toIntOrNull()?.toInt(),
                         content = content,
                         messageType = GroupChatApi.Broadcast.MessageType.TEXT
                     )
@@ -254,8 +280,8 @@ class DiscussionActivity : AppCompatActivity() {
                     } else {
                         // 发送成功，保存消息到服务器
                         val saveRequest = GroupChatApi.SaveMessage.RequestBody(
-                            teamId = groupId.toLongOrNull(),
-                            fromUserId = currentUserId.toLongOrNull(),
+                            teamId = groupId.toIntOrNull()?.toInt(),
+                            fromUserId = currentUserId.toIntOrNull()?.toInt(),
                             content = content,
                             messageType = GroupChatApi.Broadcast.MessageType.TEXT
                         )
@@ -308,6 +334,62 @@ class DiscussionActivity : AppCompatActivity() {
     }
 
     /**
+     * 处理接收到的广播消息
+     * @param message 接收到的消息内容
+     */
+    private fun handleBroadcastMessage(message: String) {
+        try {
+            // 解析消息数据
+            // 使用typeToken来安全地进行类型转换
+            val messageData = gson.fromJson(message, object : TypeToken<Map<String, Any>>() {}.type)
+                as Map<String, Any>
+            val type = messageData["type"] as? String
+            
+            when (type) {
+                "broadcast" -> {
+                    // 处理普通广播消息
+                    val content = messageData["content"] as? String
+                    if (content != null) {
+                        // 创建广播消息对象
+                        val broadcastMessage = Message(
+                            id = "broadcast_${System.currentTimeMillis()}",
+                            senderId = "teacher",
+                            senderName = "教师",
+                            content = content,
+                            timestamp = System.currentTimeMillis(),
+                            isFromTeacher = true
+                        )
+                        // 添加广播消息到讨论区
+                        addMessage(broadcastMessage)
+                    }
+                }
+                "question_type" -> {
+                    // 处理题型广播消息
+                    val questionType = messageData["questionType"] as? String
+                    if (questionType != null) {
+                        // 创建题型广播消息对象
+                        val questionMessage = Message(
+                            id = "question_${System.currentTimeMillis()}",
+                            senderId = "teacher",
+                            senderName = "教师",
+                            content = "【题型广播】当前讨论题型: $questionType",
+                            timestamp = System.currentTimeMillis(),
+                            isFromTeacher = true
+                        )
+                        // 添加题型广播消息到讨论区
+                        addMessage(questionMessage)
+                    }
+                }
+                else -> {
+                    Log.w("DiscussionActivity", "未知的消息类型: $type")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("DiscussionActivity", "处理广播消息失败: ${e.message}")
+        }
+    }
+
+    /**
      * 为新消息添加动画效果
      * 为新添加的消息添加进入动画
      * @param position 消息在列表中的位置
@@ -339,9 +421,6 @@ class DiscussionActivity : AppCompatActivity() {
         binding.ivSend.isEnabled = binding.etMessage.text?.isNotEmpty() == true
         binding.ivSend.alpha = if (binding.etMessage.text?.isNotEmpty() == true) 1f else 0.5f
     }
-
-    // 删除不再使用的模拟方法
-    // simulateGroupDiscussion和simulateReply方法已被移除，现在使用真实的API实现
 
     /**
      * 更新在线人数
@@ -456,19 +535,90 @@ class DiscussionActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    // 小组人员列表
+    private val groupMembers = mutableListOf<Member>()
+
+    /**
+     * 加载小组人员信息
+     */
+    private fun loadGroupMembers() {
+        // 获取用户token
+        val saToken = TokenManager.getToken() ?: ""
+        if (saToken.isEmpty()) {
+            Log.e("DiscussionActivity", "未登录，无法加载小组人员信息")
+            return
+        }
+
+        // 在协程中调用API获取小组人员信息
+        lifecycleScope.launch {
+            try {
+                // 由于没有直接的API获取小组人员，我们通过加载所有小组数据来获取当前小组的成员
+                val groupsResponse = RetrofitClient.apiService.getGroups(
+                    satoken = saToken,
+                    subjectId = 0, // 可以根据实际情况传入正确的Int值
+                    createdBy = 0  // 可以根据实际情况传入正确的Int值
+                )
+
+                if (groupsResponse.code == 0 && groupsResponse.data != null) {
+                    // 查找当前小组
+                    val currentGroup = groupsResponse.data?.find { it.id == groupId.toInt() }
+                    if (currentGroup != null) {
+                        // 清空现有成员列表
+                        groupMembers.clear()
+
+                        // 添加真实的小组人员信息
+                        currentGroup.students.forEachIndexed { index, student ->
+                            if (student != null) {
+                                groupMembers.add(Member(
+                                    id = student.id.toString(),
+                                    name = student.name,
+                                    isOnline = false // 暂时设置为离线，实际可以根据WebSocket状态更新
+                                ))
+                            }
+                        }
+
+                        // 如果API没有返回成员信息，使用一些模拟数据确保UI能正常显示
+                        if (groupMembers.isEmpty()) {
+                            // 添加一些模拟数据
+                            groupMembers.add(Member("1", "张三", true))
+                            groupMembers.add(Member("2", "李四", false))
+                            groupMembers.add(Member("3", "王五", true))
+                        }
+                    }
+                } else {
+                    Log.e("DiscussionActivity", "加载小组数据失败: ${groupsResponse.message}")
+                    // 使用模拟数据
+                    setupMockMembers()
+                }
+            } catch (e: Exception) {
+                Log.e("DiscussionActivity", "网络连接异常: ${e.message}")
+                // 使用模拟数据
+                setupMockMembers()
+            }
+        }
+    }
+
+    /**
+     * 设置模拟成员数据
+     */
+    private fun setupMockMembers() {
+        groupMembers.clear()
+        groupMembers.add(Member("1", "张三", true))
+        groupMembers.add(Member("2", "李四", false))
+        groupMembers.add(Member("3", "王五", true))
+    }
+
     /**
      * 显示小组成员
      * 显示小组成员列表对话框
      */
     private fun showGroupMembers() {
-        // 模拟小组成员列表
-        val members = listOf(
-            "组长1 (在线)",
-            "学生2 (在线)",
-            "学生3 (在线)",
-            "学生4 (离线)",
-            "学生5 (在线)"
-        )
+        // 如果成员列表为空，尝试加载成员信息
+        if (groupMembers.isEmpty()) {
+            loadGroupMembers()
+            Toast.makeText(this, "正在加载小组人员信息...", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         // 创建底部弹窗
         val dialog = BottomSheetDialog(this)
@@ -476,9 +626,10 @@ class DiscussionActivity : AppCompatActivity() {
 
         // 动态添加成员项
         val membersContainer = view.findViewById<ViewGroup>(R.id.membersContainer)
-        members.forEach { member ->
+        membersContainer.removeAllViews() // 清空容器
+        groupMembers.forEach { member ->
             val memberView = layoutInflater.inflate(R.layout.item_member, membersContainer, false)
-            memberView.findViewById<TextView>(R.id.tvMemberName).text = member
+            memberView.findViewById<TextView>(R.id.tvMemberName).text = "${member.name} (${if (member.isOnline) "在线" else "离线"})"
             membersContainer.addView(memberView)
         }
 
@@ -533,9 +684,10 @@ class DiscussionActivity : AppCompatActivity() {
             lifecycleScope.launch { 
                 try {
                     val request = GroupChatApi.Broadcast.RequestBody(
+                        teamId = listOf(groupId.toIntOrNull()?: 0), // 转换为List<Int>
+                        fromUserId = currentUserId.toIntOrNull(),
                         content = content,
-                        messageType = GroupChatApi.Broadcast.MessageType.TEXT,
-                        timestamp = System.currentTimeMillis()
+                        messageType = GroupChatApi.Broadcast.MessageType.TEXT
                     )
                     RetrofitClient.apiService.broadcastGroupChatMessage(
                         request = request
@@ -587,25 +739,150 @@ class DiscussionActivity : AppCompatActivity() {
 
     /**
      * Activity生命周期方法 - 销毁
-     * 清理资源，移除消息处理器回调
+     * 清理资源，取消任务，断开WebSocket连接
      */
     override fun onDestroy() {
         super.onDestroy()
-        // 移除所有消息处理回调
+        // 取消所有延迟任务
         messageHandler.removeCallbacksAndMessages(null)
-        // 添加系统消息：用户离开讨论区
-        if (!isTeacherMode) {
-            // 创建并添加系统消息
-            val systemMessage = Message(
-                id = UUID.randomUUID().toString(),
-                senderId = "system",
-                senderName = "系统",
-                content = "${currentUserName}离开了讨论",
-                timestamp = System.currentTimeMillis(),
-                messageType = MessageType.SYSTEM,
-                isFromTeacher = false
-            )
-            addMessage(systemMessage)
+        // 断开WebSocket连接
+        disconnectWebSocket()
+    }
+
+
+    /**
+     * 连接WebSocket
+     * 建立与服务器的WebSocket连接以接收广播消息
+     */
+    private fun connectWebSocket() {
+        // 防止重复连接
+        if (isConnected) {
+            Log.d("DiscussionActivity", "WebSocket已经连接，无需重复连接")
+            return
+        }
+        
+        // 确定要使用的Token：首次连接时获取并保存，重连时使用保存的Token
+        val tokenToUse: String
+        if (initialToken.isNullOrEmpty()) {
+            // 首次连接，获取最新的Token并保存
+            tokenToUse = TokenManager.getToken() ?: ""
+            if (tokenToUse.isEmpty()) {
+                Log.e("DiscussionActivity", "Token为空，无法连接WebSocket")
+                // 尝试刷新Token并重连
+                scheduleReconnection()
+                return
+            }
+            initialToken = tokenToUse
+            Log.d("DiscussionActivity", "首次连接，保存初始Token")
+        } else {
+            // 重连，使用保存的Token
+            tokenToUse = initialToken!!
+            Log.d("DiscussionActivity", "重连中，使用保存的Token")
+        }
+        
+        // 构建完整的WebSocket连接地址
+        val wsUrl = "${wsBaseUrl}${groupId}?satoken=$tokenToUse"
+        Log.d("DiscussionActivity", "尝试连接WebSocket: $wsUrl")
+        
+        try {
+            // 创建OkHttpClient，增加连接超时和Ping/Pong配置
+            val client = OkHttpClient.Builder()
+                .readTimeout(0, TimeUnit.MILLISECONDS) // 0表示不超时
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .pingInterval(30, TimeUnit.SECONDS) // 每30秒发送一次ping保持连接
+                .build()
+            
+            // 创建WebSocket请求
+            val request = Request.Builder()
+                .url(wsUrl)
+                .build()
+            
+            // 建立WebSocket连接
+            webSocket = client.newWebSocket(request, object : WebSocketListener() {
+                override fun onOpen(webSocket: WebSocket, response: Response) {
+                    mainHandler.post {
+                        isConnected = true
+                        reconnectionAttempts = 0 // 重置重连尝试次数
+                        Log.d("DiscussionActivity", "WebSocket连接成功: ${response.message}")
+                    }
+                }
+                
+                override fun onMessage(webSocket: WebSocket, text: String) {
+                    mainHandler.post {
+                        Log.d("DiscussionActivity", "收到消息: $text")
+                        try {
+                            // 处理收到的广播消息
+                            handleBroadcastMessage(text)
+                        } catch (e: Exception) {
+                            Log.e("DiscussionActivity", "处理消息异常: ${e.message}", e)
+                            // 消息处理异常不应影响连接
+                        }
+                    }
+                }
+                
+                override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                    mainHandler.post {
+                        isConnected = false
+                        Log.d("DiscussionActivity", "WebSocket连接关闭中: $code, $reason")
+                    }
+                }
+                
+                override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                    mainHandler.post {
+                        isConnected = false
+                        Log.d("DiscussionActivity", "WebSocket连接已关闭: $code, $reason")
+                        // 移除自动重连逻辑，关闭后不再重连
+                    }
+                }
+                
+                override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    mainHandler.post {
+                        isConnected = false
+                        Log.e("DiscussionActivity", "WebSocket连接失败: ${t.message}", t)
+                        // 移除自动重连逻辑，失败后不再重连
+                    }
+                }
+            })
+            
+            // 注意：不要在连接建立后立即关闭executorService，这会导致连接断开
+            // client.dispatcher.executorService.shutdown()
+        } catch (e: Exception) {
+            Log.e("DiscussionActivity", "WebSocket连接异常: ${e.message}", e)
+            // 移除自动重连逻辑，异常后不再重连
+        }
+    }
+    
+    /**
+     * 关闭WebSocket连接
+     */
+    private fun disconnectWebSocket() {
+        if (webSocket != null) {
+            webSocket?.close(1000, "主动关闭连接")
+            webSocket = null
+            isConnected = false
+            reconnectionAttempts = 0 // 重置重连尝试次数
+        }
+    }
+    
+    /**
+     * 安排重连
+     */
+    private fun scheduleReconnection() {
+        if (reconnectionAttempts < maxReconnectionAttempts) {
+            reconnectionAttempts++
+            Log.d("DiscussionActivity", "计划重连WebSocket (尝试 $reconnectionAttempts/$maxReconnectionAttempts)")
+            
+            mainHandler.postDelayed({
+                if (!isConnected && !isFinishing) {
+                    // 重新获取Token并尝试连接
+                    connectWebSocket()
+                }
+            }, reconnectionDelay)
+        } else {
+            Log.e("DiscussionActivity", "已达到最大重连次数，停止重连")
+            mainHandler.post {
+                Toast.makeText(this@DiscussionActivity, "WebSocket连接失败，请检查网络或重新登录", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -635,6 +912,9 @@ class DiscussionActivity : AppCompatActivity() {
             return
         }
 
+        // 先加载小组人员信息，以便显示正确的发送者名称
+        loadGroupMembers()
+
         // 在协程中调用API获取历史消息
         lifecycleScope.launch { 
             try {
@@ -657,11 +937,23 @@ class DiscussionActivity : AppCompatActivity() {
                         try {
                             val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                             val timestamp = sdf.parse(apiMessage.sendTime)?.time ?: System.currentTimeMillis()
-                               
+                              
+                            // 根据senderId查找对应的成员名称
+                            var senderName = "用户"
+                            if (apiMessage.fromUserId.toString() == "teacher") {
+                                senderName = "教师"
+                            } else if (groupMembers.isNotEmpty()) {
+                                // 查找成员列表中是否有对应的id
+                                val member = groupMembers.find { it.id == apiMessage.fromUserId.toString() }
+                                if (member != null) {
+                                    senderName = member.name
+                                }
+                            }
+                                
                             val message = Message(
                                 id = apiMessage.id.toString(),
                                 senderId = apiMessage.fromUserId.toString(),
-                                senderName = "用户", // API中没有fromUserName字段，使用默认值
+                                senderName = senderName,
                                 content = apiMessage.content,
                                 timestamp = timestamp,
                                 messageType = if (apiMessage.messageType == GroupChatApi.Broadcast.MessageType.TEXT) MessageType.TEXT else MessageType.SYSTEM,

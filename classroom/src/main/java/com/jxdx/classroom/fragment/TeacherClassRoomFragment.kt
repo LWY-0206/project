@@ -1,5 +1,6 @@
 package com.jxdx.classroom.fragment
 
+import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.ViewModelProvider
 import com.example.corekit.common.BaseFragment
@@ -9,14 +10,22 @@ import com.jxdx.classroom.databinding.TeacherClassRoomFragmentBinding
 
 
 class TeacherClassRoomFragment:BaseFragment<TeacherClassRoomFragmentBinding>() {
-    val adapter: SelectClassAdapter by lazy { SelectClassAdapter() }
+    private var teacherId: Int = 0
+    private lateinit var adapter: SelectClassAdapter
     private lateinit var viewModel: SelectClassViewModel
     override fun bindLayout(): TeacherClassRoomFragmentBinding {
         return TeacherClassRoomFragmentBinding.inflate(layoutInflater)
     }
 
     override fun initView() {
+        // 获取从Activity传递过来的参数
+        arguments?.let {
+            teacherId = it.getInt("teacherId", 0)
+        }
+        
         viewModel = ViewModelProvider(this)[SelectClassViewModel::class.java]
+        // 在获取teacherId后再初始化adapter
+        adapter = SelectClassAdapter(teacherId)
         val recyclerView =find.TeacherRecyclerView
         recyclerView.adapter = adapter
         recyclerView.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())

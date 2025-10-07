@@ -118,14 +118,36 @@
                                 android:textColor="#333333"
                                 android:gravity="center"/>
                         </LinearLayout>
-
-                        <View
-                            android:id="@+id/video_2"
+                        <LinearLayout
+                            android:id="@+id/btn_student_group"
                             android:layout_width="0dp"
                             android:layout_height="120dp"
                             android:layout_weight="1"
-                            android:background="#E0E0E0"
-                            android:layout_marginHorizontal="4dp"/>
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/function_button_selector"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/ic_pdf_preview"
+                                android:scaleType="centerInside"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="学生分组"
+                                android:textSize="12sp"
+                                android:textColor="#333333"
+                                android:gravity="center"/>
+                        </LinearLayout>
+
+
 
                         <View
                             android:id="@+id/video_3"

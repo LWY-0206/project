@@ -2,12 +2,24 @@ package com.jxdx.mine.teacherhomework
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.corekit.http.bean.BaseResp
 import com.jxdx.mine.HomeworkDetail
+import com.jxdx.mine.PageData
 import com.jxdx.mine.StudentSubmission
 import com.jxdx.mine.databinding.ActivityHomeworkListBinding
+import com.jxdx.mine.http.ApiService
+import com.jxdx.mine.http.CreateHomeworkRequest
+import com.jxdx.mine.http.RetrofitClient
+import com.jxdx.mine.http.TeachCreateHWSimpleVO
 import com.jxdx.mine.teacherhomework.adapter.HomeworkAdapter
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class HomeworkListActivity: AppCompatActivity() {
     private lateinit var binding: ActivityHomeworkListBinding
@@ -15,6 +27,8 @@ class HomeworkListActivity: AppCompatActivity() {
     private val homeworkList = mutableListOf<HomeworkDetail>()
     private var courseId: String? = null
     private var courseName: String? = null
+    private var currentPage = 1
+    private val pageSize = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,7 +42,15 @@ class HomeworkListActivity: AppCompatActivity() {
         supportActionBar?.title = "$courseName - 作业列表"
 
         initRecyclerView()
+        initCreateHomeworkButton()
         loadHomework()
+    }
+    
+    private fun initCreateHomeworkButton() {
+        binding.fabCreateHomework.setOnClickListener {
+            // 调用创建作业API
+            createHomework()
+        }
     }
 
     private fun initRecyclerView() {
@@ -45,6 +67,51 @@ class HomeworkListActivity: AppCompatActivity() {
     }
 
     private fun loadHomework() {
+        // 显示加载状态
+        // 调用API获取作业列表 (@GET /api/teach/homework/create/list)
+        RetrofitClient.apiService.getTeacherHomeworkList(
+            page = currentPage,
+            size = pageSize
+        ).enqueue(object : Callback<BaseResp<PageData<TeachCreateHWSimpleVO>>> {
+            override fun onResponse(call: Call<BaseResp<PageData<TeachCreateHWSimpleVO>>>, response: Response<BaseResp<PageData<TeachCreateHWSimpleVO>>>) {
+                
+                if (response.isSuccessful && response.body()?.code == 200) {
+                    val data = response.body()?.data
+                    data?.records?.let { records ->
+                        homeworkList.clear()
+                        // 将API返回的数据转换为HomeworkDetail对象
+                        records.forEach { hw ->
+                            homeworkList.add(
+                                HomeworkDetail(
+                                    id = hw.homeworkId?.toString() ?: "",
+                                    title = hw.homeworkName ?: "未命名作业",
+                                    description = "", // 详情API获取
+                                    dueDate = hw.deadTime ?: "",
+                                    submissions = mutableListOf()
+                                )
+                            )
+                        }
+                        homeworkAdapter.notifyDataSetChanged()
+                    }
+                } else {
+                    // API调用失败，显示模拟数据
+                    showMockData()
+                    // 显示错误信息
+                    Toast.makeText(this@HomeworkListActivity, "获取作业列表失败: ${response.body()?.message ?: "未知错误"}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<BaseResp<PageData<TeachCreateHWSimpleVO>>>, t: Throwable) {
+                Log.e("HomeworkList", "Failed to load homework: ${t.message}")
+                // 网络失败，显示模拟数据
+                showMockData()
+                // 显示错误信息
+                Toast.makeText(this@HomeworkListActivity, "网络异常，获取作业列表失败", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+    
+    private fun showMockData() {
         // 模拟数据 - 根据课程ID显示不同的大学作业
         homeworkList.clear()
         
@@ -154,5 +221,34 @@ class HomeworkListActivity: AppCompatActivity() {
             }
         }
         homeworkAdapter.notifyDataSetChanged()
+    }
+    
+    private fun createHomework() {
+        // 创建一个示例作业请求
+        val request = CreateHomeworkRequest(
+            subjectId = courseId?.toInt(),
+            homeworkName = "新创建的作业",
+            homeworkContent = "这是作业内容",
+            deadTime = "2025-12-31",
+            imageUrls = listOf()
+        )
+        
+        // 调用API创建作业 (@POST /api/teach/homework/create)
+        RetrofitClient.apiService.createHomework(request).enqueue(object : Callback<BaseResp<String>> {
+            override fun onResponse(call: Call<BaseResp<String>>, response: Response<BaseResp<String>>) {
+                if (response.isSuccessful && response.body()?.code == 200) {
+                    Toast.makeText(this@HomeworkListActivity, "作业创建成功", Toast.LENGTH_SHORT).show()
+                    // 重新加载作业列表
+                    loadHomework()
+                } else {
+                    Toast.makeText(this@HomeworkListActivity, "作业创建失败: ${response.body()?.message ?: "未知错误"}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<BaseResp<String>>, t: Throwable) {
+                Log.e("HomeworkList", "Failed to create homework: ${t.message}")
+                Toast.makeText(this@HomeworkListActivity, "网络异常，作业创建失败", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

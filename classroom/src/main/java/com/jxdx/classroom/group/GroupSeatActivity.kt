@@ -19,7 +19,7 @@ import com.jxdx.classroom.R
 import com.jxdx.classroom.http.ApiService
 import com.jxdx.classroom.http.RetrofitClient
 import com.jxdx.classroom.http.DTO.JoinStuDTO
-import com.jxdx.classroom.com.jxdx.classroom.http.DTO.OutStuDTO
+import com.jxdx.classroom.http.DTO.OutStuDTO
 import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.google.android.material.tabs.TabLayout
@@ -34,7 +34,8 @@ class GroupSeatActivity : AppCompatActivity() {
     private val groups = mutableListOf<Group>()
     private val currentStudentId = 1
     private val currentStudentName = "我自己"
-    private val totalStudents = 19
+    private var currentStudentAvatar: String? = null
+    private var totalStudents = 19 
     private val groupSize = 5
     private var assignedCount = 0
     private val activityScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
@@ -60,20 +61,23 @@ class GroupSeatActivity : AppCompatActivity() {
         // 获取老师ID
         teacherId = intent.getIntExtra("teacherId", 6)
         
-        // 记录参数值，便于调试
-        Log.d("GroupSeatActivity", "onCreate - subjectId: $subjectId, teacherId: $teacherId")
-        Log.d("GroupSeatActivity", "onCreate - Token exists: ${TokenManager.getToken() != null}")
-
-        // 先生成本地默认小组数据作为备用
+        // 尝试获取当前学生的头像URL
+        // 注意：在实际应用中，应该从用户登录信息或API中获取真实的头像URL
+        // 这里使用一个模拟的头像URL作为示例
+        currentStudentAvatar = "https://tc-new.z.wiki/autoupload/f/d9oSIkypaT4MX13ceI-M6PmYtDrGvPpsluM_NdUVaNGyl5f0KlZfm6UsKj-HyTuv/20250905/Jr96/458X300/90.jpg"
+        
+        // 生成默认的小组数据
         generateGroups()
-        // 添加UI渲染调用，确保初始时显示分组内容
+        
+        // 渲染UI
         renderGroupsUI()
-        // 尝试从API获取小组列表数据
+        
+        // 尝试从API加载真实的小组数据
         loadGroupsFromApi()
     }
 
     private fun initViews() {
-        // 使用findViewById初始化所有控件
+        // 初始化控件
         ivBack = findViewById(R.id.ivBack)
         btnAutoAssign = findViewById(R.id.btnAutoAssign)
         btnStartDiscussion = findViewById(R.id.btnStartDiscussion)
@@ -81,30 +85,20 @@ class GroupSeatActivity : AppCompatActivity() {
         tvTotalStudents = findViewById(R.id.tvTotalStudents)
         tvAssignedStudents = findViewById(R.id.tvAssignedStudents)
         tvRemainingStudents = findViewById(R.id.tvRemainingStudents)
-
-        // 返回按钮
+        
+        // 设置点击事件
         ivBack.setOnClickListener {
-            finish()
-            // 使用存在的slide_in_right动画替代不存在的slide_in_left
-            try {
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-            } catch (e: Exception) {
-                // 忽略动画资源不存在的错误
-            }
+            // 使用onBackPressedDispatcher替代已弃用的onBackPressed()方法
+            onBackPressedDispatcher.onBackPressed()
         }
-
-        // 自动分配按钮
+        
         btnAutoAssign.setOnClickListener {
             autoAssignRemaining()
         }
-
-        // 开始讨论按钮
+        
         btnStartDiscussion.setOnClickListener {
-            startDiscussionForAllGroups()
+            startActivity(Intent(this, DiscussionActivity::class.java))
         }
-
-        // 更新统计数据
-        updateStats()
     }
 
     override fun onDestroy() {
@@ -112,124 +106,181 @@ class GroupSeatActivity : AppCompatActivity() {
         activityScope.cancel()
     }
 
-    // 从API获取小组列表
     private fun loadGroupsFromApi() {
         activityScope.launch {
             try {
-                val token = TokenManager.getToken() ?: ""
-                
-                // 检查Token是否存在
-                if (token.isEmpty()) {
-                    Log.e("GroupSeatActivity", "Token为空，可能需要重新登录")
-                    // 即使Token为空，也继续尝试API调用，让服务器返回具体的错误信息
-                }
-                
                 // 记录API调用参数
-                Log.d("GroupSeatActivity", "loadGroupsFromApi - 调用API参数: subjectId=$subjectId, createdBy=$teacherId")
+                Log.d("GroupSeat", "调用API加载小组数据: subjectId=$subjectId, teacherId=$teacherId")
                 
-                // 使用从intent获取的subjectId和teacherId
+                val token = TokenManager.getToken() ?: ""
+                // 检查API定义，确保参数名正确
                 val response = RetrofitClient.apiService.getGroups(token, subjectId, teacherId)
                 
-                // 记录API响应
-                Log.d("GroupSeatActivity", "loadGroupsFromApi - API响应: code=${response.code}, message=${response.message}, dataSize=${response.data?.size ?: 0}")
-                
-                if (response.code == 0 && response.data != null) {
-                    // 清空现有小组数据
+                if (response.code == 0) {
+                    // 清空现有的小组数据
                     groups.clear()
                     assignedCount = 0
                     
-                    // 处理API返回的小组数据
-                    val data = response.data
-                    // 使用安全调用处理可空类型
-                    if (data?.isNotEmpty() == true) {
-                        data.forEach { group ->
-                            groups.add(group)
-                            // 已分配的学生数
-                            assignedCount += group.currentCount
+                    // 将API返回的小组数据映射到本地数据结构
+                    response.data?.forEach { groupDTO ->
+                        // 确保小组容量合理，如果API返回的容量小于2，则使用应用程序中定义的groupSize
+                        val capacity = groupDTO.capacity
+                        val group = Group(
+                            id = groupDTO.id,
+                            name = groupDTO.name,
+                            capacity = capacity,
+                            currentCount = groupDTO.currentCount,
+                            students = MutableList(capacity) { null }
+                        )
+                        
+                        // 初始化所有位置为null
+                        group.students = MutableList(capacity) { null }
+                        
+                        // 映射学生数据，按照memberIndex来安排学生在小组中的位置
+                        groupDTO.students?.forEach { studentDTO ->
+                            if (studentDTO != null) {
+                                // 确保学生核心信息完整
+                                val studentId = studentDTO.id
+                                val studentName = studentDTO.name ?: "未知学生"
+                                
+                                if (studentId == 0 || studentName.isEmpty()) {
+                                    Log.w("GroupSeat", "忽略无效学生数据: ID=${studentDTO.id}, name=${studentDTO.name}")
+                                    return@forEach
+                                }
+                                
+                                // 获取学生的memberIndex，如果为null则使用当前迭代的索引
+                                val memberIndex = studentDTO.memberIndex ?: 0
+                                
+                                // 记录加载学生信息，用于调试
+                                Log.d("GroupSeat", "加载学生: ID=${studentId}, name=${studentName}, 原始memberIndex=${studentDTO.memberIndex}, 实际使用memberIndex=$memberIndex")
+                                
+                                // 确保memberIndex在有效范围内
+                                if (memberIndex >= 0 && memberIndex < capacity) {
+                                    // 使用API返回的memberIndex作为目标位置
+                                    val targetIndex = memberIndex
+                                    
+                                    // 确保位置有效
+                                    if (targetIndex < capacity) {
+                                        // 创建学生对象，使用正确的字段名，并为可能为null的name提供默认值
+                                        val student = Student(
+                                            id = studentId,
+                                            name = studentName,  // 处理name可能为null的情况
+                                            avatarUrl = studentDTO.avatarUrl,
+                                            isLeader = studentDTO.isLeader ?: false, // 为isLeader提供默认值
+                                            memberIndex = memberIndex // 保持原始的memberIndex
+                                        )
+                                        
+                                        // 如果是当前学生，确保使用当前学生的完整信息
+                                        if (studentId == currentStudentId) {
+                                            Log.d("GroupSeat", "检测到当前学生，使用本地完整数据")
+                                            val currentUserStudent = Student(
+                                                id = currentStudentId,
+                                                name = currentStudentName,
+                                                avatarUrl = currentStudentAvatar,
+                                                isLeader = student.isLeader,
+                                                memberIndex = memberIndex
+                                            )
+                                            group.students[targetIndex] = currentUserStudent
+                                        } else {
+                                            group.students[targetIndex] = student
+                                        }
+                                        assignedCount++
+                                        Log.d("GroupSeat", "学生${studentName} 放置在位置$targetIndex")
+                                    } else {
+                                        Log.w("GroupSeat", "小组${group.name}已满，无法放置学生${studentName}")
+                                    }
+                                } else {
+                                    Log.w("GroupSeat", "忽略无效的memberIndex: $memberIndex 对于学生ID: ${studentId}")
+                                }
+                            }
                         }
                         
-                        // 重新渲染UI
-                        renderGroupsUI()
-                        updateStats()
-                        Log.d("GroupSeatActivity", "成功从API获取小组数据")
-                    } else {
-                        // 如果API返回空数据，确保有默认数据显示
-                        Log.d("GroupSeatActivity", "API返回空数据，使用本地生成数据")
-                        generateGroups()
-                        renderGroupsUI()
-                        updateStats()
-                    }
-                } else {
-                    // 如果API调用失败，继续使用本地生成的小组数据
-                    Log.e("GroupSeatActivity", "从API获取小组数据失败: ${response.message ?: "未知错误"}")
-                    // 如果API返回的数据为空，则确保有默认数据显示
-                    if (groups.isEmpty()) {
-                        generateGroups()
-                        renderGroupsUI()
-                        updateStats()
+                        groups.add(group)
                     }
                     
-                    // 特殊处理登录相关错误
-                    if (response.code == 401 || response.code == 403 || 
-                        response.message?.contains("未登录") == true || 
-                        response.message?.contains("token") == true) {
-                        Log.e("GroupSeatActivity", "检测到登录状态异常，建议重新登录")
-                        // 在UI线程显示提示
-                        withContext(Dispatchers.Main) {
-                            Toast.makeText(this@GroupSeatActivity, "登录状态已失效，请重新登录", Toast.LENGTH_SHORT).show()
-                        }
+                    // 检查是否需要生成默认小组数据
+                    if (groups.isEmpty()) {
+                        Log.d("GroupSeat", "API返回的小组数据为空，生成默认小组数据")
+                        generateGroups()
+                    } else {
+                        // 即使小组都没有学生，也要显示从API返回的空组
+                        Log.d("GroupSeat", "API返回了${groups.size}个小组，即使它们可能都是空组")
                     }
-                }
-            } catch (e: Exception) {
-                Log.e("GroupSeatActivity", "API调用异常: ${e.message}")
-                e.printStackTrace() // 打印完整异常堆栈，便于调试
-                
-                // 异常情况下，确保有默认数据显示
-                if (groups.isEmpty()) {
+                    
+                    // 更新总学生数
+                    totalStudents = calculateTotalStudentsCapacity()
+                    
+                    // 记录小组加载结果，包括空组信息
+                    val emptyGroupsCount = groups.count { it.currentCount == 0 }
+                    Log.d("GroupSeat", "成功加载小组数据: 共${groups.size}个小组, 其中空组${emptyGroupsCount}个, 已分配${assignedCount}人, 总容量${totalStudents}人")
+                    
+                    // 检查当前学生是否在已分配的小组中
+                    val currentStudentPosition = findCurrentStudentPosition()
+                    if (currentStudentPosition != null) {
+                        val (group, index) = currentStudentPosition
+                        Log.d("GroupSeat", "当前学生已在${group?.name}的位置${index+1}")
+                    } else {
+                        Log.d("GroupSeat", "当前学生尚未分配位置")
+                    }
+                    
+                    // 渲染UI
+                    renderGroupsUI()
+                    updateStats()
+                } else {
+                    Log.e("GroupSeat", "加载小组数据失败: ${response.message}")
+                    // 显示加载失败提示
+                    Toast.makeText(this@GroupSeatActivity, "加载小组数据失败: ${response.message}", Toast.LENGTH_SHORT).show()
+                    // 加载失败时也生成默认小组数据
                     generateGroups()
                     renderGroupsUI()
                     updateStats()
                 }
-                
+            } catch (e: Exception) {
+                Log.e("GroupSeat", "加载小组数据异常: ${e.message}")
                 // 显示网络异常提示
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@GroupSeatActivity, "网络连接异常，请检查网络设置", Toast.LENGTH_SHORT).show()
-                }
+                Toast.makeText(this@GroupSeatActivity, "网络异常，请检查网络连接后重试", Toast.LENGTH_SHORT).show()
+                // 异常时生成默认小组数据
+                generateGroups()
+                renderGroupsUI()
+                updateStats()
             }
         }
     }
 
-    //初始化空的学生列表
     private fun generateGroups() {
-        groups.clear() // 清空现有小组数据
-        assignedCount = 0 // 重置已分配计数
+        // 清空现有的小组数据
+        groups.clear()
+        assignedCount = 0
         
-        // 计算小组数量：对于19人分5人一组，应该是4个小组(5+5+5+4=19)
-        val groupCount = if (totalStudents % groupSize == 0) {
-            totalStudents / groupSize
-        } else {
-            totalStudents / groupSize + 1
-        }
-        
-        // 实际需要检查的是：有多少个小组可以达到满员状态
-        val fullGroupsCount = totalStudents / groupSize
-        val remainingStudents = totalStudents % groupSize
+        // 计算需要创建的小组数量
+        val groupCount = Math.ceil(totalStudents.toDouble() / groupSize).toInt()
         
         // 创建小组
         for (i in 1..groupCount) {
-            // 计算当前小组的成员数
-            val actualSize = if (i <= fullGroupsCount) {
-                // 前fullGroupsCount个小组是满员的
-                groupSize
+            // 计算小组容量
+            val capacity = if (i == groupCount) {
+                totalStudents - (groupCount - 1) * groupSize
             } else {
-                // 最后一个小组处理剩下的学生
-                remainingStudents
+                groupSize
             }
             
-            // 初始化空的学生列表
-            val students = MutableList<Student?>(actualSize) { null }
-            groups.add(Group(i, "小组 $i", actualSize, 0, students))
+            // 创建小组并添加到列表
+            groups.add(Group(
+                id = i,
+                name = "第${i}小组",
+                capacity = capacity,
+                currentCount = 0,
+                students = MutableList(capacity) { null }
+            ))
         }
+        
+        // 更新总学生数
+        totalStudents = calculateTotalStudentsCapacity()
+    }
+
+    // 计算所有小组的容量之和
+    private fun calculateTotalStudentsCapacity(): Int {
+        return groups.sumOf { it.capacity }
     }
 
     private fun renderGroupsUI() {
@@ -239,7 +290,7 @@ class GroupSeatActivity : AppCompatActivity() {
         }
         
         groupContainer.removeAllViews()
-
+        
         for (group in groups) {
             val groupCard = layoutInflater.inflate(R.layout.item_group_card, null)
             setupGroupCard(groupCard, group)
@@ -253,11 +304,9 @@ class GroupSeatActivity : AppCompatActivity() {
         val tvGroupStatus = view.findViewById<TextView>(R.id.tvGroupStatus)
         val ivGroupLock = view.findViewById<ImageView>(R.id.ivGroupLock)
         val memberContainer = view.findViewById<LinearLayout>(R.id.memberContainer)
-        // 移除不存在的tvMemberCount控件引用
         
         // 设置小组名称
         tvGroupName.text = group.name
-        // 移除对不存在的tvMemberCount的设置
         
         // 设置小组状态
         val filledSeats = getFilledSeatsCount(group)
@@ -271,16 +320,18 @@ class GroupSeatActivity : AppCompatActivity() {
             filledSeats > 0 -> {
                 tvGroupStatus.text = "进行中"
                 tvGroupStatus.setBackgroundResource(R.drawable.bg_status_in_progress)
+                ivGroupLock.visibility = View.GONE
             }
             else -> {
                 tvGroupStatus.text = "待分组"
                 tvGroupStatus.setBackgroundResource(R.drawable.bg_status_pending)
+                ivGroupLock.visibility = View.GONE
             }
         }
-
+        
         // 渲染成员座位
         memberContainer.removeAllViews()
-
+        
         // 渲染所有座位
         for ((index, student) in group.students.withIndex()) {
             // 第一个位置设为组长位
@@ -392,31 +443,150 @@ class GroupSeatActivity : AppCompatActivity() {
 
         activityScope.launch {
             try {
-                // 创建当前学生对象，使用正确的字段名avatarUrl
-                val currentStudent = Student(currentStudentId, currentStudentName, null, isLeader)
+                // 首先检查并移除当前学生的位置（如果有）
+                val currentPosition = findCurrentStudentPosition()
+                if (currentPosition != null) {
+                    val (currentGroup, currentIndex) = currentPosition
+                    // 如果要加入的是当前所在的组且位置相同，则不需要操作
+                    if (currentGroup?.id == group.id && currentIndex == seatIndex) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@GroupSeatActivity, "您已经在该位置", Toast.LENGTH_SHORT).show()
+                            showLoadingAnimation(loadingAnimation, false)
+                        }
+                        return@launch
+                    }
+                    // 否则先移除当前位置
+                    removeCurrentStudent()
+                }
                 
-                // 创建JoinStuDTO请求体
+                // 记录座位索引信息，用于调试
+                Log.d("GroupSeat", "用户点击的位置索引: ${seatIndex}")
+                
+                // 验证当前学生信息
+                if (currentStudentId == 0 || currentStudentName.isEmpty()) {
+                    Log.e("GroupSeat", "当前学生信息不完整: ID=${currentStudentId}, 姓名=${currentStudentName}")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@GroupSeatActivity, "学生信息不完整，无法加入小组", Toast.LENGTH_SHORT).show()
+                        showLoadingAnimation(loadingAnimation, false)
+                    }
+                    return@launch
+                }
+                
+                // 确认座位索引有效
+                if (seatIndex < 0 || seatIndex >= group.capacity) {
+                    Log.e("GroupSeat", "无效的座位索引: ${seatIndex}, 小组容量: ${group.capacity}")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@GroupSeatActivity, "无效的座位位置", Toast.LENGTH_SHORT).show()
+                        showLoadingAnimation(loadingAnimation, false)
+                    }
+                    return@launch
+                }
+                
+                // 创建当前学生对象，明确指定所有字段
+                val currentStudent = Student(
+                    id = currentStudentId,
+                    name = currentStudentName,
+                    avatarUrl = currentStudentAvatar,
+                    isLeader = isLeader,
+                    memberIndex = seatIndex
+                )
+                
+                Log.d("GroupSeat", "创建学生对象: ID=${currentStudentId}, 姓名=${currentStudentName}, 位置=${seatIndex}, isLeader=${isLeader}")
+                
+                // 确保学生信息完整
+                if (currentStudent.id == 0 || currentStudent.name.isEmpty()) {
+                    Log.e("GroupSeat", "学生对象信息不完整: $currentStudent")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@GroupSeatActivity, "学生信息不完整，无法加入小组", Toast.LENGTH_SHORT).show()
+                        showLoadingAnimation(loadingAnimation, false)
+                    }
+                    return@launch
+                }
+                
+                // 创建JoinStuDTO请求体，确保所有字段都被正确设置
                 val joinRequest = JoinStuDTO(
                     teamId = group.id,
-                    index = seatIndex,
-                    student = currentStudent
+                    student = Student(
+                        id = currentStudentId,
+                        name = currentStudentName,
+                        avatarUrl = currentStudentAvatar,
+                        isLeader = isLeader,
+                        memberIndex = seatIndex
+                    )
                 )
+                
+                // 记录完整的请求体信息用于调试
+                Log.d("GroupSeat", "完整的JoinStuDTO请求体: teamId=${group.id}, student=${currentStudent}")
+                
+                // 记录加入请求信息，详细记录学生对象的每个字段
+                Log.d("GroupSeat", "发送加入小组请求: teamId=${group.id}, 请求位置=${seatIndex}")
+                Log.d("GroupSeat", "学生信息明细: id=${currentStudent.id}, name=${currentStudent.name}, avatarUrl=${currentStudent.avatarUrl}, isLeader=${currentStudent.isLeader}, memberIndex=${currentStudent.memberIndex}")
+                
+                // 确保学生对象的所有必需字段都有值
+                if (currentStudent.id == 0 || currentStudent.name.isEmpty()) {
+                    Log.e("GroupSeat", "严重错误: 学生对象的关键字段为空，无法发送有效的API请求")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@GroupSeatActivity, "学生信息不完整，无法加入小组", Toast.LENGTH_SHORT).show()
+                        showLoadingAnimation(loadingAnimation, false)
+                    }
+                    return@launch
+                }
                 
                 // 调用API加入小组
                 val token = TokenManager.getToken() ?: ""
                 val response = RetrofitClient.apiService.joinGroups(token, joinRequest)    //学生加入小组
                 
+                // 记录API响应
+                Log.d("GroupSeat", "加入小组API响应: code=${response.code}, message=${response.message}")
+                
                 if (response.code == 0) {
-                    // API调用成功，更新本地数据
+                    // API调用成功，确保本地数据立即更新到用户点击的位置
                     withContext(Dispatchers.Main) {
-                        // 将学生保存到Group.students的相应位置
-                        group.students[seatIndex] = currentStudent
-                        assignedCount++
+                        // 确保位置有效并立即更新UI
+                        if (seatIndex < group.capacity) {
+                            group.students[seatIndex] = currentStudent
+                            assignedCount++
+                        }
 
                         updateStats()
                         showJoinAnimation(view)
                         Toast.makeText(this@GroupSeatActivity, "成功加入 ${group.name}", Toast.LENGTH_SHORT).show()
+                        
+                        // 立即渲染UI，让用户看到学生在正确的位置
                         renderGroupsUI()
+                        
+                        // 在后台重新加载数据，但不覆盖用户选择的位置
+                        Log.d("GroupSeat", "加入成功，在后台重新加载小组数据以确保其他数据一致性")
+                        activityScope.launch {
+                            try {
+                                loadGroupsFromApi()
+                                delay(500) // 增加延迟时间以确保数据完全加载完成
+                                withContext(Dispatchers.Main) {
+                                    // 再次确认学生在用户点击的位置
+                                    val targetGroup = groups.find { it.id == group.id }
+                                    if (targetGroup != null && seatIndex < targetGroup.students.size) {
+                                        // 重新设置学生到用户点击的位置，确保使用当前学生的完整信息
+                                        val currentUserStudent = Student(
+                                            id = currentStudentId,
+                                            name = currentStudentName,
+                                            avatarUrl = currentStudentAvatar,
+                                            isLeader = isLeader,
+                                            memberIndex = seatIndex
+                                        )
+                                        
+                                        // 即使API返回的数据可能有不同的位置，也要强制设置到用户点击的位置
+                                        targetGroup.students[seatIndex] = currentUserStudent
+                                        Log.d("GroupSeat", "已确保学生在请求的位置${seatIndex}")
+                                        renderGroupsUI()
+                                    } else {
+                                        Log.w("GroupSeat", "无法找到目标组或位置无效")
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Log.e("GroupSeat", "重新加载数据时出错", e)
+                            }
+                        }
+                        
                         showLoadingAnimation(loadingAnimation, false)
                     }
                 } else {
@@ -427,7 +597,7 @@ class GroupSeatActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    Log.e("GroupSeatActivity", "加入小组异常: ${e.message}")
+                    Log.e("GroupSeat", "加入小组异常: ${e.message}")
                     Toast.makeText(this@GroupSeatActivity, "网络异常，请重试", Toast.LENGTH_SHORT).show()
                     showLoadingAnimation(loadingAnimation, false)
                 }
@@ -472,7 +642,7 @@ class GroupSeatActivity : AppCompatActivity() {
                         )
                         RetrofitClient.apiService.outGroups(token, outRequest)
                     } catch (e: Exception) {
-                        Log.e("GroupSeatActivity", "退出小组异常: ${e.message}")
+                        Log.e("GroupSeat", "退出小组异常: ${e.message}")
                     }
                 }
                 
@@ -484,31 +654,15 @@ class GroupSeatActivity : AppCompatActivity() {
     }
 
     private fun showCancelPositionDialog(onConfirm: () -> Unit) {
-        Toast.makeText(this, "确定要取消当前位置选择吗？", Toast.LENGTH_LONG).show()
-        // 为了简化，这里直接在短暂延迟后执行确认操作
-        Handler(Looper.getMainLooper()).postDelayed({
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("")
+        builder.setMessage("确定要取消位置选择吗？")
+        builder.setPositiveButton("确定") { dialog, which ->
             onConfirm()
-        }, 1500)
-    }
-
-    private fun showLoadingAnimation(view: LottieAnimationView, show: Boolean) {
-        view.visibility = if (show) View.VISIBLE else View.GONE
-        if (show) {
-            view.playAnimation()
-        } else {
-            view.cancelAnimation()
         }
-    }
-
-    private fun showJoinAnimation(view: View) {
-        val scaleX = ObjectAnimator.ofFloat(view, "scaleX", 0.8f, 1.2f, 1.0f)
-        val scaleY = ObjectAnimator.ofFloat(view, "scaleY", 0.8f, 1.2f, 1.0f)
-
-        val animatorSet = AnimatorSet()
-        animatorSet.playTogether(scaleX, scaleY)
-        animatorSet.duration = 500
-        animatorSet.interpolator = android.view.animation.OvershootInterpolator()
-        animatorSet.start()
+        builder.setNegativeButton("取消") { dialog, which ->
+        }
+        builder.show()
     }
 
     private fun autoAssignRemaining() {
@@ -525,6 +679,13 @@ class GroupSeatActivity : AppCompatActivity() {
     }
 
     private fun assignSinglePosition() {
+        // 首先检查并移除当前学生的位置（如果有）
+        val currentPosition = findCurrentStudentPosition()
+        if (currentPosition != null) {
+            // 移除当前位置
+            removeCurrentStudent()
+        }
+        
         // 查找所有空座位
         val emptySlots = mutableListOf<EmptySlot>()
         
@@ -548,21 +709,94 @@ class GroupSeatActivity : AppCompatActivity() {
         // 随机选择一个空位
         val randomSlot = emptySlots.random()
         
-        // 分配到选择的位置，使用正确的字段名avatarUrl
-        val currentStudent = Student(currentStudentId, currentStudentName, null, randomSlot.isLeader)
+        // 分配到选择的位置，使用正确的具名参数
+        val currentStudent = Student(
+            id = currentStudentId,
+            name = currentStudentName,
+            avatarUrl = currentStudentAvatar,
+            isLeader = randomSlot.isLeader,
+            memberIndex = randomSlot.seatIndex
+        )
         randomSlot.group.students[randomSlot.seatIndex] = currentStudent
         assignedCount++
         updateStats()
+        
+        // 渲染UI
         renderGroupsUI()
-        Toast.makeText(this, "已为你自动分配到${randomSlot.group.name}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "已自动分配位置", Toast.LENGTH_SHORT).show()
+        
+        // 调用API将分配操作同步到服务器
+        activityScope.launch {
+            try {
+                // 创建Student对象
+                val currentStudent = Student(
+                    id = currentStudentId,
+                    name = currentStudentName,
+                    avatarUrl = currentStudentAvatar,
+                    isLeader = randomSlot.isLeader,
+                    memberIndex = randomSlot.seatIndex
+                )
+                
+                // 创建JoinStuDTO请求体
+                val joinRequest = JoinStuDTO(
+                    teamId = randomSlot.group.id,
+                    student = currentStudent
+                )
+                
+                // 记录加入请求信息，详细记录学生对象的每个字段
+                Log.d("GroupSeat", "发送自动分配位置请求: teamId=${randomSlot.group.id}, index=${randomSlot.seatIndex}")
+                Log.d("GroupSeat", "学生信息明细: id=${currentStudent.id}, name=${currentStudent.name}, avatarUrl=${currentStudent.avatarUrl}, isLeader=${currentStudent.isLeader}, memberIndex=${currentStudent.memberIndex}")
+                
+                // 确保学生对象的所有必需字段都有值
+                if (currentStudent.id == 0 || currentStudent.name.isEmpty()) {
+                    Log.e("GroupSeat", "严重错误: 学生对象的关键字段为空，无法发送有效的API请求")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@GroupSeatActivity, "学生信息不完整，自动分配失败", Toast.LENGTH_SHORT).show()
+                    }
+                    return@launch
+                }
+                
+                // 调用API加入小组
+                val token = TokenManager.getToken() ?: ""
+                val response = RetrofitClient.apiService.joinGroups(token, joinRequest)
+                
+                // 记录API响应
+                Log.d("GroupSeat", "自动分配位置API响应: code=${response.code}, message=${response.message}")
+                
+                if (response.code != 0) {
+                    withContext(Dispatchers.Main) {
+                        // 处理失败情况
+                        Toast.makeText(this@GroupSeatActivity, "自动分配位置失败: ${response.message}", Toast.LENGTH_SHORT).show()
+                        Log.w("GroupSeat", "自动分配位置API调用失败: ${response.message}")
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e("GroupSeat", "自动分配位置异常: ${e.message}")
+                }
+            }
+        }
     }
 
-    // 辅助类，用于存储空位信息
-    private data class EmptySlot(
-        val group: Group,
-        val isLeader: Boolean,
-        val seatIndex: Int
-    )
+    private fun showLoadingAnimation(view: LottieAnimationView, show: Boolean) {
+        view.visibility = if (show) View.VISIBLE else View.GONE
+        if (show) {
+            view.playAnimation()
+        } else {
+            view.cancelAnimation()
+        }
+    }
+
+    private fun showJoinAnimation(view: View) {
+        val scaleX = ObjectAnimator.ofFloat(view, "scaleX", 0.8f, 1.2f, 1.0f)
+        val scaleY = ObjectAnimator.ofFloat(view, "scaleY", 0.8f, 1.2f, 1.0f)
+
+        val animatorSet = AnimatorSet()
+        animatorSet.playTogether(scaleX, scaleY)
+        animatorSet.duration = 500
+        animatorSet.interpolator = android.view.animation.OvershootInterpolator()
+        animatorSet.start()
+    }
 
     private fun updateStats() {
         // 确保所有控件已初始化
@@ -581,36 +815,14 @@ class GroupSeatActivity : AppCompatActivity() {
             tvAssignedStudents.text = assignedCount.toString()
             tvRemainingStudents.text = (totalStudents - assignedCount).toString()
         } catch (e: Exception) {
-            Log.e("GroupSeatActivity", "更新统计数据失败: ${e.message}")
+            Log.e("GroupSeat", "更新统计数据失败: ${e.message}")
         }
     }
 
-    private fun isAllGroupsFull(): Boolean {
-        return assignedCount >= totalStudents
-    }
-
-    private fun startDiscussionForAllGroups() {
-        groups.forEach { group ->
-            if (group.students.any { it?.id == currentStudentId }) {
-                enterDiscussion(group)
-                return
-            }
-        }
-        // 如果当前学生不在任何组，自动分配到第一个组
-        enterDiscussion(groups.first())
-    }
-
-    private fun enterDiscussion(group: Group) {
-        val intent = Intent(this, DiscussionActivity::class.java)
-        intent.putExtra("groupId", group.id)
-        intent.putExtra("groupName", group.name)
-        intent.putExtra("isTeacher", false)  //学生进入讨论区
-        startActivity(intent)
-        try {
-            // 使用存在的slide_in_right动画
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
-        } catch (e: Exception) {
-            // 忽略动画资源不存在的错误
-        }
-    }
+    // 辅助类，用于存储空位信息
+    private data class EmptySlot(
+        val group: Group,
+        val isLeader: Boolean,
+        val seatIndex: Int
+    )
 }

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.corekit.common.BaseActivity
 import com.jxdx.classroom.databinding.ActivityClassdynamicBinding
 import com.jxdx.classroom.entity.Classroom
+import com.jxdx.classroom.group.TeacherViewActivity
 
 class ActivityClassDynamic: BaseActivity<ActivityClassdynamicBinding>() {
 
@@ -16,6 +17,7 @@ class ActivityClassDynamic: BaseActivity<ActivityClassdynamicBinding>() {
     private lateinit var createLiveRoomViewModel: CreateLiveRoomViewModel
     private var subjectId: Int = 0
     private var subjectName: String = ""
+    private var teacherId: Int = 0 // 添加teacherId成员变量
     
     override fun bindLayout(): ActivityClassdynamicBinding {
         return ActivityClassdynamicBinding.inflate(layoutInflater)
@@ -26,6 +28,9 @@ class ActivityClassDynamic: BaseActivity<ActivityClassdynamicBinding>() {
         intent?.let {
             subjectId = it.getIntExtra("subjectId", 0)
             subjectName = it.getStringExtra("subjectName") ?: ""
+            teacherId = it.getIntExtra("teacherId", 0)
+            // 添加日志，帮助调试参数传递问题
+            Log.d("ClassDynamic", "接收到的参数: subjectId=$subjectId, subjectName=$subjectName, teacherId=$teacherId")
         }
         
         // 更新顶部标题文本框
@@ -58,6 +63,17 @@ class ActivityClassDynamic: BaseActivity<ActivityClassdynamicBinding>() {
         view.btnPdfPreview.setOnClickListener {
             val intent = Intent(this, PdfPreviewActivity::class.java)
             startActivity(intent)
+        }
+        
+        // 学生分组按钮点击事件
+        view.btnStudentGroup.setOnClickListener {
+            // 使用成员变量teacherId，而不是再次从intent中获取
+            val jumpIntent = Intent(this, TeacherViewActivity::class.java)
+            jumpIntent.putExtra("teacherId", teacherId)
+            jumpIntent.putExtra("subjectId", subjectId)
+            // 添加日志，记录传递给TeacherViewActivity的参数
+            Log.d("ClassDynamic", "跳转到TeacherViewActivity: teacherId=$teacherId, subjectId=$subjectId")
+            startActivity(jumpIntent)
         }
         
         // 初始化RecyclerView和适配器

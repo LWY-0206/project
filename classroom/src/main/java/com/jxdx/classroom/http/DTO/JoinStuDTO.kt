@@ -4,6 +4,5 @@ import com.jxdx.classroom.group.Student
 
 data class JoinStuDTO(
     val teamId: Int,
-    val index: Int,
     val student: Student
 )

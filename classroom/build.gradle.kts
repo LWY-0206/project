@@ -83,5 +83,7 @@ dependencies {
 
     // 图片加载库
     implementation("com.github.bumptech.glide:glide:4.16.0")
-
+    
+    // OkHttp依赖
+    implementation("com.squareup.okhttp3:okhttp:5.1.0")
 }

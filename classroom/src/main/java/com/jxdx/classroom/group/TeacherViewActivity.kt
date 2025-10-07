@@ -22,8 +22,8 @@ import com.google.gson.Gson
 import com.jxdx.classroom.R
 import com.jxdx.classroom.databinding.ActivityTeacherViewBinding
 import com.jxdx.classroom.http.RetrofitClient
-import com.jxdx.classroom.com.jxdx.classroom.http.DTO.GenerateGroupDTO
-import com.jxdx.classroom.com.jxdx.classroom.http.DTO.FreeDistribution
+import com.jxdx.classroom.http.DTO.GenerateGroupDTO
+import com.jxdx.classroom.http.DTO.FreeDistribution
 import com.example.corekit.http.TokenManager
 import kotlinx.coroutines.*
 import okhttp3.*
@@ -37,7 +37,7 @@ class TeacherViewActivity : AppCompatActivity() {
     private val groups = mutableListOf<Group>()
     private var subjectId = 1 // 默认值，将在onCreate中更新
     private var groupNumber = 0 // 默认值，将在onCreate中更新
-    private var teacherId = 1 // 默认值，将在onCreate中更新
+    private var teacherId = 6 // 默认值，将在onCreate中更新
     
     // 创建与Activity生命周期绑定的协程作用域
     private val activityScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
@@ -45,10 +45,11 @@ class TeacherViewActivity : AppCompatActivity() {
     // WebSocket相关
     private val mainHandler = Handler(Looper.getMainLooper())
     private val gson = Gson()
-    private val saToken by lazy { TokenManager.getToken() ?: "" }
     private val wsBaseUrl = "ws://121.41.176.238:8080/group/chat/"
     private var isConnected = false
     private var webSocket: WebSocket? = null
+    // 存储初始连接时的Token，用于重连时使用
+    private var initialToken: String? = null
     
     // 请求码
     companion object {
@@ -60,9 +61,12 @@ class TeacherViewActivity : AppCompatActivity() {
         binding = ActivityTeacherViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 获取从上一个界面传递的courseId和teacherId
+        // 获取从上一个界面传递的subjectId和teacherId
         subjectId = intent.getIntExtra("subjectId", 1)
         teacherId = intent.getIntExtra("teacherId", 6)
+        
+        // 添加日志，记录接收到的参数
+        Log.d("TeacherViewActivity", "onCreate接收到的参数: subjectId=$subjectId, teacherId=$teacherId")
         // 初始化视图
         initView()
         
@@ -139,7 +143,8 @@ class TeacherViewActivity : AppCompatActivity() {
      * 执行自由分配未入组成员操作
      */
     private fun performFreeDistribution() {
-        if (saToken.isEmpty()) {
+        val token = TokenManager.getToken() ?: ""
+        if (token.isEmpty()) {
             Toast.makeText(this, "Token获取失败，无法执行分配操作", Toast.LENGTH_SHORT).show()
             return
         }
@@ -157,7 +162,7 @@ class TeacherViewActivity : AppCompatActivity() {
                 
                 // 调用自由分配未入组成员接口
                 val response = RetrofitClient.apiService.freeDistribution(
-                    satoken = saToken,
+                    satoken = token,
                     request = requestBody
                 )
                 
@@ -165,38 +170,26 @@ class TeacherViewActivity : AppCompatActivity() {
                 if (response.code == 0) {
                     Toast.makeText(this@TeacherViewActivity, "随机分配成功", Toast.LENGTH_SHORT).show()
                     
-                    // 调用结束分组接口，自动锁定分组
-                    try {
-                        val endGroupResponse = RetrofitClient.apiService.endGroup(
-                            satoken = saToken,
-                            subjectId = subjectId,
-                            createdBy = teacherId
-                        )
-                        
-                        if (endGroupResponse.code == 0) {
-                            Log.d("TeacherViewActivity", "分组已锁定")
-                        } else {
-                            val errorMsg = "分组锁定失败: ${endGroupResponse.message ?: "未知错误"}"
-                            Log.e("TeacherViewActivity", errorMsg)
-                            // 锁定失败不影响主流程
-                        }
-                    } catch (e: Exception) {
-                        Log.e("TeacherViewActivity", "分组锁定异常: ${e.message}", e)
-                        // 锁定异常不影响主流程
-                    }
+                    // 随机分配成功后不立即重新加载数据，避免因网络问题导致分组消失
+                    // 直接更新UI显示
+                    binding.tvSummary.text = "共 ${groups.size} 个小组，${getTotalStudents()} 名学生"
+                    binding.tvTotalGroups.text = groups.size.toString()
+                    setupGroupsList()
                     
-                    // 重新加载小组数据以更新UI
-                    loadGroupsData()
+                    // 延迟3秒后再重新加载数据，确保有足够时间让服务器处理完成
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        loadGroupsData()
+                    }, 3000)
                 } else {
                     val errorMsg = "随机分配失败: ${response.message ?: "未知错误"}"
                     Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
                     Log.e("TeacherViewActivity", errorMsg)
                 }
             } catch (e: Exception) {
-                val errorMsg = "随机分配异常: ${e.message}"
-                Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
-                Log.e("TeacherViewActivity", errorMsg, e)
-            }
+                    val errorMsg = "随机分配异常: ${e.message}"
+                    Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                    Log.e("TeacherViewActivity", errorMsg, e)
+                }
         }
     }
     
@@ -220,7 +213,7 @@ class TeacherViewActivity : AppCompatActivity() {
       * 显示广播操作选项
       */
      private fun showBroadcastOptions() {
-         val options = arrayOf("发送广播消息", "选择题型广播")
+         val options = arrayOf("发送广播消息", "选择题型广播", "结束分组")
          AlertDialog.Builder(this)
              .setTitle("广播操作")
              .setItems(options) {
@@ -228,10 +221,49 @@ class TeacherViewActivity : AppCompatActivity() {
                  when (which) {
                      0 -> showBroadcastMessageDialog()
                      1 -> selectQuestionTypeForBroadcast()
+                     2 -> endGroup()
                  }
              }
              .setNegativeButton("取消", null)
              .show()
+     }
+      
+     /**
+      * 结束分组，锁定分组状态
+      */
+     private fun endGroup() {
+         val token = TokenManager.getToken() ?: ""
+         if (token.isEmpty()) {
+             Toast.makeText(this, "Token获取失败，无法执行结束分组操作", Toast.LENGTH_SHORT).show()
+             return
+         }
+         
+         // 显示加载提示
+         Toast.makeText(this, "正在结束分组...", Toast.LENGTH_SHORT).show()
+         
+         activityScope.launch {
+             try {
+                 // 调用结束分组接口
+                 val endGroupResponse = RetrofitClient.apiService.endGroup(
+                     satoken = token,
+                     subjectId = subjectId,
+                     createdBy = teacherId
+                 )
+                 
+                 if (endGroupResponse.code == 0) {
+                     Toast.makeText(this@TeacherViewActivity, "分组已成功结束", Toast.LENGTH_SHORT).show()
+                     Log.d("TeacherViewActivity", "分组已结束")
+                 } else {
+                     val errorMsg = "分组结束失败: ${endGroupResponse.message ?: "未知错误"}"
+                     Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                     Log.e("TeacherViewActivity", errorMsg)
+                 }
+             } catch (e: Exception) {
+                 val errorMsg = "分组结束异常: ${e.message}"
+                 Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                 Log.e("TeacherViewActivity", errorMsg, e)
+             }
+         }
      }
       
      /**
@@ -291,7 +323,7 @@ class TeacherViewActivity : AppCompatActivity() {
             val jsonMessage = gson.toJson(broadcastData)
             webSocket?.send(jsonMessage)
             Toast.makeText(this, "广播消息已发送", Toast.LENGTH_SHORT).show()
-            Log.d("TeacherViewActivity", "发送广播消息: $jsonMessage")
+            Log.d("GroupSeat", "发送广播消息: $jsonMessage")
         } else {
             Toast.makeText(this, "WebSocket未连接，无法发送广播消息", Toast.LENGTH_SHORT).show()
         }
@@ -311,7 +343,7 @@ class TeacherViewActivity : AppCompatActivity() {
             val jsonMessage = gson.toJson(questionData)
             webSocket?.send(jsonMessage)
             Toast.makeText(this, "题型广播已发送", Toast.LENGTH_SHORT).show()
-            Log.d("TeacherViewActivity", "发送题型广播: $jsonMessage")
+            Log.d("GroupSeat", "发送题型广播: $jsonMessage")
         } else {
             Toast.makeText(this, "WebSocket未连接，无法发送题型广播", Toast.LENGTH_SHORT).show()
         }
@@ -321,20 +353,32 @@ class TeacherViewActivity : AppCompatActivity() {
      * 连接WebSocket
      */
     private fun connectWebSocket() {
-        if (saToken.isEmpty()) {
-            Log.e("TeacherViewActivity", "Token为空，无法连接WebSocket")
-            Toast.makeText(this, "Token获取失败，无法建立WebSocket连接", Toast.LENGTH_SHORT).show()
-            return
+        // 确定要使用的Token：首次连接时获取并保存，重连时使用保存的Token
+        val tokenToUse: String
+        if (initialToken.isNullOrEmpty()) {
+            // 首次连接，获取最新的Token并保存
+            tokenToUse = TokenManager.getToken() ?: ""
+            if (tokenToUse.isEmpty()) {
+                Log.e("TeacherViewActivity", "Token为空，无法连接WebSocket")
+                Toast.makeText(this, "Token获取失败，无法建立WebSocket连接", Toast.LENGTH_SHORT).show()
+                return
+            }
+            initialToken = tokenToUse
+            Log.d("TeacherViewActivity", "首次连接，保存初始Token")
+        } else {
+            // 重连，使用保存的Token
+            tokenToUse = initialToken!!
+            Log.d("TeacherViewActivity", "重连中，使用保存的Token")
         }
         
         // 构建完整的WebSocket连接地址
-        // 根据用户要求，从group数据中获取正确的teamId
+        // 优化teamId获取逻辑，确保URL格式正确
         val teamId = if (groups.isNotEmpty()) {
             groups[0].id.toString() // 使用第一个小组的id作为teamId
         } else {
-            "" // 如果没有小组，使用空字符串作为默认值
+            "default" // 使用"default"作为默认teamId，避免空字符串导致URL格式问题
         }
-        val wsUrl = "${wsBaseUrl}${teamId}?satoken=$saToken"
+        val wsUrl = "${wsBaseUrl}${teamId}?satoken=$tokenToUse"
         
         try {
             // 创建OkHttpClient
@@ -363,6 +407,12 @@ class TeacherViewActivity : AppCompatActivity() {
                     mainHandler.post {
                         Log.d("TeacherViewActivity", "收到消息: $text")
                         // 处理收到的消息
+                        // 检查是否收到未登录异常消息
+                        if (text.contains("当前用户未登录") || text.contains("Token is empty")) {
+                            Log.e("TeacherViewActivity", "WebSocket认证失败")
+                            // 仅断开连接，不自动重连
+                            disconnectWebSocket()
+                        }
                     }
                 }
                 
@@ -419,15 +469,17 @@ class TeacherViewActivity : AppCompatActivity() {
         // 显示加载提示
         Toast.makeText(this, "正在获取小组数据...", Toast.LENGTH_SHORT).show()
         
+        // 添加日志，打印当前使用的subjectId和teacherId，帮助调试
+        Log.d("TeacherViewActivity", "加载小组数据: subjectId=$subjectId, teacherId=$teacherId")
+        
         // 尝试从API获取小组数据
         activityScope.launch {
             try {
-                // 使用token、subjectId和teacherId调用getGroups接口
-                val groupsResponse = RetrofitClient.apiService.getGroups(
-                    satoken = saToken,
-                    subjectId = subjectId,
-                    createdBy = teacherId
-                )
+                // 使用TokenManager获取token、subjectId和teacherId调用getGroups接口
+                val token = TokenManager.getToken() ?: ""
+                
+                // 使用位置参数而非命名参数，避免参数名不匹配问题
+                val groupsResponse = RetrofitClient.apiService.getGroups(token, subjectId, teacherId)
                 
                 if (groupsResponse.code == 0 && groupsResponse.data != null) {
                     val groupList = groupsResponse.data
@@ -444,7 +496,7 @@ class TeacherViewActivity : AppCompatActivity() {
                         // 计算预设学生总数（所有小组的capacity之和）
                         val totalCapacity = groups.sumOf { it.capacity }
                         // 设置预设学生总数到tvOnlineStudents
-                        binding.tvOnlineStudents.text = totalCapacity.toString()
+                        binding.tvAllStudents.text = totalCapacity.toString()
                         
                         // 更新UI显示
                         binding.tvSummary.text = "共 ${groups.size} 个小组，${getTotalStudents()} 名学生"
@@ -454,7 +506,7 @@ class TeacherViewActivity : AppCompatActivity() {
                         // 即使数据为空，也正常显示空列表
                         groups.clear()
                         groupNumber = 0
-                        binding.tvOnlineStudents.text = "0"
+                        binding.tvAllStudents.text = "0"
                         binding.tvSummary.text = "共 ${groups.size} 个小组，${getTotalStudents()} 名学生"
                         binding.tvTotalGroups.text = groups.size.toString()
                         setupGroupsList()
@@ -469,7 +521,7 @@ class TeacherViewActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 // 发生异常，使用默认数据
                 handleApiFailure()
-                Log.e("TeacherViewActivity", "获取小组数据异常: ${e.message}")
+                Log.e("GroupSeat", "获取小组数据异常: ${e.message}")
                 
                 // 即使发生异常，也尝试建立WebSocket连接
                 connectWebSocket()
@@ -497,17 +549,6 @@ class TeacherViewActivity : AppCompatActivity() {
                 // 显示加载提示
                 Toast.makeText(this@TeacherViewActivity, "正在保存分组大小...", Toast.LENGTH_SHORT).show()
                 
-                // 设置分组数
-                groupNumber = newGroupNumber
-                Toast.makeText(this@TeacherViewActivity, "分组大小设置成功", Toast.LENGTH_SHORT).show()
-                // 立即更新tvTotalGroups显示为新的分组数
-                binding.tvTotalGroups.text = newGroupNumber.toString()
-                
-                // 更新本地groups列表和UI
-                initData()
-                binding.tvSummary.text = "共 " + groups.size + " 个小组，" + getTotalStudents() + " 名学生"
-                setupGroupsList()
-                
                 // 调用生成小组接口，传入subjectId和targetTeamCount
                 try {
                     withContext(Dispatchers.IO) {
@@ -516,34 +557,48 @@ class TeacherViewActivity : AppCompatActivity() {
                             subjectId = subjectId,
                             targetTeamCount = newGroupNumber
                         )
+                        
+                        val token = TokenManager.getToken() ?: ""
                         val response = RetrofitClient.apiService.generateGroups(
-                            satoken = saToken,  // 显式传递token
+                            satoken = token,  // 使用TokenManager获取的token
                             request = requestBody
                         )
+                        
                         // 检查响应是否成功
                         Log.d("TeacherViewActivity", "generateGroups响应: code=${response.code}, message=${response.message}")
-                        if (response.code != 200 && response.code != 0) {
+                        if (response.code != 0 && response.code != 200) {
                             throw Exception("服务器返回错误: ${response.message ?: "未知错误"} (code=${response.code}) ")
                         }
                     }
-                    Toast.makeText(this@TeacherViewActivity, "小组生成请求已发送", Toast.LENGTH_SHORT).show()
+                    
+                    // API调用成功后，更新分组数并重新加载数据
+                    groupNumber = newGroupNumber
+                    Toast.makeText(this@TeacherViewActivity, "分组大小设置成功", Toast.LENGTH_SHORT).show()
+                    
+                    // 立即重新加载分组数据，确保本地数据与服务器数据同步
+                    loadGroupsData()
                 } catch (e: Exception) {
-                    // 生成小组失败，但不影响主流程
-                    val errorMsg = "小组生成请求失败(subjectId=$subjectId, targetTeamCount=$newGroupNumber): " + e.message
-                    Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_LONG).show()
+                    // API调用失败，仍然更新本地数据
+                    groupNumber = newGroupNumber
+                    // 更新本地groups列表和UI
+                    initData()
+                    binding.tvSummary.text = "共 " + groups.size + " 个小组，" + getTotalStudents() + " 名学生"
+                    binding.tvTotalGroups.text = newGroupNumber.toString()
+                    binding.tvAllStudents.text = getTotalStudents().toString()
+                    setupGroupsList()
+                    
+                    val errorMsg = "保存失败，但已更新本地数据: " + e.message
+                    Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
                     Log.e("TeacherViewActivity", errorMsg, e)
                     
-                    // 特别处理分组数错误情况 (code=201)
+                    // 特别处理分组数错误情况
                     if (e.message?.contains("code=201") == true || e.message?.contains("选择目标队伍数量") == true) {
                         // 显示更友好的提示，建议用户重新选择分组数
-                        Toast.makeText(this@TeacherViewActivity, "服务器不接受该分组数量，请尝试选择其他数字（建议4-6组）", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@TeacherViewActivity, "服务器不接受该分组数量，请尝试选择其他数字", Toast.LENGTH_LONG).show()
                         // 打开设置分组数对话框，让用户重新选择
                         showSetGroupSizeDialog()
                     }
                 }
-                
-                // 注意：不再立即重新加载分组数据，避免覆盖刚刚设置的新数据
-                // 如果需要刷新数据，用户可以手动点击刷新按钮
             } catch (e: Exception) {
                 val errorMsg = "保存失败: " + e.message
                 Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
@@ -558,7 +613,7 @@ class TeacherViewActivity : AppCompatActivity() {
         
         // 创建一个输入框
         val input = EditText(this)
-        input.hint = "请输入小组数目（建议4-6组，该范围内服务器更容易接受）"
+        input.hint = "请输入小组数目"
         input.setText(groupNumber.toString())
         input.inputType = android.text.InputType.TYPE_CLASS_NUMBER
         
@@ -568,14 +623,10 @@ class TeacherViewActivity : AppCompatActivity() {
         // 设置确定按钮
         builder.setPositiveButton("确定") { dialog, which ->
             val newGroupNumber = input.text.toString().toIntOrNull()
-            if (newGroupNumber != null && newGroupNumber in 2..8) {
-                // 如果用户选择了4-6组以外的数字，给出额外提示
-                if (newGroupNumber !in 4..6) {
-                    Toast.makeText(this, "注意：非4-6组的分组数量可能不被服务器接受", Toast.LENGTH_LONG).show()
-                }
+            if(newGroupNumber!=null){
                 saveGroupNumberToServer(newGroupNumber)    //保存到后端
-            } else {
-                Toast.makeText(this, "请输入2-8之间的数字", Toast.LENGTH_SHORT).show()
+            }else{
+                showSetGroupSizeDialog()
             }
         }
         
@@ -588,10 +639,10 @@ class TeacherViewActivity : AppCompatActivity() {
 
     private fun initData() {
         // 模拟小组数据
-        val student1 = Student(1, "张三", null)
-        val student2 = Student(2, "李四", null)
-        val student3 = Student(3, "王五", null)
-        val student4 = Student(4, "赵六", null)
+        val student1 = Student(1, "张三", null, false, 0)
+        val student2 = Student(2, "李四", null, false, 1)
+        val student3 = Student(3, "王五", null, false, 2)
+        val student4 = Student(4, "赵六", null, false, 0)
 
         groups.clear()
         // 根据groupNumber创建对应的小组数量

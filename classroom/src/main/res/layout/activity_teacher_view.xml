@@ -137,10 +137,10 @@
                     android:gravity="center">
 
                     <TextView
-                        android:id="@+id/tvOnlineStudents"
+                        android:id="@+id/tvAllStudents"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="15"
+                        android:text="12"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/warning"/>
@@ -148,7 +148,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="在线学生"
+                        android:text="总学生数"
                         android:textSize="17sp"
                         android:textColor="@color/text_secondary"/>
                 </LinearLayout>

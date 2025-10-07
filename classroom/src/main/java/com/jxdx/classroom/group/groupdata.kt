@@ -6,6 +6,7 @@ data class Student(
     val name: String,
     val avatarUrl: String?,      //头像
     var isLeader: Boolean = false,      //是否为组长
+    val memberIndex:Int,
 )
 
 data class Group(
@@ -13,7 +14,7 @@ data class Group(
     val name: String,
     val capacity:Int,
     val currentCount: Int,
-    val students: MutableList<Student?>
+    var students: MutableList<Student?>
 )
 
 

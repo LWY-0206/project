@@ -1,9 +1,12 @@
 package com.jxdx.classroom.entrance
 
 import android.content.Intent
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -58,7 +61,6 @@ class EntranceFragment : Fragment() {
 
         viewPager = binding.viewpagerSubjects
 
-        viewModel.getSubject()
         val iconReS=listOf(
             R.drawable.ig1,
             R.drawable.ic_math,
@@ -70,13 +72,22 @@ class EntranceFragment : Fragment() {
             R.drawable.ic_politics
         )
 
+        // 先更新用户信息，获取用户身份
+        updateEntranceUseInfo()
 
         // 查询用户的所有课程
         viewModel.subjectsList.observe(requireActivity()){
-            subjects = it?.mapIndexed { index, course ->
+            subjects = it?.mapIndexed { index, item ->
                 val iconIndex = index % iconReS.size
+                val subjectName = when (item) {
+                    // 兼容AllCourse类型
+                    is com.jxdx.classroom.AllCourse -> item.subjectName
+                    // 兼容SubjectsVO类型
+                    is com.jxdx.classroom.SubjectsVO -> item.subjectName
+                    else -> "科目${index + 1}"
+                }
                 Subject(
-                    course?.subjectName ?: "科目${index + 1}",
+                    subjectName,
                     iconReS[iconIndex]
                 )
             } ?: emptyList()
@@ -108,6 +119,15 @@ class EntranceFragment : Fragment() {
 
         // 退出按钮
         binding.exit.setOnClickListener {
+            // 清除登录信息
+            val preferences: SharedPreferences = requireContext().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+            val editor = preferences.edit()
+            // 只清除登录相关的状态，保留用户数据
+            editor.remove("is_logged_in")
+            editor.remove("username")
+            editor.remove("phone")
+            editor.apply()
+            
             ServiceRegistry.get(LoginService::class.java)?.navigateToLogin(requireContext())
         }
 
@@ -131,7 +151,36 @@ class EntranceFragment : Fragment() {
             if(identity==0) {
                 startActivity(Intent(requireContext(), ActivityToClassRoomFragment::class.java))//学生
             }else{
-                startActivity(Intent(requireContext(), ActivityToTeacherClassRoomFragment::class.java))//老师
+                val intent = Intent(requireContext(), ActivityToTeacherClassRoomFragment::class.java)
+                // 获取用户信息并设置老师id参数
+                RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
+                    override fun onResponse(
+                        call: Call<BaseResp<UserInfo>?>,
+                        response: Response<BaseResp<UserInfo>?>?
+                    ) {
+                        if (response != null && response.isSuccessful) {
+                            response.body()?.let { body ->
+                                if (body.code == 0) {
+                                    body.data?.let { userInfo ->
+                                        // 从userInfo中获取userId字段作为teacherId
+                                        val teacherId = userInfo.id
+                                        Log.d("EntranceFragment",userInfo.toString())
+                                        intent.putExtra("teacherId", teacherId)
+                                        startActivity(intent)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    override fun onFailure(
+                        call: Call<BaseResp<UserInfo>?>,
+                        t: Throwable
+                    ) {
+                        // 获取用户信息失败时，直接跳转
+                        startActivity(intent)
+                    }
+                })
             }
         }
         binding.ivGroup.setOnClickListener {
@@ -143,7 +192,6 @@ class EntranceFragment : Fragment() {
                 ServiceRegistry.get(ClassService::class.java)?.navigateToTeacherViewActivity(requireContext())
             }
         }
-        updateEntranceUseInfo()
     }
 
     /**
@@ -196,6 +244,7 @@ class EntranceFragment : Fragment() {
                             if(it.data?.identity == 0) {
                                 identity = 0
                                 binding.tvUserName.text = "欢迎" + it.data?.userName + "同学！"
+                                Log.d("EntranceFrance",it.data.toString())
                                 Glide.with(requireContext())
                                     .load(it.data?.avatarUrl)
                                     .circleCrop()
@@ -203,11 +252,14 @@ class EntranceFragment : Fragment() {
                             } else {
                                 identity = 1
                                 binding.tvUserName.text = "欢迎" + it.data?.userName + "！"
+                                Log.d("EntranceFrance",it.data.toString())
                                 Glide.with(requireContext())
                                     .load(it.data?.avatarUrl)
                                     .circleCrop()
                                     .into(binding.ivAvatar)
                             }
+                            // 获取用户身份后，根据身份调用对应的接口
+                            viewModel.getSubject(identity)
                         } else {
                             Toast.makeText(requireContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show()
                         }

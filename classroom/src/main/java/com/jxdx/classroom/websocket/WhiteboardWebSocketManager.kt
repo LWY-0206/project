@@ -30,6 +30,8 @@ class WhiteboardWebSocketManager {
     private var webSocket: WebSocket? = null
     private var client: OkHttpClient? = null
     private var isConnected = false
+    // 存储初始连接时的Token，用于重连时使用
+    private var initialToken: String? = null
     
     // 回调接口
     private var messageListener: MessageListener? = null
@@ -98,13 +100,23 @@ class WhiteboardWebSocketManager {
         val url = "ws://121.41.176.238:8080/live/room?roomId=$roomId&identity=$identity"
         Log.d(TAG, "正在连接WebSocket: $url")
         
-        // 获取Token
-        val token = com.example.corekit.http.TokenManager.getToken()
-        Log.d(TAG, "Token: ${if (token.isNullOrEmpty()) "空" else "已设置"}")
+        // 确定要使用的Token：首次连接时获取并保存，后续连接时使用保存的Token
+        val tokenToUse: String
+        if (initialToken.isNullOrEmpty()) {
+            // 首次连接，获取最新的Token并保存
+            tokenToUse = com.example.corekit.http.TokenManager.getToken() ?: ""
+            initialToken = tokenToUse
+            Log.d(TAG, "首次连接，保存初始Token")
+        } else {
+            // 后续连接，使用保存的Token
+            tokenToUse = initialToken!!
+            Log.d(TAG, "后续连接，使用保存的Token")
+        }
+        Log.d(TAG, "Token: ${if (tokenToUse.isEmpty()) "空" else "已设置"}")
         
         val request = Request.Builder()
             .url(url)
-            .addHeader("satoken", token.toString())
+            .addHeader("satoken", tokenToUse)
             .build()
         
         webSocket = client?.newWebSocket(request, object : WebSocketListener() {

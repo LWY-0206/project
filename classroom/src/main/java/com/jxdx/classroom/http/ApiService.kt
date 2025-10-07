@@ -3,10 +3,11 @@ package com.jxdx.classroom.http
 import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.classroom.AllCourse
+import com.jxdx.classroom.SubjectsVO
 import com.jxdx.classroom.UserInfo
-import com.jxdx.classroom.com.jxdx.classroom.http.DTO.FreeDistribution
-import com.jxdx.classroom.com.jxdx.classroom.http.DTO.GenerateGroupDTO
-import com.jxdx.classroom.com.jxdx.classroom.http.DTO.OutStuDTO
+import com.jxdx.classroom.http.DTO.FreeDistribution
+import com.jxdx.classroom.http.DTO.GenerateGroupDTO
+import com.jxdx.classroom.http.DTO.OutStuDTO
 import com.jxdx.classroom.http.DTO.JoinStuDTO
 import com.jxdx.classroom.entity.ClassLive
 import com.jxdx.classroom.entity.Classroom
@@ -14,6 +15,7 @@ import com.jxdx.classroom.entity.CreateLiveRoomRequest
 import com.jxdx.classroom.entity.RtmpUrl
 import com.jxdx.classroom.entity.SelectClass
 import com.jxdx.classroom.group.Group
+import com.jxdx.classroom.group.GroupChatApi
 import com.jxdx.classroom.group.Student
 import retrofit2.Call
 import retrofit2.http.Body
@@ -33,7 +35,14 @@ interface ApiService {
     //查看所有课程
     @GET("/api/student/courses/list")
     fun getAllCourse(
-        @Header("satoken")satoken: String= TokenManager.getToken()?:""): Call<BaseResp<List<AllCourse>>>
+        @Header("satoken")satoken: String= TokenManager.getToken()?:""
+    ): Call<BaseResp<List<AllCourse>>>
+
+    //获取老师对应的学科
+    @GET("/api/teacher/subject")
+    fun getTeacherSubject(
+        @Header("satoken")satoken: String= TokenManager.getToken()?:""
+    ):Call<BaseResp<List<SubjectsVO>>>
 
     @GET("/live/room/student/page")
     suspend fun getClassRoom(
@@ -120,26 +129,26 @@ interface ApiService {
         @Query("teamId") teamId: Int,
         @Query("pageNum") pageNum: Int,
         @Query("pageSize") pageSize: Int
-    ): BaseResp<com.jxdx.classroom.group.GroupChatApi.GetHistory.Response.Data>
+    ): BaseResp<GroupChatApi.GetHistory.Response.Data>
 
     // 保存消息
     @POST("/groupChat/saveMessage")
     suspend fun saveGroupChatMessage(
         @Header ("satoken") satoken: String= TokenManager.getToken() ?: "",
-        @Body request: com.jxdx.classroom.group.GroupChatApi.SaveMessage.RequestBody
+        @Body request:GroupChatApi.SaveMessage.RequestBody
     ): BaseResp<Int>
 
     // 发送消息
     @POST("/groupChat/sendMessage")
     suspend fun sendGroupChatMessage(
         @Header ("satoken") satoken: String= TokenManager.getToken() ?: "",
-        @Body request: com.jxdx.classroom.group.GroupChatApi.SendMessage.RequestBody
-    ): BaseResp<Long>
+        @Body request: GroupChatApi.SendMessage.RequestBody
+    ): BaseResp<Int>
 
     // 教师广播消息
     @POST("/groupChat/broadcast")
     suspend fun broadcastGroupChatMessage(
         @Header ("satoken") satoken: String= TokenManager.getToken() ?: "",
-        @Body request: com.jxdx.classroom.group.GroupChatApi.Broadcast.RequestBody
+        @Body request:GroupChatApi.Broadcast.RequestBody
     ): BaseResp<Any>
 }
