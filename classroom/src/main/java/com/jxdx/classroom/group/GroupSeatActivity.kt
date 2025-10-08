@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.jxdx.classroom.R
 import com.jxdx.classroom.http.ApiService
 import com.jxdx.classroom.http.RetrofitClient
@@ -96,7 +97,7 @@ class GroupSeatActivity : AppCompatActivity() {
         btnAutoAssign.setOnClickListener {
             autoAssignRemaining()
         }
-        
+
         btnStartDiscussion.setOnClickListener {
             // 查找当前学生所在的小组
             val currentPosition = findCurrentStudentPosition()
@@ -383,12 +384,25 @@ class GroupSeatActivity : AppCompatActivity() {
         if (student != null) {
             // 有学生的情况
             tvName.text = student.name
-            if (isLeader) {
+            // 加载用户真实头像
+            if (!student.avatarUrl.isNullOrEmpty()) {
+                Glide.with(this)
+                    .load(student.avatarUrl)
+                    .circleCrop()
+                    .into(ivAvatar)
+            } else if (isLeader) {
+                // 如果是组长且没有头像URL，使用组长默认头像
                 ivAvatar.setImageResource(R.drawable.ic_leader_avatar)
+            } else {
+                // 其他情况使用学生默认头像
+                ivAvatar.setImageResource(R.drawable.ic_student_avatar)
+            }
+
+            // 如果是组长，显示组长标识
+            if (isLeader) {
                 ivLeaderBadge.visibility = View.VISIBLE
                 tvName.setTextColor(ContextCompat.getColor(this, R.color.leader_color))
             } else {
-                ivAvatar.setImageResource(R.drawable.ic_student_avatar)
                 vOnlineStatus.visibility = View.VISIBLE
                 tvName.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
             }

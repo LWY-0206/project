@@ -7,7 +7,7 @@ import com.example.corekit.http.TokenManager
 import com.jxdx.classroom.R
 import com.jxdx.classroom.fragment.TeacherClassRoomFragment
 import com.jxdx.classroom.http.RetrofitClient
-import com.jxdx.classroom.UserInfo
+import com.jxdx.login.UserInfo
 import com.example.corekit.http.bean.BaseResp
 import retrofit2.Call
 import retrofit2.Callback
@@ -62,19 +62,19 @@ class ActivityToTeacherClassRoomFragment : AppCompatActivity() {
      * 获取当前登录用户的ID
      */
     private fun getCurrentUserId(callback: (Int) -> Unit) {
-        // 使用RetrofitClient获取用户信息
-        RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
+        // 使用正确的Callback类型获取用户信息
+        RetrofitClient.apiService.getUserInfo().enqueue(object : retrofit2.Callback<BaseResp<UserInfo>> {
             override fun onResponse(
-                call: Call<BaseResp<UserInfo>>,
-                response: Response<BaseResp<UserInfo>>
+                call: retrofit2.Call<BaseResp<UserInfo>>,
+                response: retrofit2.Response<BaseResp<UserInfo>>
             ) {
                 if (response.isSuccessful) {
                     val body = response.body()
                     if (body != null && body.code == 0) {
                         val data = body.data
                         if (data != null) {
-                            // 注意：根据UserInfo模型，用户ID字段是id
-                            val userId = data.id
+                            // 注意：根据UserInfo模型，用户ID字段是userId
+                            val userId = data.userId
                             callback(userId)
                             return
                         }
@@ -82,8 +82,11 @@ class ActivityToTeacherClassRoomFragment : AppCompatActivity() {
                 }
                 callback(0) // 获取失败返回0
             }
-            
-            override fun onFailure(call: Call<BaseResp<UserInfo>>, t: Throwable) {
+
+            override fun onFailure(
+                call: retrofit2.Call<BaseResp<UserInfo>>,
+                t: Throwable
+            ) {
                 Log.e("TeacherClassRoom", "获取用户信息失败", t)
                 callback(0) // 获取失败返回0
             }

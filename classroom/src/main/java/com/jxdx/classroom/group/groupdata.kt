@@ -21,12 +21,13 @@ data class Group(
 //小组讨论专用消息类
 data class Message(
     val id: String,
-    val senderId: String,
+    val senderId: Int,
     val senderName: String,
     val content: String,
     val timestamp: Long,
     val messageType: MessageType = MessageType.TEXT,
-    val isFromTeacher: Boolean = false
+    val isFromTeacher: Boolean = false,
+    val senderAvatar: String? = null
 )
 
 data class DiscussionState(

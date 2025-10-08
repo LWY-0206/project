@@ -4,7 +4,7 @@ import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.classroom.AllCourse
 import com.jxdx.classroom.SubjectsVO
-import com.jxdx.classroom.UserInfo
+import com.jxdx.login.UserInfo
 import com.jxdx.classroom.http.DTO.FreeDistribution
 import com.jxdx.classroom.http.DTO.GenerateGroupDTO
 import com.jxdx.classroom.http.DTO.OutStuDTO
