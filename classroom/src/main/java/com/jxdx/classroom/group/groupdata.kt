@@ -14,7 +14,8 @@ data class Group(
     val name: String,
     val capacity:Int,
     val currentCount: Int,
-    var students: MutableList<Student?>
+    var students: MutableList<Student?>,
+    var isLocked: Boolean=false
 )
 
 

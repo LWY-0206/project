@@ -46,12 +46,16 @@ class CourseFragment : Fragment() {
                 // 学生点击课程
                 val intent = Intent(requireContext(), CourseListActivity::class.java)
                 intent.putExtra("courseId", it.subjectId)
+                intent.putExtra("subjectName", it.subjectName)
+                intent.putExtra("teacherName", it.teacherName)
+                intent.putExtra("identity", identity)
                 startActivity(intent)
             },
             {
                 // 老师点击学科
                 val intent = Intent(requireContext(), CourseListActivity::class.java)
                 intent.putExtra("courseId", it.subjectId)
+                intent.putExtra("identity", identity)
                 startActivity(intent)
             }
         )

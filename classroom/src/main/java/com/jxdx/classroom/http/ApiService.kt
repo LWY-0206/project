@@ -19,6 +19,7 @@ import com.jxdx.classroom.group.GroupChatApi
 import com.jxdx.classroom.group.Student
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -151,4 +152,12 @@ interface ApiService {
         @Header ("satoken") satoken: String= TokenManager.getToken() ?: "",
         @Body request:GroupChatApi.Broadcast.RequestBody
     ): BaseResp<Any>
+
+    // 删除全部小组
+    @DELETE("/groupChat/deleteAll")
+    suspend fun deleteAllGroups(
+        @Header ("satoken") satoken: String= TokenManager.getToken() ?: "",
+        @Query("subjectId") subjectId: Int,
+        @Query("createdBy") createdBy: Int
+    ): BaseResp<Unit>
 }

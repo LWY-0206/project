@@ -237,10 +237,10 @@ class TeacherViewActivity : AppCompatActivity() {
              Toast.makeText(this, "Token获取失败，无法执行结束分组操作", Toast.LENGTH_SHORT).show()
              return
          }
-         
+          
          // 显示加载提示
          Toast.makeText(this, "正在结束分组...", Toast.LENGTH_SHORT).show()
-         
+          
          activityScope.launch {
              try {
                  // 调用结束分组接口
@@ -249,10 +249,21 @@ class TeacherViewActivity : AppCompatActivity() {
                      subjectId = subjectId,
                      createdBy = teacherId
                  )
-                 
+                  
                  if (endGroupResponse.code == 0) {
-                     Toast.makeText(this@TeacherViewActivity, "分组已成功结束", Toast.LENGTH_SHORT).show()
-                     Log.d("TeacherViewActivity", "分组已结束")
+                     // 成功结束分组后，标记所有小组为已锁定
+                     groups.forEach { group ->
+                         group.isLocked = true
+                     }
+                      
+                     // 更新UI，显示分组已结束
+                     binding.tvSummary.text = "共 ${groups.size} 个小组，${getTotalStudents()} 名学生 (分组已结束)"
+                      
+                     // 向所有客户端广播分组结束的消息
+                     broadcastGroupEndMessage()
+                      
+                     Toast.makeText(this@TeacherViewActivity, "分组已成功结束，学生不能再更改小组", Toast.LENGTH_SHORT).show()
+                     Log.d("TeacherViewActivity", "分组已结束并锁定")
                  } else {
                      val errorMsg = "分组结束失败: ${endGroupResponse.message ?: "未知错误"}"
                      Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
@@ -263,6 +274,24 @@ class TeacherViewActivity : AppCompatActivity() {
                  Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
                  Log.e("TeacherViewActivity", errorMsg, e)
              }
+         }
+     }
+      
+     /**
+      * 广播分组结束的消息给所有客户端
+      */
+     private fun broadcastGroupEndMessage() {
+         if (isConnected && webSocket != null) {
+             val broadcastData = mapOf(
+                 "type" to "group_end",
+                 "subjectId" to subjectId,
+                 "teacherId" to teacherId
+             )
+             val jsonMessage = gson.toJson(broadcastData)
+             webSocket?.send(jsonMessage)
+             Log.d("TeacherViewActivity", "广播分组结束消息: $jsonMessage")
+         } else {
+             Log.d("TeacherViewActivity", "WebSocket未连接，无法广播分组结束消息")
          }
      }
       
@@ -408,12 +437,6 @@ class TeacherViewActivity : AppCompatActivity() {
                             Log.e("TeacherViewActivity", "WebSocket认证失败: $text")
                             // 断开当前连接
                             disconnectWebSocket()
-                            
-                            // 延迟1秒后尝试使用新的token重连
-                            mainHandler.postDelayed({
-                                Log.d("TeacherViewActivity", "尝试使用新Token重连WebSocket")
-                                connectWebSocket()
-                            }, 1000)
                         }
                     }
                 }
@@ -561,14 +584,15 @@ class TeacherViewActivity : AppCompatActivity() {
                         )
                         
                         val token = TokenManager.getToken() ?: ""
+                        // 根据ApiService接口定义，satoken应该作为HTTP头参数传递
                         val response = RetrofitClient.apiService.generateGroups(
-                            satoken = token,  // 使用TokenManager获取的token
+                            satoken = token,
                             request = requestBody
                         )
                         
-                        // 检查响应是否成功
+                        // 检查响应是否成功 - 只检查业务逻辑code是否为0
                         Log.d("TeacherViewActivity", "generateGroups响应: code=${response.code}, message=${response.message}")
-                        if (response.code != 0 && response.code != 200) {
+                        if (response.code != 0) {
                             throw Exception("服务器返回错误: ${response.message ?: "未知错误"} (code=${response.code}) ")
                         }
                     }

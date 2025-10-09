@@ -1,5 +1,6 @@
 package com.jxdx.classroom.group
 
+import android.app.AlertDialog
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
@@ -90,6 +91,8 @@ class DiscussionActivity : AppCompatActivity() {
     private val messages = mutableListOf<Message>()
     // 消息适配器，用于RecyclerView的数据绑定
     private lateinit var messagesAdapter: MessagesAdapter
+    // 学科ID，用于删除全部小组接口
+    private var subjectId: Int = 0
     // 消息处理器，用于处理延迟任务
     private val messageHandler = Handler(Looper.getMainLooper())
     // 模拟消息列表
@@ -146,6 +149,8 @@ class DiscussionActivity : AppCompatActivity() {
         groupId = intent.getIntExtra("groupId", 0)
         groupName = intent.getStringExtra("groupName") ?: "讨论组"
         isTeacherMode = intent.getBooleanExtra("isTeacher", false)
+        // 获取学科ID，用于删除全部小组接口
+        subjectId = intent.getIntExtra("subjectId", 0)
 
         // 尝试获取并解析传递过来的students JSON字符串
             try {
@@ -578,15 +583,6 @@ class DiscussionActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
-        // 教师模式下显示教师工具选项
-        if (isTeacherMode) {
-            view.findViewById<View>(R.id.optionTeacherTools).setOnClickListener {
-                Toast.makeText(this, "教师工具功能开发中", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-            }
-            view.findViewById<View>(R.id.optionTeacherTools).visibility = View.VISIBLE
-        }
-
         // 显示弹窗
         dialog.setContentView(view)
         dialog.show()
@@ -594,7 +590,7 @@ class DiscussionActivity : AppCompatActivity() {
 
     /**
      * 显示教师操作
-     * 显示教师操作底部弹窗（添加任务、评价、干预）
+     * 显示教师操作底部弹窗（添加任务、评价、删除全部小组）
      */
     private fun showTeacherActions() {
         // 创建底部弹窗
@@ -613,9 +609,74 @@ class DiscussionActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+        // 设置删除全部小组点击事件
+        view.findViewById<View>(R.id.optionDeleteAllGroups).setOnClickListener {
+            deleteAllGroups()
+            dialog.dismiss()
+        }
+
         // 显示弹窗
         dialog.setContentView(view)
         dialog.show()
+    }
+
+    /**
+     * 删除全部小组
+     * 弹出确认对话框并调用删除全部小组接口
+     */
+    private fun deleteAllGroups() {
+        AlertDialog.Builder(this)
+            .setTitle("确认删除")
+            .setMessage("确定要删除当前学科的全部小组吗？此操作不可撤销！")
+            .setPositiveButton("确定") { dialog, which ->
+                executeDeleteAllGroups()
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    /**
+     * 执行删除全部小组操作
+     * 调用API删除当前学科的全部小组
+     */
+    private fun executeDeleteAllGroups() {
+        // 获取用户token
+        val token = TokenManager.getToken() ?: ""
+        if (token.isEmpty()) {
+            Toast.makeText(this, "Token获取失败，无法执行删除操作", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 显示加载提示
+        Toast.makeText(this, "正在删除全部小组...", Toast.LENGTH_SHORT).show()
+
+        lifecycleScope.launch {
+            try {
+                // 调用删除全部小组接口
+                val response = RetrofitClient.apiService.deleteAllGroups(
+                    satoken = token,
+                    subjectId = subjectId,
+                    createdBy = currentUserId.toIntOrNull() ?: 0
+                )
+
+                if (response.code == 0) {
+                    // 删除成功，显示提示并返回上一页
+                    Toast.makeText(this@DiscussionActivity, "全部小组已成功删除", Toast.LENGTH_SHORT).show()
+                    // 添加系统消息到聊天记录
+                    addSystemMessage("全部小组已被删除")
+                    // 返回上一页
+                    finish()
+                } else {
+                    val errorMsg = "删除失败: \${response.message}" ?: "未知错误"
+                    Toast.makeText(this@DiscussionActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                    Log.e("DiscussionActivity", errorMsg)
+                }
+            } catch (e: Exception) {
+                val errorMsg = "删除异常: \${e.message}"
+                Toast.makeText(this@DiscussionActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                Log.e("DiscussionActivity", errorMsg, e)
+            }
+        }
     }
 
     // 小组人员列表
@@ -685,8 +746,8 @@ class DiscussionActivity : AppCompatActivity() {
                 // 由于没有直接的API获取小组人员，我们通过加载所有小组数据来获取当前小组的成员
                 val groupsResponse = RetrofitClient.apiService.getGroups(
                     satoken = saToken,
-                    subjectId = 0, // 可以根据实际情况传入正确的Int值
-                    createdBy = 0  // 可以根据实际情况传入正确的Int值
+                    subjectId = 1, // 可以根据实际情况传入正确的Int值
+                    createdBy = 6  // 可以根据实际情况传入正确的Int值
                 )
 
                 if (groupsResponse.code == 0 && groupsResponse.data != null) {

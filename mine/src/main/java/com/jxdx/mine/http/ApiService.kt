@@ -9,17 +9,24 @@ import com.jxdx.mine.PageData
 import com.jxdx.mine.StuHomeWorkDetailVO
 import com.jxdx.mine.SubjectsVO
 import com.jxdx.mine.UserInfo
+import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
-
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.POST
-
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiService {
+    // 获取老师对应学科的上课班级
+    @GET("/api/teacher/subject/class")
+    fun getTeacherSubjectClass(
+        @Query("subjectId") subjectId: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<List<ClassInfo>>>
     //根据ID获取用户信息
     @GET("/user/info/{userId}")
     fun getUserInfo(@Path("userId") userId: Int): Call<BaseResp<UserInfo>>
@@ -33,12 +40,32 @@ interface ApiService {
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<String>>
 
+
+    //未完成作业的分页查询（未提交）
     @GET("/api/stu/homework")
     fun getHomework(
+        @Query ("subjectId") subjectId: Int?,
         @Query ("page") page: Int,
         @Query ("size") size: Int,
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<PageData<Homework>>>
+    //查看该学科已完成但未批改的作业（待批改）
+    @GET("/api/stu/homework/cmpl/uncor")
+    fun getHomeworkCmpl(
+        @Query ("subjectId") subjectId: Int?,
+        @Query ("page") page: Int,
+        @Query ("size") size: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<PageData<Homework>>>
+    //查看该学科已完成并已批改的作业（已完成）
+    @GET("/api/stu/homework/cmpl/cor")
+    fun getHomeworkCmplcor(
+        @Query ("subjectId") subjectId: Int?,
+        @Query ("page") page: Int,
+        @Query ("size") size: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<PageData<Homework>>>
+
 
     //查看所有课程
     @GET("/api/student/courses/list")
@@ -107,6 +134,18 @@ interface ApiService {
     fun getTeacherSubject(
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<List<SubjectsVO>>>
+    
+    // 上传文件
+    @Multipart
+    @POST("/common/upload")
+    fun uploadFile(@Part file: MultipartBody.Part): Call<BaseResp<List<String>>>
+    
+    //上传课件
+    @POST("/api/teacher/courses/uploadFile")
+    fun uploadCourseWare(
+        @Body request: UploadCourseWareRequest,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
 }
 
 //作业提交请求类
@@ -146,6 +185,20 @@ data class TeachCreateHWDetailVO(
     val createdTime: String? = null,
     val updateTime: String? = null,
     val imageUrls: List<String>? = null
+)
+
+//上传课件请求类
+data class UploadCourseWareRequest(
+    val subjectId: Int? = null,
+    val fileUrl: String? = null,
+    val fileDescription: String? = null,
+    val classIds: List<Int>? = null
+)
+
+// 班级信息数据类
+data class ClassInfo(
+    val classId: Int? = null,
+    val className: String? = null
 )
 
 

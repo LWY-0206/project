@@ -112,6 +112,7 @@ class GroupSeatActivity : AppCompatActivity() {
                     // 将小组成员信息转换为JSON字符串并传递
                     val gson = Gson()
                     intent.putExtra("groupStudentsJson", gson.toJson(group.students))
+                    intent.putExtra("subjectId", subjectId) // 传递subjectId
                     
                     // 跳转到讨论页面
                     startActivity(intent)
@@ -420,12 +421,18 @@ class GroupSeatActivity : AppCompatActivity() {
         }
 
         // 点击事件
-        view.setOnClickListener {
-            val filledSeats = getFilledSeatsCount(group)
-            if (filledSeats >= group.capacity) {
-                Toast.makeText(this, "该小组已锁定", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            view.setOnClickListener {
+                // 检查小组是否已锁定（通过endGroup接口标记）
+                if (group.isLocked) {
+                    Toast.makeText(this, "分组已结束，不能更改小组", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                
+                val filledSeats = getFilledSeatsCount(group)
+                if (filledSeats >= group.capacity) {
+                    Toast.makeText(this, "该小组已满", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
 
             if (student == null) {
                 // 检查是否已经在其他位置
