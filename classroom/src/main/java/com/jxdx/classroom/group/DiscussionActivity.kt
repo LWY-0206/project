@@ -667,12 +667,12 @@ class DiscussionActivity : AppCompatActivity() {
                     // 返回上一页
                     finish()
                 } else {
-                    val errorMsg = "删除失败: \${response.message}" ?: "未知错误"
+                    val errorMsg = "删除失败: ${response.message}" ?: "未知错误"
                     Toast.makeText(this@DiscussionActivity, errorMsg, Toast.LENGTH_SHORT).show()
                     Log.e("DiscussionActivity", errorMsg)
                 }
             } catch (e: Exception) {
-                val errorMsg = "删除异常: \${e.message}"
+                val errorMsg = "删除异常: ${e.message ?: "未知异常"}"
                 Toast.makeText(this@DiscussionActivity, errorMsg, Toast.LENGTH_SHORT).show()
                 Log.e("DiscussionActivity", errorMsg, e)
             }
