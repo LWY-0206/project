@@ -21,18 +21,19 @@ class CourseListAdapter(
         if(list!=null){
             items .addAll(list)
         }
+        // 无论API返回数据如何，始终添加测试项
+        items.add(Courseware("第一章 引论","https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/48cd1e0d-f1a4-41ea-b158-9dfbd917f1e2.pptx"))
         notifyDataSetChanged()
     }
 
     inner class CoursewareViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvUploadTime: TextView = itemView.findViewById(R.id.tv_upload_time)
         private val tvTitle: TextView = itemView.findViewById(R.id.tv_course_description)
-        private val btnPrevie: Button = itemView.findViewById(R.id.btn_preview)
+        private val btnPreview: Button = itemView.findViewById(R.id.btn_preview)
         private val btnDownload: Button = itemView.findViewById(R.id.btn_download)
 
         fun bind(courseware: Courseware) {
             tvTitle.text = courseware.CoursewareName
-            btnPrevie.setOnClickListener { onPreviewClick(courseware) }
+            btnPreview.setOnClickListener { onPreviewClick(courseware) }
             btnDownload.setOnClickListener { onDownloadClick(courseware) }
         }
     }

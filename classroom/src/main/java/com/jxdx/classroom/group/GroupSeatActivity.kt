@@ -15,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.jxdx.classroom.R
 import com.jxdx.classroom.http.ApiService
 import com.jxdx.classroom.http.RetrofitClient
@@ -27,6 +28,8 @@ import com.airbnb.lottie.LottieAnimationView
 import kotlinx.coroutines.*
 import java.util.*
 import kotlin.collections.ArrayList
+import com.jxdx.classroom.group.Member
+import com.google.gson.Gson
 
 class GroupSeatActivity : AppCompatActivity() {
     private var subjectId: Int = 1
@@ -60,11 +63,12 @@ class GroupSeatActivity : AppCompatActivity() {
         subjectId = intent.getIntExtra("subjectId", 1)
         // 获取老师ID
         teacherId = intent.getIntExtra("teacherId", 6)
-        
+
         // 尝试获取当前学生的头像URL
         // 注意：在实际应用中，应该从用户登录信息或API中获取真实的头像URL
         // 这里使用一个模拟的头像URL作为示例
-        currentStudentAvatar = "https://tc-new.z.wiki/autoupload/f/d9oSIkypaT4MX13ceI-M6PmYtDrGvPpsluM_NdUVaNGyl5f0KlZfm6UsKj-HyTuv/20250905/Jr96/458X300/90.jpg"
+        currentStudentAvatar =
+            "https://tc-new.z.wiki/autoupload/f/d9oSIkypaT4MX13ceI-M6PmYtDrGvPpsluM_NdUVaNGyl5f0KlZfm6UsKj-HyTuv/20250905/Jr96/458X300/90.jpg"
         
         // 生成默认的小组数据
         generateGroups()
@@ -94,9 +98,31 @@ class GroupSeatActivity : AppCompatActivity() {
         btnAutoAssign.setOnClickListener {
             autoAssignRemaining()
         }
-        
+
         btnStartDiscussion.setOnClickListener {
-            startActivity(Intent(this, DiscussionActivity::class.java))
+            // 查找当前学生所在的小组
+            val currentPosition = findCurrentStudentPosition()
+            if (currentPosition != null) {
+                val (group, _) = currentPosition
+                if (group != null) {
+                    val intent = Intent(this, DiscussionActivity::class.java)
+                    // 传递小组ID（作为整数传递）
+                    intent.putExtra("groupId", group.id)
+                    intent.putExtra("groupName", group.name)
+                    
+                    // 将小组成员信息转换为JSON字符串并传递
+                    val gson = Gson()
+                    intent.putExtra("groupStudentsJson", gson.toJson(group.students))
+                    intent.putExtra("subjectId", subjectId) // 传递subjectId
+                    
+                    // 跳转到讨论页面
+                    startActivity(intent)
+                    return@setOnClickListener
+                }
+            }
+            
+            // 如果未找到小组或未分配位置，显示提示
+            Toast.makeText(this, "请先加入小组后再开始讨论", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -360,12 +386,25 @@ class GroupSeatActivity : AppCompatActivity() {
         if (student != null) {
             // 有学生的情况
             tvName.text = student.name
-            if (isLeader) {
+            // 加载用户真实头像
+            if (!student.avatarUrl.isNullOrEmpty()) {
+                Glide.with(this)
+                    .load(student.avatarUrl)
+                    .circleCrop()
+                    .into(ivAvatar)
+            } else if (isLeader) {
+                // 如果是组长且没有头像URL，使用组长默认头像
                 ivAvatar.setImageResource(R.drawable.ic_leader_avatar)
+            } else {
+                // 其他情况使用学生默认头像
+                ivAvatar.setImageResource(R.drawable.ic_student_avatar)
+            }
+
+            // 如果是组长，显示组长标识
+            if (isLeader) {
                 ivLeaderBadge.visibility = View.VISIBLE
                 tvName.setTextColor(ContextCompat.getColor(this, R.color.leader_color))
             } else {
-                ivAvatar.setImageResource(R.drawable.ic_student_avatar)
                 vOnlineStatus.visibility = View.VISIBLE
                 tvName.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
             }
@@ -383,12 +422,18 @@ class GroupSeatActivity : AppCompatActivity() {
         }
 
         // 点击事件
-        view.setOnClickListener {
-            val filledSeats = getFilledSeatsCount(group)
-            if (filledSeats >= group.capacity) {
-                Toast.makeText(this, "该小组已锁定", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
+            view.setOnClickListener {
+                // 检查小组是否已锁定（通过endGroup接口标记）
+                if (group.isLocked) {
+                    Toast.makeText(this, "分组已结束，不能更改小组", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+                
+                val filledSeats = getFilledSeatsCount(group)
+                if (filledSeats >= group.capacity) {
+                    Toast.makeText(this, "该小组已满", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
 
             if (student == null) {
                 // 检查是否已经在其他位置

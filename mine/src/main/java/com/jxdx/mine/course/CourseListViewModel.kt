@@ -46,13 +46,23 @@ class CourseListViewModel : ViewModel() {
                                         )
                                     }
                                     courseWareList.value = coursewares                                  //保存一个Courseware类型的
+                                } else {
+                                    // 如果fileMap为空，设置一个空列表以触发Observer
+                                    courseWareList.value = emptyList()
                                 }
+                            } else {
+                                // 如果coursedDetail为空，设置一个空列表以触发Observer
+                                courseWareList.value = emptyList()
                             }
                         } else {
                             Log.d("CourseListViewModel", "Response not successful or code != 0")
+                            // API返回不成功，设置一个空列表以触发Observer
+                            courseWareList.value = emptyList()
                         }
                     } else {
                         Log.d("CourseListViewModel", "Response is null")
+                        // Response为空，设置一个空列表以触发Observer
+                        courseWareList.value = emptyList()
                     }
                 }
 
@@ -62,6 +72,8 @@ class CourseListViewModel : ViewModel() {
                 ) {
                     Log.d("CourseListViewModel", "onFailure: ${t.message}")
                     t.printStackTrace()
+                    // API调用失败，设置一个空列表以触发Observer
+                    courseWareList.value = emptyList()
                 }
             })
 

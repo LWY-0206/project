@@ -76,6 +76,27 @@ class ActivityClassDynamic: BaseActivity<ActivityClassdynamicBinding>() {
             startActivity(jumpIntent)
         }
         
+        // 习题准备按钮点击事件
+        view.btnExercisePreparation.setOnClickListener {
+            // 这里可以实现跳转到习题准备相关的页面
+            // 目前先显示一个提示信息
+            val intent= Intent(this, ActivityUpdateQuestion::class.java)
+            startActivity( intent)
+            
+            // 日志记录
+            Log.d("ClassDynamic", "点击了习题准备按钮，teacherId=$teacherId, subjectId=$subjectId")
+        }
+        
+        // 预习查看按钮点击事件
+        view.btnPreviewCheck.setOnClickListener {
+            // 这里可以实现跳转到预习查看相关的页面
+            // 目前先显示一个提示信息
+            Toast.makeText(this, "预习查看功能开发中", Toast.LENGTH_SHORT).show()
+            
+            // 日志记录
+            Log.d("ClassDynamic", "点击了预习查看按钮，teacherId=$teacherId, subjectId=$subjectId")
+        }
+        
         // 初始化RecyclerView和适配器
         initRecyclerView()
         

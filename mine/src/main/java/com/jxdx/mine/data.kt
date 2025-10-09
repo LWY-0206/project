@@ -116,7 +116,10 @@ data class HomeworkDetail(
     var title: String,
     var description: String,
     var dueDate: String,
-    val submissions: MutableList<StudentSubmission>
+    val submissions: MutableList<StudentSubmission>,
+    val isPublished: Boolean = false,  // 是否已发布
+    val publishTime: String? = null,   // 发布时间
+    val createTime: String? = null     // 创建时间
 )
 // 学生提交模型
 data class StudentSubmission(

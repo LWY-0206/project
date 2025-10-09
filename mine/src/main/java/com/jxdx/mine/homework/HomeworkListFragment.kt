@@ -6,20 +6,45 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jxdx.mine.R
+import com.jxdx.mine.Homework
+import com.jxdx.mine.SubjectGroup
 import com.jxdx.mine.adapter.HomeworkAdapter
 import com.jxdx.mine.adapter.HomeworkRepository
 import com.jxdx.mine.adapter.HomeworkViewModel
+import com.jxdx.mine.databinding.FragmentHomeworkListBinding
 import com.jxdx.mine.homework.HomeworkDetailActivity
 
 class HomeworkListFragment : Fragment() {
-
+    private lateinit var binding: FragmentHomeworkListBinding
     private lateinit var viewModel: HomeworkViewModel
     private lateinit var adapter: HomeworkAdapter
     private lateinit var recyclerView: RecyclerView
+    
+    // 用于接收HomeworkDetailActivity返回结果的启动器
+    private lateinit var detailLauncher: ActivityResultLauncher<Intent>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // 在onCreate中初始化ActivityResultLauncher
+        detailLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            // 如果操作成功，重新加载作业列表以更新状态
+            if (it.resultCode == AppCompatActivity.RESULT_OK) {
+                val status = arguments?.getInt("status", -1) ?: -1
+                val finalStatus = if (status in 0..2) status else 0
+                viewModel.loadHomework(finalStatus)
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,11 +69,12 @@ class HomeworkListFragment : Fragment() {
         Log.d("HomeworkListFragment", "RecyclerView configured")
 
         // 设置作业项点击事件
-        adapter.setOnItemClickListener {
+        adapter.setOnItemClickListener { 
             val homeworkId = it.homeworkId.toIntOrNull() ?: return@setOnItemClickListener
             val intent = Intent(requireContext(), HomeworkDetailActivity::class.java)
             intent.putExtra("homeworkId", homeworkId)
-            startActivity(intent)
+            // 使用launcher启动Activity，而不是直接startActivity
+            detailLauncher.launch(intent)
         }
 
         // 初始化ViewModel并传入HomeworkRepository

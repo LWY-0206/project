@@ -142,7 +142,7 @@ class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun bind(group: SubjectGroup) {
             tvSubjectName.text = group.subjectName
             tvHomeworkCount.text = "${group.homeworkList.size}份"
-            ivExpand.rotation = if (group.isExpanded) 180f else 90f
+            ivExpand.rotation = if (group.isExpanded) 90f else 180f
 
             // 点击科目头部展开/折叠
             itemView.setOnClickListener {

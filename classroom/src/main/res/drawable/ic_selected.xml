@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 选中状态 -->
+    <item android:state_selected="true">
+        <layer-list>
+            <!-- 圆形背景 -->
+            <item>
+                <shape android:shape="oval">
+                    <solid android:color="#4A90E2" />
+                    <stroke
+                        android:width="2dp"
+                        android:color="#FFFFFF" />
+                </shape>
+            </item>
+            <!-- 对勾图标 -->
+            <item>
+                <rotate
+                    android:fromDegrees="-45"
+                    android:pivotX="25%"
+                    android:pivotY="75%">
+                    <shape android:shape="line">
+                        <stroke
+                            android:width="2dp"
+                            android:color="#FFFFFF"
+                            android:strokeLineCap="round" />
+                        <size
+                            android:width="14dp"
+                            android:height="14dp" />
+                    </shape>
+                </rotate>
+            </item>
+            <item>
+                <rotate
+                    android:fromDegrees="45"
+                    android:pivotX="75%"
+                    android:pivotY="25%">
+                    <shape android:shape="line">
+                        <stroke
+                            android:width="2dp"
+                            android:color="#FFFFFF"
+                            android:strokeLineCap="round" />
+                        <size
+                            android:width="8dp"
+                            android:height="8dp" />
+                    </shape>
+                </rotate>
+            </item>
+        </layer-list>
+    </item>
+    <!-- 未选中状态 -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#00000000" />
+            <stroke
+                android:width="2dp"
+                android:color="#FFFFFF" />
+        </shape>
+    </item>
+</selector>

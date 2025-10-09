@@ -17,6 +17,7 @@ import android.widget.PopupWindow
 import android.widget.Toast
 import com.jxdx.classroom.R
 import com.jxdx.classroom.activity.WhiteboardActivity
+import com.jxdx.classroom.activity.ResourceSelectionActivity
 
 /**
  * 悬浮球管理器
@@ -155,6 +156,8 @@ class FloatingBallManager(private val context: Context) {
         }
         
         menuView.findViewById<LinearLayout>(R.id.menu_attendance).setOnClickListener {
+            Log.d(TAG, "点击了资料菜单项")
+            Toast.makeText(context, "点击资料菜单", Toast.LENGTH_SHORT).show()
             openAttendanceActivity()
             popupWindow?.dismiss()
         }
@@ -191,12 +194,21 @@ class FloatingBallManager(private val context: Context) {
     }
     
     /**
-     * 打开签到界面
+     * 打开发布资源界面
      */
     private fun openAttendanceActivity() {
-        // TODO: 实现签到功能
-        Toast.makeText(context, "签到功能开发中...", Toast.LENGTH_SHORT).show()
-        Log.d(TAG, "打开签到界面，房间ID: $roomId")
+        Log.d(TAG, "点击资料菜单，准备跳转到资料选择界面")
+        try {
+            val intent = Intent(context, ResourceSelectionActivity::class.java).apply {
+                putExtra("roomId", roomId)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+            Log.d(TAG, "成功启动ResourceSelectionActivity")
+        } catch (e: Exception) {
+            Log.e(TAG, "启动ResourceSelectionActivity失败", e)
+            Toast.makeText(context, "启动资料选择界面失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
     
     /**
