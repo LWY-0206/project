@@ -80,6 +80,18 @@
             android:textColor="@color/text_secondary"
             android:layout_marginTop="4dp" />
 
+        <!-- 状态TextView已隐藏，不再显示"未提交"文字 -->
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="@color/red_600"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

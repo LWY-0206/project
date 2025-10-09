@@ -1,13 +1,12 @@
 package com.jxdx.mine.http.vo
 
-//老师作业详情VO
+//已发布作业详情VO
 data class TeachCreateHWDetailVO(
     val homeworkId: Long? = null,
-    val subject: String? = null,
+    val subject: String? = null, // 科目，可能为null
     val homeworkName: String? = null,
     val homeworkContent: String? = null,
+    val sendTime: String? = null,
     val deadTime: String? = null,
-    val createdTime: String? = null,
-    val updateTime: String? = null,
     val imageUrls: List<String>? = null
 )

@@ -6,5 +6,7 @@ data class TeachCreateHWSimpleVO(
     val subjectName: String? = null,
     val homeworkName: String? = null,
     val deadTime: String? = null,
-    val createTime: String? = null
+    val createTime: String? = null,
+    val isPublished: Boolean? = null,  // 是否已发布
+    val publishTime: String? = null    // 发布时间
 )

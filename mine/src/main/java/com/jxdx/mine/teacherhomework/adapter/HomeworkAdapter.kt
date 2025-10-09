@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jxdx.mine.HomeworkDetail
+import com.jxdx.mine.R
 import com.jxdx.mine.databinding.ItemHomeworkBinding
 
 class HomeworkAdapter(
@@ -33,7 +34,18 @@ class HomeworkAdapter(
         holder.binding.tvHomeworkTitle.text = homework.title
         
         // 设置状态
-        holder.binding.tvSendTime.text = "发布"
+        if (homework.isPublished) {
+            holder.binding.tvSendTime.text = "✅ 已发布"
+            if (homework.publishTime != null) {
+                holder.binding.tvSendTime.text = "✅ 发布于: ${homework.publishTime}"
+            }
+            // 已发布的作业使用绿色文字
+            holder.binding.tvSendTime.setTextColor(holder.itemView.context.getColor(R.color.green_dark))
+        } else {
+            holder.binding.tvSendTime.text = "📝 草稿"
+            // 草稿使用灰色文字
+            holder.binding.tvSendTime.setTextColor(holder.itemView.context.getColor(R.color.text_secondary))
+        }
         
         // 设置截止时间
         if (homework.dueDate.isNotEmpty()) {
@@ -44,10 +56,21 @@ class HomeworkAdapter(
         
         // 设置提交状态
         val submissionCount = homework.submissions.filter { it.content.isNotEmpty() }.size
+        val reviewedCount = homework.submissions.count { it.isReviewed }
+        
         if (submissionCount == 0) {
-            holder.binding.tvSubmissionStatus.text = "暂无提交"
+            holder.binding.tvSubmissionStatus.text = "📝 暂无提交"
+            holder.binding.tvSubmissionStatus.setTextColor(holder.itemView.context.getColor(R.color.text_secondary))
         } else {
-            holder.binding.tvSubmissionStatus.text = "已提交: ${submissionCount}人"
+            if (reviewedCount == submissionCount) {
+                // 全部已批改
+                holder.binding.tvSubmissionStatus.text = "✅ 已批改: ${submissionCount}人"
+                holder.binding.tvSubmissionStatus.setTextColor(holder.itemView.context.getColor(R.color.green_dark))
+            } else {
+                // 部分已批改
+                holder.binding.tvSubmissionStatus.text = "📊 已提交: ${submissionCount}人 (已批改: ${reviewedCount}人)"
+                holder.binding.tvSubmissionStatus.setTextColor(holder.itemView.context.getColor(R.color.primary_color))
+            }
         }
 
         // 设置复选框的显示和状态

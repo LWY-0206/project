@@ -155,6 +155,21 @@ interface ApiService {
         @Query("homeworkId") homeworkId: String,
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<String>>
+    
+    //获取已发布的作业列表
+    @GET("/api/teach/homework/send/list")
+    fun getPublishedHomeworkList(
+        @Query("page") page: Int,
+        @Query("size") size: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<PageData<TeachCreateHWSimpleVO>>>
+    
+    //获取已发布作业详情
+    @GET("/api/teach/homework/send/find")
+    fun getPublishedHomeworkDetail(
+        @Query("homeworkId") homeworkId: Long,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<TeachCreateHWDetailVO>>
 }
 
 

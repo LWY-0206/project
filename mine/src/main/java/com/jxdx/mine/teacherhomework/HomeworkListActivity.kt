@@ -27,8 +27,9 @@ import retrofit2.Response
 class HomeworkListActivity: AppCompatActivity() {
     private lateinit var binding: ActivityHomeworkListBinding
     private lateinit var homeworkAdapter: HomeworkAdapter
-    private val homeworkList = mutableListOf<HomeworkDetail>()
+    private val homeworkList = mutableListOf<HomeworkDetail>() // 已发布作业列表
     private val homeworkLibraryList = mutableListOf<HomeworkDetail>() // 作业库列表
+    private val publishedHomeworkList = mutableListOf<HomeworkDetail>() // 已发布作业缓存
     private var courseId: String? = null
     private var courseName: String? = null
     private var currentPage = 1
@@ -55,7 +56,8 @@ class HomeworkListActivity: AppCompatActivity() {
         
         initViews()
         setupListeners()
-        loadHomework(true)
+        // 初始化时加载作业库数据（所有作业）
+        loadHomeworkLibrary()
     }
 
     private fun initViews() {
@@ -101,6 +103,10 @@ class HomeworkListActivity: AppCompatActivity() {
             hideCreateMenu()
         }
         
+        // 重置分页状态
+        currentPage = 1
+        hasMoreData = true
+        
         if (tabIndex == 0) {
             // 已发放 - 显示已发布的作业
             binding.tabIssued.setBackgroundResource(R.drawable.bg_tab_selected)
@@ -108,8 +114,9 @@ class HomeworkListActivity: AppCompatActivity() {
             binding.tabLibrary.setBackgroundResource(R.drawable.bg_tab_unselected)
             binding.tabLibrary.setTextColor(getColor(R.color.primary_color))
             binding.fabCreateHomework.visibility = android.view.View.GONE
+            
             // 显示已发放的作业（已发布的作业）
-            homeworkAdapter.updateData(homeworkList)
+            showPublishedHomework()
         } else {
             // 作业库 - 显示您之前创建的所有作业
             binding.tabLibrary.setBackgroundResource(R.drawable.bg_tab_selected)
@@ -294,10 +301,19 @@ class HomeworkListActivity: AppCompatActivity() {
 
     private fun initRecyclerView() {
         homeworkAdapter = HomeworkAdapter(homeworkList) { homework ->
-            val intent = Intent(this, HomeworkDetailActivity::class.java)
-            intent.putExtra("homeworkId", homework.id)
-            intent.putExtra("homeworkTitle", homework.title)
-            startActivity(intent)
+            // 根据当前标签页跳转到不同的详情页面
+            if (currentTab == 0) {
+                // 已发布标签页 - 跳转到已发布作业详情
+                val intent = Intent(this, PublishedHomeworkDetailActivity::class.java)
+                intent.putExtra("homeworkId", homework.id.toLongOrNull() ?: -1L)
+                startActivity(intent)
+            } else {
+                // 作业库标签页 - 跳转到普通作业详情
+                val intent = Intent(this, HomeworkDetailActivity::class.java)
+                intent.putExtra("homeworkId", homework.id)
+                intent.putExtra("homeworkTitle", homework.title)
+                startActivity(intent)
+            }
         }
         
         // 设置选择变化监听器
@@ -336,10 +352,21 @@ class HomeworkListActivity: AppCompatActivity() {
         // 显示加载更多提示
         Toast.makeText(this, "正在加载更多...", Toast.LENGTH_SHORT).show()
         
-        // 加载下一页数据
-        loadHomework(false)
+        // 根据当前标签页加载不同的数据
+        if (currentTab == 0) {
+            // 已发布标签页
+            loadPublishedHomework()
+        } else {
+            // 作业库标签页
+            loadHomework(false)
+        }
     }
 
+    private fun loadHomeworkLibrary() {
+        // 加载作业库数据（所有作业）
+        loadHomework(true)
+    }
+    
     private fun initHomeworkLibrary() {
         // 作业库显示您之前创建的所有作业（包括已发布和未发布的）
         // 这里应该从API获取您创建的所有作业
@@ -350,6 +377,118 @@ class HomeworkListActivity: AppCompatActivity() {
         // 可以添加更多您之前创建的作业
         // 这里可以根据实际需求从数据库或API获取
     }
+    
+    private fun showPublishedHomework() {
+        // 如果有缓存数据，直接显示；否则加载数据
+        if (publishedHomeworkList.isNotEmpty()) {
+            homeworkAdapter.updateData(publishedHomeworkList)
+        } else {
+            loadPublishedHomework()
+        }
+    }
+    
+    private fun loadPublishedHomework() {
+        if (isLoading) return
+        
+        isLoading = true
+        
+        // 调用已发布作业接口
+        RetrofitClient.apiService.getPublishedHomeworkList(
+            page = currentPage,
+            size = pageSize
+        ).enqueue(object : Callback<BaseResp<PageData<TeachCreateHWSimpleVO>>> {
+            override fun onResponse(
+                call: Call<BaseResp<PageData<TeachCreateHWSimpleVO>>>,
+                response: Response<BaseResp<PageData<TeachCreateHWSimpleVO>>>
+            ) {
+                isLoading = false
+                
+                if (response.isSuccessful && response.body()?.code == 0) {
+                    val data = response.body()?.data
+                    data?.records?.let { records ->
+                        if (records.isEmpty()) {
+                            // 没有已发布的作业，显示空状态
+                            showEmptyPublishedState()
+                        } else {
+                            // 有已发布的作业，显示列表
+                            val newPublishedHomework = records.map { hw ->
+                                HomeworkDetail(
+                                    id = hw.homeworkId?.toString() ?: "",
+                                    title = hw.homeworkName ?: "未命名作业",
+                                    description = "",
+                                    dueDate = hw.deadTime ?: "",
+                                    submissions = mutableListOf(),
+                                    isPublished = true, // 这个接口返回的都是已发布的
+                                    publishTime = hw.publishTime,
+                                    createTime = hw.createTime
+                                )
+                            }
+                            
+                            // 保存到缓存中
+                            if (currentPage == 1) {
+                                publishedHomeworkList.clear()
+                            }
+                            publishedHomeworkList.addAll(newPublishedHomework)
+                            
+                            homeworkAdapter.updateData(publishedHomeworkList)
+                            
+                            // 显示统计信息
+                            Log.d("HomeworkList", "已发布作业数量: ${publishedHomeworkList.size}")
+                        }
+                        
+                        // 检查是否还有更多数据
+                        hasMoreData = currentPage < (data?.pages ?: 0)
+                        currentPage++
+                    }
+                } else {
+                    // API调用失败，显示空状态
+                    showEmptyPublishedState()
+                    val errorMsg = response.body()?.message ?: "获取已发布作业失败"
+                    Toast.makeText(this@HomeworkListActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(
+                call: Call<BaseResp<PageData<TeachCreateHWSimpleVO>>>,
+                t: Throwable
+            ) {
+                isLoading = false
+                // 网络失败，显示空状态
+                showEmptyPublishedState()
+                Toast.makeText(this@HomeworkListActivity, "网络异常，获取已发布作业失败", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+    
+    private fun showEmptyPublishedState() {
+        // 显示暂无已发布作业的状态
+        publishedHomeworkList.clear()
+        homeworkAdapter.updateData(emptyList())
+        Toast.makeText(this, "暂无已发布的作业", Toast.LENGTH_SHORT).show()
+    }
+    
+    private fun publishHomework(homeworkId: String) {
+        // 调用发布作业API
+        RetrofitClient.apiService.publishHomework(homeworkId).enqueue(object : Callback<BaseResp<String>> {
+            override fun onResponse(
+                call: Call<BaseResp<String>>,
+                response: Response<BaseResp<String>>
+            ) {
+                if (response.isSuccessful && response.body()?.code == 0) {
+                    Toast.makeText(this@HomeworkListActivity, "作业发布成功", Toast.LENGTH_SHORT).show()
+                    // 重新加载数据
+                    loadHomework(true)
+                } else {
+                    val errorMsg = response.body()?.message ?: "发布失败"
+                    Toast.makeText(this@HomeworkListActivity, "发布失败: $errorMsg", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<BaseResp<String>>, t: Throwable) {
+                Toast.makeText(this@HomeworkListActivity, "网络异常，发布失败", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
     private fun loadHomework(isRefresh: Boolean = false) {
         if (isLoading) return
@@ -357,7 +496,6 @@ class HomeworkListActivity: AppCompatActivity() {
         if (isRefresh) {
             currentPage = 1
             hasMoreData = true
-            homeworkList.clear()
             homeworkLibraryList.clear()
         }
         
@@ -365,7 +503,7 @@ class HomeworkListActivity: AppCompatActivity() {
         
         isLoading = true
         
-        // 调用API获取作业列表 (@GET /api/teach/homework/create/list)
+        // 调用API获取作业库列表 (@GET /api/teach/homework/create/list)
         RetrofitClient.apiService.getTeacherHomeworkList(
             page = currentPage,
             size = pageSize
@@ -377,32 +515,28 @@ class HomeworkListActivity: AppCompatActivity() {
                     val data = response.body()?.data
                     data?.records?.let { records ->
                         // 将API返回的数据转换为HomeworkDetail对象
-                        records.forEach { hw ->
-                            val homework = HomeworkDetail(
+                        val newHomeworkList = records.map { hw ->
+                            HomeworkDetail(
                                 id = hw.homeworkId?.toString() ?: "",
                                 title = hw.homeworkName ?: "未命名作业",
                                 description = "", // 详情API获取
                                 dueDate = hw.deadTime ?: "",
-                                submissions = mutableListOf()
+                                submissions = mutableListOf(),
+                                isPublished = hw.isPublished ?: false,
+                                publishTime = hw.publishTime,
+                                createTime = hw.createTime
                             )
-                            
-                            // 所有作业都加入作业库
-                            homeworkLibraryList.add(homework)
-                            
-                            // 只有已发布的作业加入已发放列表
-                            // 这里可以根据实际业务逻辑判断是否已发布
-                            // 暂时假设所有作业都已发布
-                            homeworkList.add(homework)
                         }
+                        
+                        // 添加到作业库列表
+                        homeworkLibraryList.addAll(newHomeworkList)
                         
                         // 检查是否还有更多数据
                         hasMoreData = currentPage < (data?.pages ?: 0)
                         currentPage++
                         
-                        // 根据当前标签显示对应数据
-                        if (currentTab == 0) {
-                            homeworkAdapter.updateData(homeworkList)
-                        } else {
+                        // 只在作业库标签页时更新显示
+                        if (currentTab == 1) {
                             homeworkAdapter.updateData(homeworkLibraryList)
                         }
                     }
@@ -413,7 +547,7 @@ class HomeworkListActivity: AppCompatActivity() {
                         showMockData()
                     }
                     // 显示错误信息
-                    Toast.makeText(this@HomeworkListActivity, "获取作业列表失败: ${response.body()?.message ?: "未知错误"}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@HomeworkListActivity, "获取作业库失败: ${response.body()?.message ?: "未知错误"}", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -426,7 +560,7 @@ class HomeworkListActivity: AppCompatActivity() {
                     showMockData()
                 }
                 // 显示错误信息
-                Toast.makeText(this@HomeworkListActivity, "网络异常，获取作业列表失败", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@HomeworkListActivity, "网络异常，获取作业库失败", Toast.LENGTH_SHORT).show()
             }
         })
     }
@@ -450,7 +584,10 @@ class HomeworkListActivity: AppCompatActivity() {
                             StudentSubmission("s2", "张伟", "https://example.com/calculus_answer1.jpg", 92, "解题步骤清晰，极限证明方法正确，计算准确", true),
                             StudentSubmission("s3", "李娜", "答案内容：我采用了夹逼定理来求解第5题的极限，过程如下...", null, null, false),
                             StudentSubmission("s4", "王芳", "https://example.com/calculus_answer2.jpg", 85, "整体表现良好，但第7题的连续性证明可以更严谨", true)
-                        )
+                        ),
+                        isPublished = true,
+                        publishTime = "2025-10-15 09:00:00",
+                        createTime = "2025-10-15 08:30:00"
                     )
                 )
                 homeworkList.add(
@@ -463,7 +600,24 @@ class HomeworkListActivity: AppCompatActivity() {
                             StudentSubmission("s1", "刘小明", "https://example.com/derivative_answer1.jpg", null, null, false),
                             StudentSubmission("s2", "张伟", "", null, null, false),
                             StudentSubmission("s3", "李娜", "https://example.com/derivative_answer2.jpg", 88, "隐函数求导掌握较好，但高阶导数计算有小错误", true)
-                        )
+                        ),
+                        isPublished = true,
+                        publishTime = "2025-10-20 10:00:00",
+                        createTime = "2025-10-20 09:30:00"
+                    )
+                )
+                
+                // 添加一些未发布的作业到作业库
+                homeworkLibraryList.add(
+                    HomeworkDetail(
+                        id = "h2_draft",
+                        title = "积分计算作业（草稿）",
+                        description = "完成教材第60页练习题1-8题，包括不定积分和定积分的计算。",
+                        dueDate = "2025-11-01",
+                        submissions = mutableListOf(),
+                        isPublished = false,
+                        publishTime = null,
+                        createTime = "2025-10-22 14:30:00"
                     )
                 )
             }
