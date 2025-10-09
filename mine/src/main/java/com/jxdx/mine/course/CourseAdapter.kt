@@ -9,12 +9,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.jxdx.mine.Course
 import com.jxdx.mine.R
+import com.jxdx.mine.SubjectsVO
 
 class CourseAdapter(
-    private val onItemClick: (Course) -> Unit
+    private val identity: Int,
+    private val onCourseClick: (Course) -> Unit,
+    private val onSubjectClick: (SubjectsVO) -> Unit
 ) : RecyclerView.Adapter<CourseAdapter.CourseViewHolder>() {
 
     private val allCourses = mutableListOf<Course>()
+    private val allTeacherCourses = mutableListOf<SubjectsVO>()
 
     fun submitList(list: List<Course>?) {
         allCourses.clear()
@@ -23,20 +27,39 @@ class CourseAdapter(
         }
         notifyDataSetChanged()
     }
+    fun submitTeacherList(list: List<SubjectsVO>?) {
+        allTeacherCourses.clear()
+        if (list != null) {
+            allTeacherCourses.addAll(list)
+        }
+        notifyDataSetChanged()
+    }
+
 
     inner class CourseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvCourseName: TextView = itemView.findViewById(R.id.tv_course_name)
         private val tvTeacherName: TextView = itemView.findViewById(R.id.tv_teacher_name)
         private val tvTeacherAvatar: ImageView = itemView.findViewById(R.id.tv_teacher_avatar)
 
-        fun bind(course: Course) {
+        fun bindCourse(course: Course) {
             tvCourseName.text = course.subjectName
 
+            // 学生身份显示任课老师
             tvTeacherName.text = "任课老师：${course.teacherName}"
             Glide.with(itemView.context)
                 .load(course.avatarUrl)
                 .into(tvTeacherAvatar)
-            itemView.setOnClickListener { onItemClick(course) }
+            itemView.setOnClickListener { onCourseClick(course) }
+        }
+
+        fun bindSubject(subject: SubjectsVO) {
+            tvCourseName.text = subject.subjectName
+
+            // 老师身份显示课程ID
+            tvTeacherName.text = "课程ID：${subject.subjectId}"
+            // 老师身份时不需要显示头像，可以隐藏或使用默认头像
+            tvTeacherAvatar.visibility = View.GONE
+            itemView.setOnClickListener { onSubjectClick(subject) }
         }
     }
 
@@ -46,8 +69,15 @@ class CourseAdapter(
         return CourseViewHolder(view)
     }
 
-    override fun getItemCount() = allCourses.size
+    override fun getItemCount(): Int {
+        return if (identity == 1) allTeacherCourses.size else allCourses.size
+    }
+
     override fun onBindViewHolder(holder: CourseViewHolder, position: Int) {
-        holder.bind(allCourses[position])
+        if (identity == 1) {
+            holder.bindSubject(allTeacherCourses[position])
+        } else {
+            holder.bindCourse(allCourses[position])
+        }
     }
 }

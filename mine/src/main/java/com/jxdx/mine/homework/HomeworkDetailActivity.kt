@@ -14,10 +14,13 @@ import com.example.corekit.http.TokenManager
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.mine.R
 import com.jxdx.mine.StuHomeWorkDetailVO
+import com.jxdx.mine.UserInfo
+import com.jxdx.mine.Course
 import com.jxdx.mine.adapter.ImageAdapter
 import com.jxdx.mine.databinding.ActivityHomeworkDetailBinding
 import com.jxdx.mine.http.ApiService
 import com.jxdx.mine.http.RetrofitClient
+import com.jxdx.mine.http.SubmitHomeworkRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -71,16 +74,19 @@ class HomeworkDetailActivity : BaseActivity<ActivityHomeworkDetailBinding>() {
         // 加载作业详情
         loadHomeworkDetail()
     }
+    
+    // 每次回到此页面时重新加载作业详情，确保状态正确显示
+    override fun onResume() {
+        super.onResume()
+        loadHomeworkDetail()
+    }
 
     private fun loadHomeworkDetail() {
         // 显示加载状态
         showLoading()
 
         RetrofitClient.apiService.getHomeworkDetail(homeworkId).enqueue(object : Callback<BaseResp<StuHomeWorkDetailVO>> {
-            override fun onResponse(
-                call: Call<BaseResp<StuHomeWorkDetailVO>>,
-                response: Response<BaseResp<StuHomeWorkDetailVO>>
-            ) {
+            override fun onResponse(call: Call<BaseResp<StuHomeWorkDetailVO>>, response: Response<BaseResp<StuHomeWorkDetailVO>>) {
                 // 隐藏加载状态
                 hideLoading()
 
@@ -90,10 +96,14 @@ class HomeworkDetailActivity : BaseActivity<ActivityHomeworkDetailBinding>() {
                         // 成功获取作业详情，使用非空断言操作符
                         showHomeworkDetail(resp.data!!)
                     } else {
-                        showError("获取作业详情失败：${resp?.message}")
+                        // 显示友好的错误信息，区分作业不存在和其他错误
+                        val errorMsg = if (response.code() == 404) "作业不存在或已被删除" else "获取作业详情失败：${resp?.message}"
+                        showError(errorMsg)
                     }
                 } else {
-                    showError("网络请求失败")
+                    // 网络请求失败时显示具体错误
+                    val errorMsg = if (response.code() == 404) "作业不存在或已被删除" else "网络请求失败（${response.code()}）"
+                    showError(errorMsg)
                 }
             }
 
@@ -244,7 +254,11 @@ class HomeworkDetailActivity : BaseActivity<ActivityHomeworkDetailBinding>() {
                 
                 // 显示已选图片预览
                 view.recyclerViewSelectedImages.visibility = View.VISIBLE
-                imageAdapter.setImageUrls(selectedImages)
+                
+                // 创建一个新的适配器实例来显示已选图片，避免与作业详情图片混用
+                val selectedImageAdapter = ImageAdapter(this)
+                view.recyclerViewSelectedImages.adapter = selectedImageAdapter
+                selectedImageAdapter.setImageUrls(selectedImages)
             }
         }
     }
@@ -259,37 +273,112 @@ class HomeworkDetailActivity : BaseActivity<ActivityHomeworkDetailBinding>() {
             return
         }
         
-        // 准备提交数据
-        val submitRequest = com.jxdx.mine.http.SubmitHomeworkRequest(
-            homeworkId = homeworkId.toLong(),
-            studentContent = if (content.isEmpty()) null else listOf(content)
-            // 注意：这里简化了图片上传逻辑，实际项目中需要先上传图片获取URL
-        )
-        
-        // 显示加载状态
+        // 获取当前用户信息以获取studentId
         showLoading()
         
-        // 发送提交请求
-        RetrofitClient.apiService.submitHomework(submitRequest).enqueue(object : Callback<BaseResp<String>> {
-            override fun onResponse(call: Call<BaseResp<String>>, response: Response<BaseResp<String>>) {
-                hideLoading()
-                if (response.isSuccessful && response.body() != null) {
-                    val resp = response.body()
-                    if (resp?.code == 0) {
-                        // 提交成功，重新加载作业详情
-                        showSuccess("作业提交成功")
-                        loadHomeworkDetail()
+        RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
+            override fun onResponse(call: Call<BaseResp<UserInfo>>, userResponse: Response<BaseResp<UserInfo>>) {
+                if (userResponse.isSuccessful && userResponse.body() != null) {
+                    val userInfo = userResponse.body()
+                    if (userInfo?.code == 0 && userInfo.data != null) {
+                        // 获取到用户信息，准备提交作业数据
+                        val studentId = userInfo.data!!.userId.toLong()
+                        Log.d("HomeworkDetail", "用户ID: ${userInfo.data!!.userId}, 学生ID: $studentId")
+                        
+                        // 获取所有课程信息，根据科目名称查找subjectId
+                        RetrofitClient.apiService.getAllCourse().enqueue(object : Callback<BaseResp<List<Course>>> {
+                            override fun onResponse(call: Call<BaseResp<List<Course>>>, courseResponse: Response<BaseResp<List<Course>>>) {
+                                if (courseResponse.isSuccessful && courseResponse.body() != null) {
+                                    val courseResp = courseResponse.body()
+                                    if (courseResp?.code == 0 && courseResp.data != null) {
+                                        // 查找匹配的subjectId
+                                        val currentSubjectName = currentHomeworkDetail?.subject
+                                        Log.d("HomeworkDetail", "当前作业科目: $currentSubjectName")
+                                        
+                                        var subjectId: Int? = null
+                                        if (currentSubjectName != null) {
+                                            // 遍历课程列表，查找匹配的科目
+                                            for (course in courseResp.data!!) {
+                                                Log.d("HomeworkDetail", "课程: ${course.subjectName}, ID: ${course.subjectId}")
+                                                if (course.subjectName == currentSubjectName) {
+                                                    subjectId = course.subjectId
+                                                    break
+                                                }
+                                            }
+                                        }
+                                        
+                                        // 准备提交数据
+                                        val submitRequest = com.jxdx.mine.http.SubmitHomeworkRequest(
+                                            homeworkId = homeworkId.toLong(),
+                                            subjectId = subjectId,
+                                            studentId = studentId,
+                                            studentContent = if (content.isEmpty()) null else listOf(content)
+                                            // 注意：这里简化了图片上传逻辑，实际项目中需要先上传图片获取URL
+                                        )
+                                        
+                                        // 获取当前token
+                                        val token = TokenManager.getToken() ?: ""
+                                        Log.d("HomeworkDetail", "提交作业 - Token: $token")
+                                        Log.d("HomeworkDetail", "提交作业 - Request: $submitRequest")
+                                        
+                                        // 发送提交请求，明确传递token
+                                        RetrofitClient.apiService.submitHomework(submitRequest, token).enqueue(object : Callback<BaseResp<String>> {
+                                            override fun onResponse(call: Call<BaseResp<String>>, response: Response<BaseResp<String>>) {
+                                                hideLoading()
+                                                Log.d("HomeworkDetail", "提交作业响应码: ${response.code()}")
+                                                Log.d("HomeworkDetail", "提交作业响应体: ${response.body()}")
+                                                Log.d("HomeworkDetail", "提交作业错误体: ${response.errorBody()?.string()}")
+                                                 
+                                                if (response.isSuccessful && response.body() != null) {
+                                                    val resp = response.body()
+                                                    Log.d("HomeworkDetail", "提交作业响应数据: code=${resp?.code}, message=${resp?.message}")
+                                                    if (resp?.code == 0) {
+                                            // 提交成功，设置返回结果并重新加载作业详情
+                                            showSuccess("作业提交成功")
+                                            loadHomeworkDetail()
+                                            // 设置返回结果，通知HomeworkListFragment刷新列表
+                                            setResult(RESULT_OK)
+                                        } else {
+                                            showError("作业提交失败：${resp?.message ?: "未知错误"}")
+                                        }
+                                                } else {
+                                                    showError("网络请求失败：响应码 ${response.code()}")
+                                                }
+                                            }
+                                              
+                                            override fun onFailure(call: Call<BaseResp<String>>, t: Throwable) {
+                                                hideLoading()
+                                                showError("网络请求失败：${t.message}")
+                                            }
+                                        })
+                                    } else {
+                                        hideLoading()
+                                        showError("获取课程信息失败：${courseResp?.message}")
+                                    }
+                                } else {
+                                    hideLoading()
+                                    showError("获取课程信息网络请求失败")
+                                }
+                            }
+                              
+                            override fun onFailure(call: Call<BaseResp<List<Course>>>, t: Throwable) {
+                                hideLoading()
+                                showError("获取课程信息网络请求失败：${t.message}")
+                            }
+                        })
                     } else {
-                        showError("作业提交失败：${resp?.message}")
+                        hideLoading()
+                        showError("获取用户信息失败：${userInfo?.message}")
                     }
                 } else {
-                    showError("网络请求失败")
+                    hideLoading()
+                    showError("获取用户信息网络请求失败")
                 }
             }
             
-            override fun onFailure(call: Call<BaseResp<String>>, t: Throwable) {
+            override fun onFailure(call: Call<BaseResp<UserInfo>>, t: Throwable) {
                 hideLoading()
-                showError("网络请求失败：${t.message}")
+                showError("获取用户信息网络请求失败：${t.message}")
             }
         })
     }

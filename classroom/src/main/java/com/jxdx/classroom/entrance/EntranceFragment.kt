@@ -17,9 +17,10 @@ import com.bumptech.glide.Glide
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.classroom.R
 import com.jxdx.classroom.Subject
-import com.jxdx.classroom.UserInfo
+import com.jxdx.login.UserInfo
 import com.jxdx.classroom.activity.ActivityToClassRoomFragment
 import com.jxdx.classroom.activity.ActivityToTeacherClassRoomFragment
+
 import com.jxdx.classroom.databinding.FragmentEntranceBinding
 import com.jxdx.classroom.http.RetrofitClient
 import com.jxdx.common.http.service.MineService
@@ -153,31 +154,31 @@ class EntranceFragment : Fragment() {
             }else{
                 val intent = Intent(requireContext(), ActivityToTeacherClassRoomFragment::class.java)
                 // 获取用户信息并设置老师id参数
-                RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
+                // 使用正确的Callback类型获取用户信息
+                RetrofitClient.apiService.getUserInfo().enqueue(object : retrofit2.Callback<BaseResp<UserInfo>> {
                     override fun onResponse(
-                        call: Call<BaseResp<UserInfo>?>,
-                        response: Response<BaseResp<UserInfo>?>?
+                        call: retrofit2.Call<BaseResp<UserInfo>>,
+                        response: retrofit2.Response<BaseResp<UserInfo>>
                     ) {
-                        if (response != null && response.isSuccessful) {
-                            response.body()?.let { body ->
-                                if (body.code == 0) {
-                                    body.data?.let { userInfo ->
-                                        // 从userInfo中获取userId字段作为teacherId
-                                        val teacherId = userInfo.id
-                                        Log.d("EntranceFragment",userInfo.toString())
-                                        intent.putExtra("teacherId", teacherId)
-                                        startActivity(intent)
-                                    }
+                        if (response.isSuccessful) {
+                            val body = response.body()
+                            if (body != null && body.code == 0) {
+                                val userInfo = body.data
+                                if (userInfo != null) {
+                                    // 从userInfo中获取userId字段作为teacherId
+                                    intent.putExtra("teacherId", userInfo.userId)
+                                    Log.d("EntranceFragment", userInfo.toString())
                                 }
                             }
+                            startActivity(intent)
                         }
                     }
 
                     override fun onFailure(
-                        call: Call<BaseResp<UserInfo>?>,
+                        call: retrofit2.Call<BaseResp<UserInfo>>,
                         t: Throwable
                     ) {
-                        // 获取用户信息失败时，直接跳转
+                        Log.e("EntranceFragment", "获取用户信息失败", t)
                         startActivity(intent)
                     }
                 })
@@ -228,51 +229,54 @@ class EntranceFragment : Fragment() {
 
 
     private fun updateEntranceUseInfo() {
-        RetrofitClient.apiService.getUserInfo().enqueue(object : Callback<BaseResp<UserInfo>> {
+        // 使用正确的Callback类型获取用户信息
+        RetrofitClient.apiService.getUserInfo().enqueue(object : retrofit2.Callback<BaseResp<UserInfo>> {
             override fun onResponse(
-                call: Call<BaseResp<UserInfo>?>,
-                response: Response<BaseResp<UserInfo>?>?
+                call: retrofit2.Call<BaseResp<UserInfo>>,
+                response: retrofit2.Response<BaseResp<UserInfo>>
             ) {
                 // 检查Fragment是否仍然附加到Activity并且视图有效
                 if (!isAdded || _binding == null) {
                     return
                 }
                 
-                if (response != null && response.isSuccessful) {
-                    response.body()?.let {
-                        if (it.code == 0) {
-                            if(it.data?.identity == 0) {
+                if (response.isSuccessful) {
+                    val body = response.body()
+                    if (body != null && body.code == 0) {
+                        val userInfo = body.data
+                        if (userInfo != null) {
+                            if(userInfo.identity == 0) {
                                 identity = 0
-                                binding.tvUserName.text = "欢迎" + it.data?.userName + "同学！"
-                                Log.d("EntranceFrance",it.data.toString())
+                                binding.tvUserName.text = "欢迎" + userInfo.userName + "同学！"
+                                Log.d("EntranceFrance",userInfo.toString())
                                 Glide.with(requireContext())
-                                    .load(it.data?.avatarUrl)
+                                    .load(userInfo.avatarUrl)
                                     .circleCrop()
                                     .into(binding.ivAvatar)
                             } else {
                                 identity = 1
-                                binding.tvUserName.text = "欢迎" + it.data?.userName + "！"
-                                Log.d("EntranceFrance",it.data.toString())
+                                binding.tvUserName.text = "欢迎" + userInfo.userName + "！"
+                                Log.d("EntranceFrance",userInfo.toString())
                                 Glide.with(requireContext())
-                                    .load(it.data?.avatarUrl)
+                                    .load(userInfo.avatarUrl)
                                     .circleCrop()
                                     .into(binding.ivAvatar)
                             }
                             // 获取用户身份后，根据身份调用对应的接口
                             viewModel.getSubject(identity)
-                        } else {
-                            Toast.makeText(requireContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show()
                         }
+                    } else {
+                        Toast.makeText(requireContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
 
             override fun onFailure(
-                call: Call<BaseResp<UserInfo>?>,
+                call: retrofit2.Call<BaseResp<UserInfo>>,
                 t: Throwable
             ) {
                 // 检查Fragment是否仍然附加到Activity
-                if (isAdded) {
+                if (isAdded && _binding != null) {
                     Toast.makeText(requireContext(), "获取用户信息失败", Toast.LENGTH_SHORT).show()
                 }
             }

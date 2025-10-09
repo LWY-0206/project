@@ -52,6 +52,7 @@ android {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":login"))
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
     implementation(libs.material)

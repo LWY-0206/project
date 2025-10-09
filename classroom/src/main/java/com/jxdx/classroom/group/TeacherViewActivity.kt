@@ -84,6 +84,12 @@ class TeacherViewActivity : AppCompatActivity() {
         // 断开WebSocket连接
         disconnectWebSocket()
     }
+
+    override fun onResume() {
+        super.onResume()
+        // 在返回到该页面时重新加载小组数据，确保删除全部小组后能正确刷新
+        loadGroupsData()
+    }
     
     // 删除旧的connectWebSocket方法，新的实现在后面
 
@@ -237,10 +243,10 @@ class TeacherViewActivity : AppCompatActivity() {
              Toast.makeText(this, "Token获取失败，无法执行结束分组操作", Toast.LENGTH_SHORT).show()
              return
          }
-         
+          
          // 显示加载提示
          Toast.makeText(this, "正在结束分组...", Toast.LENGTH_SHORT).show()
-         
+          
          activityScope.launch {
              try {
                  // 调用结束分组接口
@@ -249,10 +255,21 @@ class TeacherViewActivity : AppCompatActivity() {
                      subjectId = subjectId,
                      createdBy = teacherId
                  )
-                 
+                  
                  if (endGroupResponse.code == 0) {
-                     Toast.makeText(this@TeacherViewActivity, "分组已成功结束", Toast.LENGTH_SHORT).show()
-                     Log.d("TeacherViewActivity", "分组已结束")
+                     // 成功结束分组后，标记所有小组为已锁定
+                     groups.forEach { group ->
+                         group.isLocked = true
+                     }
+                      
+                     // 更新UI，显示分组已结束
+                     binding.tvSummary.text = "共 ${groups.size} 个小组，${getTotalStudents()} 名学生 (分组已结束)"
+                      
+                     // 向所有客户端广播分组结束的消息
+                     broadcastGroupEndMessage()
+                      
+                     Toast.makeText(this@TeacherViewActivity, "分组已成功结束，学生不能再更改小组", Toast.LENGTH_SHORT).show()
+                     Log.d("TeacherViewActivity", "分组已结束并锁定")
                  } else {
                      val errorMsg = "分组结束失败: ${endGroupResponse.message ?: "未知错误"}"
                      Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
@@ -263,6 +280,24 @@ class TeacherViewActivity : AppCompatActivity() {
                  Toast.makeText(this@TeacherViewActivity, errorMsg, Toast.LENGTH_SHORT).show()
                  Log.e("TeacherViewActivity", errorMsg, e)
              }
+         }
+     }
+      
+     /**
+      * 广播分组结束的消息给所有客户端
+      */
+     private fun broadcastGroupEndMessage() {
+         if (isConnected && webSocket != null) {
+             val broadcastData = mapOf(
+                 "type" to "group_end",
+                 "subjectId" to subjectId,
+                 "teacherId" to teacherId
+             )
+             val jsonMessage = gson.toJson(broadcastData)
+             webSocket?.send(jsonMessage)
+             Log.d("TeacherViewActivity", "广播分组结束消息: $jsonMessage")
+         } else {
+             Log.d("TeacherViewActivity", "WebSocket未连接，无法广播分组结束消息")
          }
      }
       
@@ -353,24 +388,16 @@ class TeacherViewActivity : AppCompatActivity() {
      * 连接WebSocket
      */
     private fun connectWebSocket() {
-        // 确定要使用的Token：首次连接时获取并保存，重连时使用保存的Token
-        val tokenToUse: String
-        if (initialToken.isNullOrEmpty()) {
-            // 首次连接，获取最新的Token并保存
-            tokenToUse = TokenManager.getToken() ?: ""
-            if (tokenToUse.isEmpty()) {
-                Log.e("TeacherViewActivity", "Token为空，无法连接WebSocket")
-                Toast.makeText(this, "Token获取失败，无法建立WebSocket连接", Toast.LENGTH_SHORT).show()
-                return
-            }
-            initialToken = tokenToUse
-            Log.d("TeacherViewActivity", "首次连接，保存初始Token")
-        } else {
-            // 重连，使用保存的Token
-            tokenToUse = initialToken!!
-            Log.d("TeacherViewActivity", "重连中，使用保存的Token")
+        // 获取最新的Token
+        val tokenToUse = TokenManager.getToken() ?: ""
+        if (tokenToUse.isEmpty()) {
+            Log.e("TeacherViewActivity", "Token为空，无法连接WebSocket")
+            Toast.makeText(this, "Token获取失败，无法建立WebSocket连接", Toast.LENGTH_SHORT).show()
+            return
         }
         
+        Log.d("TeacherViewActivity", "连接WebSocket，Token长度: ${tokenToUse.length}")
+
         // 构建完整的WebSocket连接地址
         // 优化teamId获取逻辑，确保URL格式正确
         val teamId = if (groups.isNotEmpty()) {
@@ -378,7 +405,10 @@ class TeacherViewActivity : AppCompatActivity() {
         } else {
             "default" // 使用"default"作为默认teamId，避免空字符串导致URL格式问题
         }
-        val wsUrl = "${wsBaseUrl}${teamId}?satoken=$tokenToUse"
+        
+        // 构建基础URL，不包含token
+        val wsUrl = "${wsBaseUrl}${teamId}"
+        Log.d("TeacherViewActivity", "WebSocket连接URL: $wsUrl")
         
         try {
             // 创建OkHttpClient
@@ -386,9 +416,10 @@ class TeacherViewActivity : AppCompatActivity() {
                 .readTimeout(0, TimeUnit.MILLISECONDS)
                 .build()
             
-            // 创建WebSocket请求
+            // 创建WebSocket请求，将token放在请求头中而不是URL参数
             val request = Request.Builder()
                 .url(wsUrl)
+                .addHeader("satoken", tokenToUse)
                 .build()
             
             // 建立WebSocket连接
@@ -409,8 +440,8 @@ class TeacherViewActivity : AppCompatActivity() {
                         // 处理收到的消息
                         // 检查是否收到未登录异常消息
                         if (text.contains("当前用户未登录") || text.contains("Token is empty")) {
-                            Log.e("TeacherViewActivity", "WebSocket认证失败")
-                            // 仅断开连接，不自动重连
+                            Log.e("TeacherViewActivity", "WebSocket认证失败: $text")
+                            // 断开当前连接
                             disconnectWebSocket()
                         }
                     }
@@ -559,14 +590,15 @@ class TeacherViewActivity : AppCompatActivity() {
                         )
                         
                         val token = TokenManager.getToken() ?: ""
+                        // 根据ApiService接口定义，satoken应该作为HTTP头参数传递
                         val response = RetrofitClient.apiService.generateGroups(
-                            satoken = token,  // 使用TokenManager获取的token
+                            satoken = token,
                             request = requestBody
                         )
                         
-                        // 检查响应是否成功
+                        // 检查响应是否成功 - 只检查业务逻辑code是否为0
                         Log.d("TeacherViewActivity", "generateGroups响应: code=${response.code}, message=${response.message}")
-                        if (response.code != 0 && response.code != 200) {
+                        if (response.code != 0) {
                             throw Exception("服务器返回错误: ${response.message ?: "未知错误"} (code=${response.code}) ")
                         }
                     }
@@ -666,15 +698,24 @@ class TeacherViewActivity : AppCompatActivity() {
     }
 
     private fun setupGroupsList() {
-        binding.rvGroups.layoutManager = LinearLayoutManager(this)
-        binding.rvGroups.adapter = GroupsAdapter(groups) { group ->
-            val intent = Intent(this, DiscussionActivity::class.java)
-            intent.putExtra("groupId", group.id)
-            intent.putExtra("groupName", group.name)
-            intent.putExtra("isTeacher", true)
-            startActivity(intent)
-        }
-    }
+         binding.rvGroups.layoutManager = LinearLayoutManager(this)
+         binding.rvGroups.adapter = GroupsAdapter(groups) { group ->
+             val intent = Intent(this, DiscussionActivity::class.java)
+             intent.putExtra("groupId", group.id)
+             intent.putExtra("groupName", group.name)
+             intent.putExtra("isTeacher", true)
+             // 将students集合转换为JSON字符串后传递
+             try {
+                 val gson = com.google.gson.Gson()
+                 val studentsJson = gson.toJson(group.students)
+                 Log.d("TeacherViewActivity", "Failed to convert students to JSON: ${studentsJson}")
+                 intent.putExtra("groupStudentsJson", studentsJson)
+             } catch (e: Exception) {
+                 Log.e("TeacherViewActivity", "Failed to convert students to JSON: ${e.message}")
+             }
+             startActivity(intent)
+         }
+     }
 
     private fun getTotalStudents(): Int {
         return groups.sumOf { group ->

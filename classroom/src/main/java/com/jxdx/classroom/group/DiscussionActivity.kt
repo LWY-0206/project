@@ -1,5 +1,6 @@
 package com.jxdx.classroom.group
 
+import android.app.AlertDialog
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
@@ -11,10 +12,12 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import com.bumptech.glide.Glide
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -27,12 +30,17 @@ import com.jxdx.classroom.R
 import com.jxdx.classroom.databinding.ActivityDiscussionBinding
 import com.jxdx.classroom.http.RetrofitClient
 import com.example.corekit.http.TokenManager
+import com.example.corekit.http.bean.BaseResp
+import com.jxdx.login.UserInfo
 import kotlinx.coroutines.*
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okhttp3.Request
 import okhttp3.OkHttpClient
-import okhttp3.Response
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -42,7 +50,7 @@ import java.util.concurrent.TimeUnit
 data class Member(
     val id: String,
     val name: String,
-    val isOnline: Boolean
+    var isOnline: Boolean
 )
 
 // 消息项的装饰器，用于设置不同类型消息之间的间距
@@ -60,18 +68,19 @@ class MessageItemDecoration : RecyclerView.ItemDecoration() {
 }
 
 /**
- * 讨论组活动类
- * 负责显示小组讨论界面，处理消息发送和接收，以及各种用户交互操作
- */
+     * 讨论组活动类
+     * 负责显示小组讨论界面，处理消息发送和接收，以及各种用户交互操作
+     */
 class DiscussionActivity : AppCompatActivity() {
     // 视图绑定对象，用于访问XML布局中的UI元素
     private lateinit var binding: ActivityDiscussionBinding
     // 当前用户ID
-    private val currentUserId = "student_1"
-    // 当前用户名
-    private val currentUserName = "组长1"
+    private var currentUserId = "1"
+    private var currentUserName = "张三"
+    // 当前用户头像
+    private var currentUserAvatar: String? = null
     // 群组ID
-    private lateinit var groupId: String
+    private  var groupId: Int=0
     // 群组名称
     private lateinit var groupName: String
     // 是否为教师模式
@@ -82,6 +91,8 @@ class DiscussionActivity : AppCompatActivity() {
     private val messages = mutableListOf<Message>()
     // 消息适配器，用于RecyclerView的数据绑定
     private lateinit var messagesAdapter: MessagesAdapter
+    // 学科ID，用于删除全部小组接口
+    private var subjectId: Int = 0
     // 消息处理器，用于处理延迟任务
     private val messageHandler = Handler(Looper.getMainLooper())
     // 模拟消息列表
@@ -117,9 +128,9 @@ class DiscussionActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // 调用各初始化方法
+        initRecyclerView() // 先初始化RecyclerView和messagesAdapter
         initData()
         initViews()
-        initRecyclerView()
         setupClickListeners()
 
         // 加载历史消息
@@ -135,9 +146,46 @@ class DiscussionActivity : AppCompatActivity() {
      */
     private fun initData() {
         // 获取从上一个Activity传递过来的数据
-        groupId = intent.getStringExtra("groupId") ?: ""
+        groupId = intent.getIntExtra("groupId", 0)
         groupName = intent.getStringExtra("groupName") ?: "讨论组"
         isTeacherMode = intent.getBooleanExtra("isTeacher", false)
+        // 获取学科ID，用于删除全部小组接口
+        subjectId = intent.getIntExtra("subjectId", 0)
+
+        // 尝试获取并解析传递过来的students JSON字符串
+            try {
+                val studentsJson = intent.getStringExtra("groupStudentsJson")
+                if (!studentsJson.isNullOrEmpty()) {
+                    val gson = com.google.gson.Gson()
+                    val type = object : com.google.gson.reflect.TypeToken<List<Student>>() {}.type
+                    val students = gson.fromJson<List<Student>>(studentsJson, type)
+                    
+                    // 将学生数据转换为Member对象并添加到groupMembers列表
+                    groupMembers.clear()
+                    students.forEachIndexed { index, student ->
+                        if (student != null) {
+                            groupMembers.add(Member(
+                                id = student.id.toString(),
+                                name = student.name,
+                                isOnline = false // 暂时设置为离线，实际可以根据WebSocket状态更新
+                            ))
+                            
+                            // 如果是当前用户，保存头像信息
+                            if (student.id.toString() == currentUserId) {
+                                currentUserAvatar = student.avatarUrl
+                            }
+                        }
+                    }
+                    Log.d("DiscussionActivity", "Successfully loaded ${students.size} students from TeacherViewActivity")
+                }
+            } catch (e: Exception) {
+                Log.e("DiscussionActivity", "Failed to parse groupStudentsJson: ${e.message}")
+                // 解析失败时，使用模拟数据
+                setupMockMembers()
+            }
+
+        // 尝试从UserInfo获取当前用户的正确头像信息
+        loadCurrentUserAvatarFromUserInfo()
 
         // 添加系统消息：用户加入讨论区
         if (!isTeacherMode) {
@@ -187,7 +235,12 @@ class DiscussionActivity : AppCompatActivity() {
         messagesAdapter = MessagesAdapter(messages, currentUserId, isTeacherMode)
         // 设置RecyclerView的布局管理器和适配器
         binding.rvMessages.apply {
-            layoutManager = LinearLayoutManager(this@DiscussionActivity)
+            // 创建LinearLayoutManager并设置布局方向
+            val layoutManager = LinearLayoutManager(this@DiscussionActivity)
+            layoutManager.stackFromEnd = true // 从底部开始显示
+            layoutManager.reverseLayout = false // 不反转布局方向，确保新消息在底部
+            this.layoutManager = layoutManager
+            
             adapter = messagesAdapter
             // 添加消息项之间的间距
             addItemDecoration(MessageItemDecoration())
@@ -244,17 +297,6 @@ class DiscussionActivity : AppCompatActivity() {
         // 获取输入框内容并去除前后空格
         val content = binding.etMessage.text.toString().trim()
         if (content.isNotEmpty()) {
-            // 创建消息对象
-            val message = Message(
-                id = "msg_${System.currentTimeMillis()}",
-                senderId = if (isTeacherMode) "teacher" else currentUserId,
-                senderName = if (isTeacherMode) "教师" else currentUserName,
-                content = content,
-                timestamp = System.currentTimeMillis(),
-                isFromTeacher = isTeacherMode
-            )
-            // 添加消息到列表
-            addMessage(message)
             // 清空输入框
             binding.etMessage.text?.clear()
             // 更新发送按钮状态
@@ -263,9 +305,17 @@ class DiscussionActivity : AppCompatActivity() {
             // 通过API发送消息
             lifecycleScope.launch { 
                 try {
+                    // 根据是否为教师模式设置不同的fromUserId
+                    val requestFromUserId = if (isTeacherMode) {
+                        // 教师模式下使用特殊标识
+                        -1 // 假设-1代表教师ID
+                    } else {
+                        currentUserId.toIntOrNull() ?: 1001
+                    }
+                    
                     val request = GroupChatApi.SendMessage.RequestBody(
-                        teamId = groupId.toIntOrNull()?.toInt(),
-                        fromUserId = currentUserId.toIntOrNull()?.toInt(),
+                        teamId = groupId,
+                        fromUserId = requestFromUserId,
                         content = content,
                         messageType = GroupChatApi.Broadcast.MessageType.TEXT
                     )
@@ -275,19 +325,37 @@ class DiscussionActivity : AppCompatActivity() {
                     )
 
                     if (response.code != 0 || response.data == null) {
-                        // 发送失败，显示提示
-                        Toast.makeText(this@DiscussionActivity, "消息发送失败: ${response.message}", Toast.LENGTH_SHORT).show()
+                        Log.d("DiscussionActivity", "消息发送失败: ${response.message}")
+                        Toast.makeText(this@DiscussionActivity, "消息发送失败", Toast.LENGTH_SHORT).show()
                     } else {
-                        // 发送成功，保存消息到服务器
+                        // 发送成功，先保存消息到服务器
                         val saveRequest = GroupChatApi.SaveMessage.RequestBody(
-                            teamId = groupId.toIntOrNull()?.toInt(),
-                            fromUserId = currentUserId.toIntOrNull()?.toInt(),
+                            teamId = groupId,
+                            fromUserId = requestFromUserId,
                             content = content,
                             messageType = GroupChatApi.Broadcast.MessageType.TEXT
                         )
-                        RetrofitClient.apiService.saveGroupChatMessage(
+                        
+                        val saveResponse = RetrofitClient.apiService.saveGroupChatMessage(
                             request = saveRequest
                         )
+                        
+                        if (saveResponse.code == 0 && saveResponse.data != null) {
+                            // 保存成功后，再添加到本地消息列表
+                            val message = Message(
+                                id = "msg_${System.currentTimeMillis()}",
+                                senderId = if (isTeacherMode) -1 else currentUserId.toIntOrNull() ?: -1,
+                                senderName = if (isTeacherMode) "教师" else currentUserName,
+                                content = content,
+                                timestamp = System.currentTimeMillis(),
+                                isFromTeacher = isTeacherMode,
+                                senderAvatar = currentUserAvatar // 添加头像信息
+                            )
+                            // 调用addMessage方法添加消息，确保UI正确更新
+                            addMessage(message)
+                        } else {
+                            Log.d("DiscussionActivity", "消息保存失败: ${saveResponse.message}")
+                        }
                     }
                 } catch (e: Exception) {
                     // 网络异常
@@ -304,14 +372,18 @@ class DiscussionActivity : AppCompatActivity() {
      * @param message 要添加的消息对象
      */
     private fun addMessage(message: Message) {
-        // 将消息添加到列表
-        messages.add(message)
-        // 通知适配器数据变化
-        messagesAdapter.notifyItemInserted(messages.size - 1)
-        // 滚动到最新消息
-        binding.rvMessages.scrollToPosition(messages.size - 1)
-        // 为新消息添加动画效果
-        animateMessageAppearance(messages.size - 1)
+        // 检查消息是否已存在，避免重复添加
+        val isMessageExists = messages.any { it.id == message.id }
+        if (!isMessageExists) {
+            // 将消息添加到列表
+            messages.add(message)
+            // 通知适配器数据变化
+            messagesAdapter.notifyItemInserted(messages.size - 1)
+            // 滚动到最新消息
+            binding.rvMessages.scrollToPosition(messages.size - 1)
+            // 为新消息添加动画效果
+            animateMessageAppearance(messages.size - 1)
+        }
     }
 
     /**
@@ -323,7 +395,7 @@ class DiscussionActivity : AppCompatActivity() {
         // 创建系统消息对象
         val systemMessage = Message(
             id = "sys_${System.currentTimeMillis()}",
-            senderId = "system",
+            senderId = 0,
             senderName = "系统",
             content = content,
             timestamp = System.currentTimeMillis(),
@@ -350,14 +422,18 @@ class DiscussionActivity : AppCompatActivity() {
                     // 处理普通广播消息
                     val content = messageData["content"] as? String
                     if (content != null) {
+                        // 尝试从消息数据中获取原始消息ID
+                        val originalMessageId = messageData["messageId"] as? String
+                        
                         // 创建广播消息对象
                         val broadcastMessage = Message(
-                            id = "broadcast_${System.currentTimeMillis()}",
-                            senderId = "teacher",
+                            id = originalMessageId ?: "broadcast_${System.currentTimeMillis()}",
+                            senderId = -1,
                             senderName = "教师",
                             content = content,
                             timestamp = System.currentTimeMillis(),
-                            isFromTeacher = true
+                            isFromTeacher = true,
+                            senderAvatar = null // 教师头像暂时为null
                         )
                         // 添加广播消息到讨论区
                         addMessage(broadcastMessage)
@@ -370,11 +446,12 @@ class DiscussionActivity : AppCompatActivity() {
                         // 创建题型广播消息对象
                         val questionMessage = Message(
                             id = "question_${System.currentTimeMillis()}",
-                            senderId = "teacher",
+                            senderId = -1,
                             senderName = "教师",
                             content = "【题型广播】当前讨论题型: $questionType",
                             timestamp = System.currentTimeMillis(),
-                            isFromTeacher = true
+                            isFromTeacher = true,
+                            senderAvatar = null // 教师头像暂时为null
                         )
                         // 添加题型广播消息到讨论区
                         addMessage(questionMessage)
@@ -424,10 +501,27 @@ class DiscussionActivity : AppCompatActivity() {
 
     /**
      * 更新在线人数
-     * 更新UI上显示的在线人数
+     * 更新UI上显示的在线人数，实际计算groupMembers中isOnline为true的成员数量
      */
     private fun updateOnlineCount() {
-        binding.tvOnlineCount.text = "在线 $onlineCount 人"
+        // 实际计算在线人数：统计groupMembers中isOnline为true的成员数量
+        val actualOnlineCount = groupMembers.count { it.isOnline }
+        binding.tvOnlineCount.text = "在线 $actualOnlineCount 人"
+    }
+    
+    /**
+     * 更新成员在线状态
+     * 根据用户ID更新指定成员的在线状态
+     * @param memberId 成员ID
+     * @param isOnline 是否在线
+     */
+    private fun updateMemberOnlineStatus(memberId: String, isOnline: Boolean) {
+        val member = groupMembers.find { it.id == memberId }
+        if (member != null && member.isOnline != isOnline) {
+            member.isOnline = isOnline
+            // 在线状态改变时更新显示
+            updateOnlineCount()
+        }
     }
 
     /**
@@ -489,15 +583,6 @@ class DiscussionActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
-        // 教师模式下显示教师工具选项
-        if (isTeacherMode) {
-            view.findViewById<View>(R.id.optionTeacherTools).setOnClickListener {
-                Toast.makeText(this, "教师工具功能开发中", Toast.LENGTH_SHORT).show()
-                dialog.dismiss()
-            }
-            view.findViewById<View>(R.id.optionTeacherTools).visibility = View.VISIBLE
-        }
-
         // 显示弹窗
         dialog.setContentView(view)
         dialog.show()
@@ -505,7 +590,7 @@ class DiscussionActivity : AppCompatActivity() {
 
     /**
      * 显示教师操作
-     * 显示教师操作底部弹窗（添加任务、评价、干预）
+     * 显示教师操作底部弹窗（添加任务、评价、删除全部小组）
      */
     private fun showTeacherActions() {
         // 创建底部弹窗
@@ -524,22 +609,134 @@ class DiscussionActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+        // 设置删除全部小组点击事件
+        view.findViewById<View>(R.id.optionDeleteAllGroups).setOnClickListener {
+            deleteAllGroups()
+            dialog.dismiss()
+        }
+
         // 显示弹窗
         dialog.setContentView(view)
         dialog.show()
+    }
+
+    /**
+     * 删除全部小组
+     * 弹出确认对话框并调用删除全部小组接口
+     */
+    private fun deleteAllGroups() {
+        AlertDialog.Builder(this)
+            .setTitle("确认删除")
+            .setMessage("确定要删除当前学科的全部小组吗？此操作不可撤销！")
+            .setPositiveButton("确定") { dialog, which ->
+                executeDeleteAllGroups()
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    /**
+     * 执行删除全部小组操作
+     * 调用API删除当前学科的全部小组
+     */
+    private fun executeDeleteAllGroups() {
+        // 获取用户token
+        val token = TokenManager.getToken() ?: ""
+        if (token.isEmpty()) {
+            Toast.makeText(this, "Token获取失败，无法执行删除操作", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 显示加载提示
+        Toast.makeText(this, "正在删除全部小组...", Toast.LENGTH_SHORT).show()
+
+        lifecycleScope.launch {
+            try {
+                // 调用删除全部小组接口
+                val response = RetrofitClient.apiService.deleteAllGroups(
+                    satoken = token,
+                    subjectId = subjectId,
+                    createdBy = currentUserId.toIntOrNull() ?: 0
+                )
+
+                if (response.code == 0) {
+                    // 删除成功，显示提示并返回上一页
+                    Toast.makeText(this@DiscussionActivity, "全部小组已成功删除", Toast.LENGTH_SHORT).show()
+                    // 添加系统消息到聊天记录
+                    addSystemMessage("全部小组已被删除")
+                    // 返回上一页
+                    finish()
+                } else {
+                    val errorMsg = "删除失败: ${response.message}" ?: "未知错误"
+                    Toast.makeText(this@DiscussionActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                    Log.e("DiscussionActivity", errorMsg)
+                }
+            } catch (e: Exception) {
+                val errorMsg = "删除异常: ${e.message ?: "未知异常"}"
+                Toast.makeText(this@DiscussionActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                Log.e("DiscussionActivity", errorMsg, e)
+            }
+        }
     }
 
     // 小组人员列表
     private val groupMembers = mutableListOf<Member>()
 
     /**
+     * 从UserInfo获取当前用户的头像信息
+     */
+    private fun loadCurrentUserAvatarFromUserInfo() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val response = RetrofitClient.apiService.getUserInfo().execute()
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        val body = response.body()
+                        if (body != null && body.code == 0) {
+                            // 显式转换data为UserInfo类型
+                            val userInfo: UserInfo? = body.data
+                            if (userInfo != null) {
+                                // 更新当前用户头像
+                                currentUserAvatar = userInfo.avatarUrl
+                                // 更新当前用户ID和名称
+                                currentUserId = userInfo.userId.toString()
+                                currentUserName = userInfo.userName
+                                // 如果已经有消息，需要刷新适配器以显示正确的头像
+                                if (::messagesAdapter.isInitialized) {
+                                    messagesAdapter.notifyDataSetChanged()
+                                }
+                                Log.d("DiscussionActivity", "Successfully loaded current user avatar from UserInfo: ${userInfo.avatarUrl}")
+                            }
+                        } else {
+                            Log.w("DiscussionActivity", "Failed to load user info: body is null or code is not 0")
+                        }
+                    } else {
+                        Log.w("DiscussionActivity", "API request failed: ${response.code()}")
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e("DiscussionActivity", "Exception when loading user info: ${e.message}")
+                }
+            }
+        }
+    }
+
+    /**
      * 加载小组人员信息
      */
     private fun loadGroupMembers() {
+        // 检查小组成员列表是否已从前面界面传递过来（如果不为空，则不需要再次加载）
+        if (groupMembers.isNotEmpty()) {
+            Log.d("DiscussionActivity", "小组成员信息已从前面界面获取，无需再次加载")
+            return
+        }
+
         // 获取用户token
         val saToken = TokenManager.getToken() ?: ""
         if (saToken.isEmpty()) {
             Log.e("DiscussionActivity", "未登录，无法加载小组人员信息")
+            setupMockMembers()
             return
         }
 
@@ -549,8 +746,8 @@ class DiscussionActivity : AppCompatActivity() {
                 // 由于没有直接的API获取小组人员，我们通过加载所有小组数据来获取当前小组的成员
                 val groupsResponse = RetrofitClient.apiService.getGroups(
                     satoken = saToken,
-                    subjectId = 0, // 可以根据实际情况传入正确的Int值
-                    createdBy = 0  // 可以根据实际情况传入正确的Int值
+                    subjectId = 1, // 可以根据实际情况传入正确的Int值
+                    createdBy = 6  // 可以根据实际情况传入正确的Int值
                 )
 
                 if (groupsResponse.code == 0 && groupsResponse.data != null) {
@@ -578,6 +775,10 @@ class DiscussionActivity : AppCompatActivity() {
                             groupMembers.add(Member("2", "李四", false))
                             groupMembers.add(Member("3", "王五", true))
                         }
+                    } else {
+                        // 未找到当前小组，使用模拟数据
+                        Log.e("DiscussionActivity", "未找到当前小组，使用模拟数据")
+                        setupMockMembers()
                     }
                 } else {
                     Log.e("DiscussionActivity", "加载小组数据失败: ${groupsResponse.message}")
@@ -661,31 +862,52 @@ class DiscussionActivity : AppCompatActivity() {
     private fun addGroupTask() {
         // 创建任务消息
         val content = "【小组任务】请在本周内完成项目原型设计，并提交设计文档"
-        val taskMessage = Message(
-            id = "task_${System.currentTimeMillis()}",
-            senderId = "teacher",
-            senderName = "教师",
-            content = content,
-            timestamp = System.currentTimeMillis(),
-            messageType = MessageType.TEXT,
-            isFromTeacher = true
-        )
-        // 添加任务消息到列表
-        addMessage(taskMessage)
-
-        // 通过API广播任务（如果是教师模式）
+        
+        // 通过API广播任务并保存到服务器（如果是教师模式）
         if (isTeacherMode) {
             lifecycleScope.launch { 
                 try {
-                    val request = GroupChatApi.Broadcast.RequestBody(
-                        teamId = listOf(groupId.toIntOrNull()?: 0), // 转换为List<Int>
-                        fromUserId = currentUserId.toIntOrNull(),
+                    // 教师模式下使用特殊标识
+                    val requestFromUserId = -1 // 假设-1代表教师ID
+                    
+                    // 先广播消息
+                    val broadcastRequest = GroupChatApi.Broadcast.RequestBody(
+                        teamId = listOf(groupId), // 转换为List<Int>
+                        fromUserId = requestFromUserId,
                         content = content,
                         messageType = GroupChatApi.Broadcast.MessageType.TEXT
                     )
                     RetrofitClient.apiService.broadcastGroupChatMessage(
-                        request = request
+                        request = broadcastRequest
                     )
+                    
+                    // 再保存消息到服务器
+                    val saveRequest = GroupChatApi.SaveMessage.RequestBody(
+                        teamId = groupId,
+                        fromUserId = requestFromUserId,
+                        content = content,
+                        messageType = GroupChatApi.Broadcast.MessageType.TEXT
+                    )
+                    
+                    val saveResponse = RetrofitClient.apiService.saveGroupChatMessage(
+                        request = saveRequest
+                    )
+                    
+                    if (saveResponse.code == 0 && saveResponse.data != null) {
+                        // 保存成功后，添加到本地消息列表
+                        val taskMessage = Message(
+                            id = "task_${System.currentTimeMillis()}",
+                            senderId = -1,
+                            senderName = "教师",
+                            content = content,
+                            timestamp = System.currentTimeMillis(),
+                            messageType = MessageType.TEXT,
+                            isFromTeacher = true
+                        )
+                        addMessage(taskMessage)
+                    } else {
+                        Log.d("DiscussionActivity", "任务消息保存失败: ${saveResponse.message}")
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -698,18 +920,49 @@ class DiscussionActivity : AppCompatActivity() {
      * 添加教师对小组的评价消息
      */
     private fun evaluateGroup() {
-        // 创建评价消息
-        val evaluationMessage = Message(
-            id = "eval_${System.currentTimeMillis()}",
-            senderId = "teacher",
-            senderName = "教师",
-            content = "【评价】小组讨论积极，分工明确，继续保持！",
-            timestamp = System.currentTimeMillis(),
-            messageType = MessageType.TEXT,
-            isFromTeacher = true
-        )
-        // 添加评价消息到列表
-        addMessage(evaluationMessage)
+        // 创建评价消息内容
+        val content = "【评价】小组讨论积极，分工明确，继续保持！"
+        
+        // 通过API保存评价消息到服务器（如果是教师模式）
+        if (isTeacherMode) {
+            lifecycleScope.launch { 
+                try {
+                    // 教师模式下使用特殊标识
+                    val requestFromUserId = -1 // 假设-1代表教师ID
+                    
+                    // 保存消息到服务器
+                    val saveRequest = GroupChatApi.SaveMessage.RequestBody(
+                        teamId = groupId,
+                        fromUserId = requestFromUserId,
+                        content = content,
+                        messageType = GroupChatApi.Broadcast.MessageType.TEXT
+                    )
+                    
+                    val saveResponse = RetrofitClient.apiService.saveGroupChatMessage(
+                        request = saveRequest
+                    )
+                    
+                    if (saveResponse.code == 0 && saveResponse.data != null) {
+                        // 保存成功后，添加到本地消息列表
+                        val evaluationMessage = Message(
+                            id = "eval_${System.currentTimeMillis()}",
+                            senderId = -1,
+                            senderName = "教师",
+                            content = content,
+                            timestamp = System.currentTimeMillis(),
+                            messageType = MessageType.TEXT,
+                            isFromTeacher = true,
+                            senderAvatar = null
+                        )
+                        addMessage(evaluationMessage)
+                    } else {
+                        Log.d("DiscussionActivity", "评价消息保存失败: ${saveResponse.message}")
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
     /**
@@ -717,18 +970,49 @@ class DiscussionActivity : AppCompatActivity() {
      * 添加教师对讨论的干预指导消息
      */
     private fun interveneDiscussion() {
-        // 创建干预消息
-        val interventionMessage = Message(
-            id = "intervene_${System.currentTimeMillis()}",
-            senderId = "teacher",
-            senderName = "教师",
-            content = "【指导建议】建议你们考虑一下用户的使用场景和需求痛点",
-            timestamp = System.currentTimeMillis(),
-            messageType = MessageType.TEXT,
-            isFromTeacher = true
-        )
-        // 添加干预消息到列表
-        addMessage(interventionMessage)
+        // 创建干预消息内容
+        val content = "【指导建议】建议你们考虑一下用户的使用场景和需求痛点"
+        
+        // 通过API保存干预消息到服务器（如果是教师模式）
+        if (isTeacherMode) {
+            lifecycleScope.launch { 
+                try {
+                    // 教师模式下使用特殊标识
+                    val requestFromUserId = -1 // 假设-1代表教师ID
+                    
+                    // 保存消息到服务器
+                    val saveRequest = GroupChatApi.SaveMessage.RequestBody(
+                        teamId = groupId,
+                        fromUserId = requestFromUserId,
+                        content = content,
+                        messageType = GroupChatApi.Broadcast.MessageType.TEXT
+                    )
+                    
+                    val saveResponse = RetrofitClient.apiService.saveGroupChatMessage(
+                        request = saveRequest
+                    )
+                    
+                    if (saveResponse.code == 0 && saveResponse.data != null) {
+                        // 保存成功后，添加到本地消息列表
+                        val interventionMessage = Message(
+                            id = "intervene_${System.currentTimeMillis()}",
+                            senderId = -1,
+                            senderName = "教师",
+                            content = content,
+                            timestamp = System.currentTimeMillis(),
+                            messageType = MessageType.TEXT,
+                            isFromTeacher = true,
+                            senderAvatar = null
+                        )
+                        addMessage(interventionMessage)
+                    } else {
+                        Log.d("DiscussionActivity", "干预消息保存失败: ${saveResponse.message}")
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
     /**
@@ -755,28 +1039,17 @@ class DiscussionActivity : AppCompatActivity() {
             return
         }
         
-        // 确定要使用的Token：首次连接时获取并保存，重连时使用保存的Token
-        val tokenToUse: String
-        if (initialToken.isNullOrEmpty()) {
-            // 首次连接，获取最新的Token并保存
-            tokenToUse = TokenManager.getToken() ?: ""
-            if (tokenToUse.isEmpty()) {
-                Log.e("DiscussionActivity", "Token为空，无法连接WebSocket")
-                // 尝试刷新Token并重连
-                scheduleReconnection()
-                return
-            }
-            initialToken = tokenToUse
-            Log.d("DiscussionActivity", "首次连接，保存初始Token")
-        } else {
-            // 重连，使用保存的Token
-            tokenToUse = initialToken!!
-            Log.d("DiscussionActivity", "重连中，使用保存的Token")
+        // 获取最新的Token，不使用缓存的Token
+        val tokenToUse = TokenManager.getToken() ?: ""
+        
+        if (tokenToUse.isEmpty()) {
+            Log.e("DiscussionActivity", "Token为空，无法连接WebSocket")
+            // 尝试刷新Token并重连
+            scheduleReconnection()
+            return
         }
         
-        // 构建完整的WebSocket连接地址
-        val wsUrl = "${wsBaseUrl}${groupId}?satoken=$tokenToUse"
-        Log.d("DiscussionActivity", "尝试连接WebSocket: $wsUrl")
+        Log.d("DiscussionActivity", "尝试连接WebSocket，使用Token长度: ${tokenToUse.length}")
         
         try {
             // 创建OkHttpClient，增加连接超时和Ping/Pong配置
@@ -786,18 +1059,32 @@ class DiscussionActivity : AppCompatActivity() {
                 .pingInterval(30, TimeUnit.SECONDS) // 每30秒发送一次ping保持连接
                 .build()
             
-            // 创建WebSocket请求
+            // 确保URL格式正确 - 避免URL路径拼接错误导致404
+            val wsUrlBuilder = StringBuilder(wsBaseUrl)
+            // 确保URL末尾有斜杠
+            if (!wsBaseUrl.endsWith("/")) {
+                wsUrlBuilder.append("/")
+            }
+            // 添加groupId
+            if (groupId!=0) {
+                wsUrlBuilder.append(groupId)
+            }
+            
+            val finalWsUrl = wsUrlBuilder.toString()
+            Log.d("DiscussionActivity", "WebSocket连接URL: $finalWsUrl")
+            
             val request = Request.Builder()
-                .url(wsUrl)
+                .url(finalWsUrl)
+                .addHeader("satoken", tokenToUse)
                 .build()
             
             // 建立WebSocket连接
             webSocket = client.newWebSocket(request, object : WebSocketListener() {
-                override fun onOpen(webSocket: WebSocket, response: Response) {
+                override fun onOpen(webSocket: WebSocket, response: okhttp3.Response) {
                     mainHandler.post {
                         isConnected = true
                         reconnectionAttempts = 0 // 重置重连尝试次数
-                        Log.d("DiscussionActivity", "WebSocket连接成功: ${response.message}")
+                        Log.d("DiscussionActivity", "WebSocket连接成功: ${response.code}")
                     }
                 }
                 
@@ -829,11 +1116,21 @@ class DiscussionActivity : AppCompatActivity() {
                     }
                 }
                 
-                override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                override fun onFailure(webSocket: WebSocket, t: Throwable, response: okhttp3.Response?) {
                     mainHandler.post {
                         isConnected = false
-                        Log.e("DiscussionActivity", "WebSocket连接失败: ${t.message}", t)
-                        // 移除自动重连逻辑，失败后不再重连
+                        val errorCode = response?.code ?: -1
+                        Log.e("DiscussionActivity", "WebSocket连接失败: ${t.message}, 错误码: $errorCode", t)
+                        
+                        // 对于401未授权错误，强制刷新Token并重连
+                        if (errorCode == 401) {
+                            Log.d("DiscussionActivity", "401认证失败，强制获取新Token并重连")
+                            // 清除initialToken，强制下次连接获取新Token
+                            initialToken = null
+                        }
+                        
+                        // 添加重连逻辑
+                        scheduleReconnection()
                     }
                 }
             })
@@ -866,12 +1163,15 @@ class DiscussionActivity : AppCompatActivity() {
             reconnectionAttempts++
             Log.d("DiscussionActivity", "计划重连WebSocket (尝试 $reconnectionAttempts/$maxReconnectionAttempts)")
             
+            // 指数退避策略，避免短时间内频繁重连
+            val backoffDelay = reconnectionDelay * (1L shl (reconnectionAttempts - 1)).coerceAtMost(60000L) // 最大60秒，使用1L确保位移操作返回Long类型
+            
             mainHandler.postDelayed({
                 if (!isConnected && !isFinishing) {
                     // 重新获取Token并尝试连接
                     connectWebSocket()
                 }
-            }, reconnectionDelay)
+            }, backoffDelay)
         } else {
             Log.e("DiscussionActivity", "已达到最大重连次数，停止重连")
             mainHandler.post {
@@ -907,7 +1207,10 @@ class DiscussionActivity : AppCompatActivity() {
         }
 
         // 先加载小组人员信息，以便显示正确的发送者名称
-        loadGroupMembers()
+        // 如果groupMembers为空才加载，避免重复加载
+        if (groupMembers.isEmpty()) {
+            loadGroupMembers()
+        }
 
         // 在协程中调用API获取历史消息
         lifecycleScope.launch { 
@@ -931,33 +1234,50 @@ class DiscussionActivity : AppCompatActivity() {
                         try {
                             val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                             val timestamp = sdf.parse(apiMessage.sendTime)?.time ?: System.currentTimeMillis()
-                              
-                            // 根据senderId查找对应的成员名称
+                                
+                            // 根据senderId查找对应的成员名称和头像
                             var senderName = "用户"
-                            if (apiMessage.fromUserId.toString() == "teacher") {
+                            var senderAvatar: String? = null
+                            var isTeacherMsg = false
+                            
+                            // 判断是否为教师消息（检查是否为-1）
+                            if (apiMessage.fromUserId == -1 || apiMessage.fromUserId.toString() == "teacher") {
                                 senderName = "教师"
+                                isTeacherMsg = true
                             } else if (groupMembers.isNotEmpty()) {
                                 // 查找成员列表中是否有对应的id
                                 val member = groupMembers.find { it.id == apiMessage.fromUserId.toString() }
                                 if (member != null) {
                                     senderName = member.name
+                                    // 当前用户头像已在initData中保存
+                                    if (apiMessage.fromUserId.toString() == currentUserId) {
+                                        senderAvatar = currentUserAvatar
+                                    }
                                 }
                             }
                                 
                             val message = Message(
                                 id = apiMessage.id.toString(),
-                                senderId = apiMessage.fromUserId.toString(),
+                                senderId = if (isTeacherMsg) -1 else apiMessage.fromUserId,
                                 senderName = senderName,
                                 content = apiMessage.content,
                                 timestamp = timestamp,
                                 messageType = if (apiMessage.messageType == GroupChatApi.Broadcast.MessageType.TEXT) MessageType.TEXT else MessageType.SYSTEM,
-                                isFromTeacher = apiMessage.fromUserId.toString() == "teacher"
+                                isFromTeacher = isTeacherMsg,
+                                senderAvatar = senderAvatar
                             )
-                            messages.add(message)
+                            // 检查消息是否已存在，避免重复添加
+                            val isMessageExists = messages.any { it.id == message.id }
+                            if (!isMessageExists) {
+                                messages.add(message)
+                            }
                         } catch (e: ParseException) {
                             e.printStackTrace()
                         }
                     }
+                    
+                    // 按照时间戳对消息列表进行排序，确保最新的消息在列表末尾
+                    messages.sortBy { it.timestamp }
 
                     // 更新RecyclerView
                     messagesAdapter.notifyDataSetChanged()
@@ -1013,7 +1333,7 @@ class MessagesAdapter(
         return when {
             message.messageType == MessageType.SYSTEM -> TYPE_SYSTEM_MESSAGE
             message.isFromTeacher -> TYPE_TEACHER_MESSAGE
-            message.senderId == currentUserId -> TYPE_MY_MESSAGE
+            message.senderId.toString() == currentUserId -> TYPE_MY_MESSAGE
             else -> TYPE_OTHER_MESSAGE
         }
     }
@@ -1081,6 +1401,8 @@ class MessagesAdapter(
         private val layoutMyMessage = itemView.findViewById<View>(R.id.layoutMyMessage)
         private val tvMyMessageContent = itemView.findViewById<TextView>(R.id.tvMyMessageContent)
         private val tvMyMessageTime = itemView.findViewById<TextView>(R.id.tvMyMessageTime)
+        private val ivMyAvatar = itemView.findViewById<ImageView>(R.id.ivMyAvatar)
+        private val tvMySender = itemView.findViewById<TextView>(R.id.tvMySender)
 
         init {
             // 设置视图可见性
@@ -1096,6 +1418,17 @@ class MessagesAdapter(
         fun bind(message: Message) {
             tvMyMessageContent.text = message.content
             tvMyMessageTime.text = formatTime(message.timestamp)
+            // 设置发送者名字
+            tvMySender.text = message.senderName
+            
+            // 设置头像
+            if (!message.senderAvatar.isNullOrEmpty()) {
+                // 使用Glide加载头像
+                Glide.with(itemView.context).load(message.senderAvatar).into(ivMyAvatar)
+            } else {
+                // 如果没有头像URL，使用默认头像
+                ivMyAvatar.setImageResource(R.drawable.ic_my_avatar)
+            }
         }
     }
 
@@ -1108,6 +1441,7 @@ class MessagesAdapter(
         private val tvOtherSender = itemView.findViewById<TextView>(R.id.tvOtherSender)
         private val tvOtherMessageContent = itemView.findViewById<TextView>(R.id.tvOtherMessageContent)
         private val tvOtherMessageTime = itemView.findViewById<TextView>(R.id.tvOtherMessageTime)
+        private val ivOtherAvatar = itemView.findViewById<ImageView>(R.id.ivOtherAvatar)
 
         init {
             // 设置视图可见性
@@ -1124,6 +1458,15 @@ class MessagesAdapter(
             tvOtherSender.text = message.senderName
             tvOtherMessageContent.text = message.content
             tvOtherMessageTime.text = formatTime(message.timestamp)
+            
+            // 设置头像
+            if (!message.senderAvatar.isNullOrEmpty()) {
+                // 使用Glide加载头像
+                Glide.with(itemView.context).load(message.senderAvatar).into(ivOtherAvatar)
+            } else {
+                // 如果没有头像URL，使用默认头像
+                ivOtherAvatar.setImageResource(R.drawable.ic_other_avatar)
+            }
         }
     }
 
@@ -1160,6 +1503,7 @@ class MessagesAdapter(
         private val tvOtherSender = itemView.findViewById<TextView>(R.id.tvOtherSender)
         private val tvOtherMessageContent = itemView.findViewById<TextView>(R.id.tvOtherMessageContent)
         private val tvOtherMessageTime = itemView.findViewById<TextView>(R.id.tvOtherMessageTime)
+        private val ivOtherAvatar = itemView.findViewById<ImageView>(R.id.ivOtherAvatar)
 
         init {
             // 设置视图可见性
@@ -1179,6 +1523,17 @@ class MessagesAdapter(
 
             // 教师消息特殊样式
             tvOtherSender.setTextColor(ContextCompat.getColor(itemView.context, R.color.warning))
+            
+            // 尝试加载教师头像
+            if (!message.senderAvatar.isNullOrEmpty()) {
+                Glide.with(itemView.context)
+                    .load(message.senderAvatar)
+                    .circleCrop()
+                    .into(ivOtherAvatar)
+            } else {
+                // 如果没有头像URL，使用默认头像
+                ivOtherAvatar.setImageResource(R.drawable.ic_my_avatar)
+            }
         }
     }
 

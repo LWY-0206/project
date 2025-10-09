@@ -41,6 +41,12 @@
             android:name=".course.CourseListActivity"
             android:exported="false" />
         <activity
+            android:name=".course.PreviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".course.UploadCoursewareInfoActivity"
+            android:exported="false" />
+        <activity
             android:name=".teacherhomework.CourseListActivity"
             android:exported="false" />
         <activity
