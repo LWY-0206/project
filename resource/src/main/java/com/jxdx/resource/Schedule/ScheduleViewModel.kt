@@ -1,4 +1,4 @@
-package Schedule
+package com.jxdx.resource.Schedule
 
 import android.app.Application
 import android.util.Log

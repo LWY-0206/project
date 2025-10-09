@@ -22,9 +22,10 @@ class ErrorQuizRepository {
     // 恢复或开始练习
     suspend fun resumePractice(
         subjectId: Int,
-        questionCount: Int
+        questionCount: Int,
+        questionType:Int
     ): BaseResp<PracticeSession> {
-        val base = service.resumePractice(subjectId, questionCount)
+        val base = service.resumePractice(subjectId,questionType, questionCount)
         Log.d("恢复练习", "subjectId: $subjectId, questionCount: $questionCount, response: $base")
         return base
     }

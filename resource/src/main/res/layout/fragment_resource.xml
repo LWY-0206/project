@@ -5,6 +5,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:background="@drawable/gradient_background">
+
+    <!-- 轮播图区域 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,243 +17,255 @@
             android:layout_width="match_parent"
             android:layout_height="200dp" />
     </LinearLayout>
+
+    <!-- 工具箱区域 - 紧凑版本 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp"
         android:background="@drawable/rounded_corner_bg"
         android:layout_margin="8dp">
+
+        <!-- 标题区域 -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="left">
-        <TextView
-            android:id="@+id/tv_rank_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="工具箱"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp" />
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="8dp">
+
             <TextView
+                android:id="@+id/tv_rank_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="更多"
-                android:textColor="@color/gray_600"
-                android:layout_alignRight="@+id/iv_go_more"
+                android:text="工具箱"
+                android:layout_alignParentLeft="true"
                 android:layout_centerVertical="true"
-                android:layout_marginBottom="12dp"
-                android:layout_margin="30dp"/>
-         <ImageView
-             android:layout_width="30dp"
-             android:layout_height="30dp"
-             android:src="@drawable/ic_arraw_go"
-             android:layout_alignParentRight="true"
-             android:layout_centerVertical="true"
-             android:id="@+id/iv_go_more"/>
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
         </RelativeLayout>
-        <!-- 内容网格：3列2行承载6个条目 -->
+
+        <!-- 服务网格：4列紧凑布局 -->
         <GridLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:columnCount="3"
+            android:columnCount="4"
             android:rowCount="2"
-            android:useDefaultMargins="true"
-            android:alignmentMode="alignBounds"
-            android:columnOrderPreserved="false">
+            android:useDefaultMargins="false"
+            android:alignmentMode="alignBounds">
 
-            <!-- 条目1：高校特色榜 -->
+            <!-- 第1行 -->
+
+            <!-- 名人堂 -->
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_margin="8dp">
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_columnWeight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/ic_famous"
-                    />
+                    android:layout_marginBottom="6dp" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="名人堂"
-                        android:textSize="15sp"
-                        android:textColor="@color/gray_400"
-                        android:id="@+id/tv_famous"/>
-                </LinearLayout>
+                    android:text="名人堂"
+                    android:textSize="11sp"
+                    android:textColor="@color/gray_600"
+                    android:id="@+id/tv_famous"/>
             </LinearLayout>
-
-            <!-- 条目2：奇妙排行榜 -->
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_margin="8dp">
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_columnWeight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_quiz"
-                    android:layout_marginLeft="8dp"/>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="错题工坊"
-                        android:textSize="15sp"
-                        android:textColor="@color/gray_400"
-                        android:id="@+id/tv_quiz"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- 条目3：大学排行榜 -->
-            <GridLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_margin="8dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/ic_school"
-                    android:layout_marginLeft="8dp"/>
+                    android:layout_marginBottom="6dp" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="志愿帮"
-                        android:textSize="15sp"
-                        android:textColor="@color/gray_400"
-                        android:id="@+id/tv_schools"/>
-                </LinearLayout>
-            </GridLayout>
-
-            <!-- 条目4：专业排行榜 -->
+                    android:text="志愿帮"
+                    android:textSize="11sp"
+                    android:textColor="@color/gray_600"
+                    android:id="@+id/tv_schools"/>
+            </LinearLayout>
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_margin="8dp">
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_columnWeight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_chem" />
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_quiz"
+                    android:layout_marginBottom="6dp" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp">
+                    android:text="错题工坊"
+                    android:textSize="11sp"
+                    android:textColor="@color/gray_600"
+                    android:id="@+id/tv_quiz"/>
+            </LinearLayout>
+            <!-- 化学工具 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_columnWeight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="化学工具"
-                        android:textSize="15sp"
-                        android:textColor="@color/gray_400"
-                        android:id="@+id/tv_chem"/>
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_chem"
+                    android:layout_marginBottom="6dp" />
 
-                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="化学工具"
+                    android:textSize="11sp"
+                    android:textColor="@color/gray_600"
+                    android:id="@+id/tv_chem"/>
             </LinearLayout>
 
-            <!-- 条目5：就业前景榜 -->
+            <!-- 话题工坊 -->
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_margin="8dp">
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_columnWeight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_topic"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="话题工坊"
+                    android:textSize="11sp"
+                    android:textColor="@color/gray_600"
+                    android:id="@+id/tv_topic"/>
+            </LinearLayout>
+
+            <!-- 物理工具 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_columnWeight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/ic_py"
-                    android:layout_marginLeft="8dp"/>
+                    android:layout_marginBottom="6dp" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="物理工具"
-                        android:textSize="15sp"
-                        android:textColor="@color/gray_400"
-                        android:id="@+id/tv_py"/>
-                </LinearLayout>
+                    android:text="物理工具"
+                    android:textSize="11sp"
+                    android:textColor="@color/gray_600"
+                    android:id="@+id/tv_py"/>
             </LinearLayout>
 
-            <!-- 条目6：科研实力榜 -->
+            <!-- 第2行 -->
+
+            <!-- 更多 -->
+
+
+            <!-- 志愿帮 -->
+
+
+            <!-- 数学工具 -->
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_margin="8dp">
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_columnWeight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:src="@drawable/ic_math"
-                    android:layout_marginLeft="8dp"/>
+                    android:layout_marginBottom="6dp" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginLeft="8dp">
+                    android:text="数学工具"
+                    android:textSize="11sp"
+                    android:textColor="@color/gray_600"
+                    android:id="@+id/tv_math"/>
+            </LinearLayout>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="数学工具"
-                        android:textColor="@color/gray_400"
-                        android:textSize="15sp"
-                        android:id="@+id/tv_math"/>
-                </LinearLayout>
+            <!-- 错题工坊 -->
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="80dp"
+                android:layout_columnWeight="1"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_more"
+                    android:layout_marginBottom="6dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="更多"
+                    android:textSize="11sp"
+                    android:textColor="@color/gray_600"
+                    android:id="@+id/tv_more"/>
             </LinearLayout>
 
         </GridLayout>
     </LinearLayout>
+
+    <!-- 其他内容区域 -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_staggered"
         android:layout_width="match_parent"

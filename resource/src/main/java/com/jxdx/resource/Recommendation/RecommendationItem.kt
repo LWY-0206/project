@@ -40,3 +40,14 @@ data class RecommendationItem(
     // 判断是否为视频
     fun isVideo(): Boolean = type == "video"
 }
+data class  RecommendationDetail(
+    val id: Int,
+    val title: String,
+val description: String,
+val duration: String,
+val author: String,
+val fileUrl: String,
+val viewCount: Int,
+val likeCount: Int,
+val updateTime: String
+)

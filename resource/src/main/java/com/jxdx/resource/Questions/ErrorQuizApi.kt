@@ -21,6 +21,7 @@ interface ErrorQuizApi {
     @POST("/api/questions/practice/resume")
     suspend fun resumePractice(
         @Query("subjectId") subjectId: Int,
+        @Query("questionType") questionType: Int,
         @Query("questionCount") questionCount: Int,
         @Header("satoken") satoken: String = TokenManager.getToken().toString()
     ): BaseResp<PracticeSession>

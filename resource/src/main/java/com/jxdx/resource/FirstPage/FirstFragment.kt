@@ -2,8 +2,9 @@ package com.jxdx.resource.FirstPage
 
 import Schedule.FirstPage.ScheduleAdapter
 import Schedule.FirstPage.ScheduleItem
-import Schedule.ScheduleViewModel
+import com.jxdx.resource.Schedule.ScheduleViewModel
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -22,6 +23,7 @@ import com.jxdx.resource.Recommendation.RecommendationItem
 import com.jxdx.resource.Recommendation.RecommendationResponse
 import com.jxdx.resource.Recommendation.RecommendationViewModel
 import com.jxdx.resource.Recommendation.WaterfallAdapter
+import com.jxdx.resource.RescourseDetail.PdfViewerActivity
 import com.jxdx.resource.StudySuggestions.StudySuggestionActivity
 import com.jxdx.resource.databinding.FragmentFirstBinding
 import com.jxdx.resource.databinding.LayoutNewsSectionBinding
@@ -32,6 +34,8 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.jxxy.debug.h5.activity.WebViewActivity
+import java.io.File
 import java.io.IOException
 import java.util.Calendar
 
@@ -57,6 +61,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
     // 当前选择的周次和星期
     private var currentWeek = "3" // 默认为第三周
     private var currentWeekday = "2" // 默认为星期二
+
 
     override fun bindLayout(): FragmentFirstBinding {
         return FragmentFirstBinding.inflate(layoutInflater)
@@ -111,7 +116,15 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
                     recommendationList.addAll(data)
                     waterfallAdapter.updateData(recommendationList)
                     Log.d("RecommendationViewModel", "Data loaded successfully, size: ${data}")
-                } else {}
+                } else {
+                }
+            }
+        }
+        recommendationViewModel.recommendationDetailLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    WebViewActivity.actionStart(requireActivity(), data.fileUrl, data.title)
+                }
             }
         }
         scheduleViewModel.scheduleLiveData.observe(this) { result ->
@@ -199,7 +212,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         currentWeek = "第三周"
         currentWeekday = "星期三"
 
-        Log.d("Schedule", "使用固定值加载课表: 第${currentWeek}周 星期${currentWeekday}")
+        Log.d("com/jxdx/resource/Schedule", "使用固定值加载课表: 第${currentWeek}周 星期${currentWeekday}")
         scheduleViewModel.getScheduleList(currentWeek, currentWeekday)
     }
 
@@ -211,7 +224,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         currentWeek = week
         currentWeekday = weekday
 
-        Log.d("Schedule", "使用系统时间加载课表: 第${currentWeek}周 星期${getChineseWeekday(currentWeekday)}")
+        Log.d("com/jxdx/resource/Schedule", "使用系统时间加载课表: 第${currentWeek}周 星期${getChineseWeekday(currentWeekday)}")
         scheduleViewModel.getScheduleList(currentWeek, currentWeekday)
     }
 
@@ -283,7 +296,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
     private fun loadScheduleWithCustomSelection(week: String, weekday: String) {
         currentWeek = week
         currentWeekday = weekday
-        Log.d("Schedule", "手动选择加载课表: 第${currentWeek}周 星期${getChineseWeekday(currentWeekday)}")
+        Log.d("com/jxdx/resource/Schedule", "手动选择加载课表: 第${currentWeek}周 星期${getChineseWeekday(currentWeekday)}")
         scheduleViewModel.getScheduleList(currentWeek, currentWeekday)
     }
 
@@ -412,7 +425,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
 
         // 设置点击事件
         waterfallAdapter.onItemClickListener = { item ->
-            handleItemClick(item)
+          handleItemClick( item)
         }
         // 添加滚动监听实现加载更多
         waterfallRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -430,22 +443,14 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
     }
     private fun loadRecommendationData() {
         Log.d("Recommendation", "开始加载推荐数据")
-        recommendationViewModel.getRecommendationList()
+        recommendationViewModel.getRecommendationList(2)
     }
     private fun handleItemClick(item: RecommendationItem) {
         // 根据类型处理点击事件
         if (item.isVideo()) {
-            showMessage("播放视频: ${item.title}")
-            // 实际开发中这里可以跳转到视频播放页面
-            // val intent = Intent(requireContext(), VideoPlayActivity::class.java)
-            // intent.putExtra("video_id", item.id)
-            // startActivity(intent)
+            recommendationViewModel.getRecommendationDetail(item.id.toInt())
         } else {
-            showMessage("查看文章: ${item.title}")
-            // 实际开发中这里可以跳转到文章详情页面
-            // val intent = Intent(requireContext(), ArticleDetailActivity::class.java)
-            // intent.putExtra("article_id", item.id)
-            // startActivity(intent)
+            recommendationViewModel.getRecommendationDetail(item.id.toInt())
         }
     }
 
@@ -595,9 +600,11 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
             override fun onFailure(call: Call, e: IOException) {
                 e.printStackTrace()
             }
+
             override fun onResponse(call: Call, response: Response) {
                 val responseData = response.body?.string()
-                val recommendationResponse = Gson().fromJson(responseData, RecommendationResponse::class.java)
+                val recommendationResponse =
+                    Gson().fromJson(responseData, RecommendationResponse::class.java)
                 val recommendationItems = recommendationResponse.data.RecommendationList
                 Log.d("RecommendationItems", recommendationItems.toString())
                 // 更新适配器数据

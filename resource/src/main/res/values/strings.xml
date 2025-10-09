@@ -9,7 +9,7 @@
     <string name="back">返回</string>
     <string name="cancel">取消</string>
     <string name="confirm">确认</string>
-
+    <string name="geogebra_menu">geogebra菜单</string>
     <!-- 聊天界面字符串 -->
     <string name="more">更多</string>
     <string name="ai_assistant">AI助手</string>
