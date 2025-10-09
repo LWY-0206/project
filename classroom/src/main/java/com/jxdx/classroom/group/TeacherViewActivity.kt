@@ -84,6 +84,12 @@ class TeacherViewActivity : AppCompatActivity() {
         // 断开WebSocket连接
         disconnectWebSocket()
     }
+
+    override fun onResume() {
+        super.onResume()
+        // 在返回到该页面时重新加载小组数据，确保删除全部小组后能正确刷新
+        loadGroupsData()
+    }
     
     // 删除旧的connectWebSocket方法，新的实现在后面
 
