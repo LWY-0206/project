@@ -9,6 +9,11 @@ import com.jxdx.mine.PageData
 import com.jxdx.mine.StuHomeWorkDetailVO
 import com.jxdx.mine.SubjectsVO
 import com.jxdx.mine.UserInfo
+import com.jxdx.mine.http.request.EditHomeworkRequest
+import com.jxdx.mine.http.request.CreateHomeworkRequest
+import com.jxdx.mine.http.request.SubmitHomeworkRequest
+import com.jxdx.mine.http.vo.TeachCreateHWSimpleVO
+import com.jxdx.mine.http.vo.TeachCreateHWDetailVO
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
@@ -203,23 +208,7 @@ interface ApiService {
     ): Call<BaseResp<TeachCreateHWDetailVO>>
 }
 
-//作业提交请求类
-data class SubmitHomeworkRequest(
-    val homeworkId: Long? = null,
-    val subjectId: Int? = null,
-    val studentId: Long? = null,
-    val studentContent: List<String>? = null
-)
 
-//创建作业请求类
-data class CreateHomeworkRequest(
-    val homeworkId: Long? = null,
-    val subjectId: Int? = null,
-    val homeworkName: String? = null,
-    val deadTime: String? = null,
-    val homeworkContent: String? = null,
-    val imageUrls: List<String>? = null
-)
 
 
 

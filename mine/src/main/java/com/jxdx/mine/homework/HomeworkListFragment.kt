@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -29,8 +30,13 @@ class HomeworkListFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     
     // 用于接收HomeworkDetailActivity返回结果的启动器
-    private val detailLauncher by lazy {
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    private lateinit var detailLauncher: ActivityResultLauncher<Intent>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        
+        // 在onCreate中初始化ActivityResultLauncher
+        detailLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             // 如果操作成功，重新加载作业列表以更新状态
             if (it.resultCode == AppCompatActivity.RESULT_OK) {
                 val status = arguments?.getInt("status", -1) ?: -1
