@@ -80,7 +80,7 @@ dependencies {
     implementation("com.airbnb.android:lottie:6.1.0")
 
     // PDF查看器依赖
-    implementation("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
+    implementation(libs.android.pdf.viewer)
 
     // 图片加载库
     implementation("com.github.bumptech.glide:glide:4.16.0")
