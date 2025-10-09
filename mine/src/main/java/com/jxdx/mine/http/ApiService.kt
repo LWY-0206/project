@@ -12,11 +12,12 @@ import com.jxdx.mine.UserInfo
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.Multipart
+import retrofit2.http.Part
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
-import retrofit2.http.Multipart
 import retrofit2.http.POST
-import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -97,6 +98,14 @@ interface ApiService {
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<String>>
     
+    //图片上传接口
+    @Multipart
+    @POST("/common/upload")
+    fun uploadImage(
+        @Part file: MultipartBody.Part,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<List<String>>>
+
     //老师创建作业
     @POST("/api/teach/homework/create")
     fun createHomework(
@@ -104,6 +113,13 @@ interface ApiService {
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<String>>
     
+    //老师编辑作业
+    @POST("/api/teach/homework/create/edit")
+    fun editHomework(
+        @Body request: EditHomeworkRequest,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
+
     //老师获取作业列表
     @GET("/api/teach/homework/create/list")
     fun getTeacherHomeworkList(
@@ -134,18 +150,57 @@ interface ApiService {
     fun getTeacherSubject(
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<List<SubjectsVO>>>
-    
+
     // 上传文件
     @Multipart
     @POST("/common/upload")
     fun uploadFile(@Part file: MultipartBody.Part): Call<BaseResp<List<String>>>
-    
+
     //上传课件
     @POST("/api/teacher/courses/uploadFile")
     fun uploadCourseWare(
         @Body request: UploadCourseWareRequest,
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<String>>
+
+
+
+    //删除作业（支持批量删除）
+    @DELETE("/api/teach/homework/send/del")
+    fun deleteHomework(
+        @Query("homeworkId") homeworkId: String,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
+
+    //AI创建作业
+    @POST("/api/teach/homework/create/ai")
+    fun createHomeworkWithAi(
+        @Query("msg") msg: String,
+        @Query("subjectId") subjectId: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
+
+    //发布作业
+    @POST("/api/teach/homework/send")
+    fun publishHomework(
+        @Query("homeworkId") homeworkId: String,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
+
+    //获取已发布的作业列表
+    @GET("/api/teach/homework/send/list")
+    fun getPublishedHomeworkList(
+        @Query("page") page: Int,
+        @Query("size") size: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<PageData<TeachCreateHWSimpleVO>>>
+
+    //获取已发布作业详情
+    @GET("/api/teach/homework/send/find")
+    fun getPublishedHomeworkDetail(
+        @Query("homeworkId") homeworkId: Long,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<TeachCreateHWDetailVO>>
 }
 
 //作业提交请求类
@@ -166,26 +221,7 @@ data class CreateHomeworkRequest(
     val imageUrls: List<String>? = null
 )
 
-//老师作业简单信息VO
-data class TeachCreateHWSimpleVO(
-    val homeworkId: Long? = null,
-    val subjectName: String? = null,
-    val homeworkName: String? = null,
-    val deadTime: String? = null,
-    val createTime: String? = null
-)
 
-//老师作业详情VO
-data class TeachCreateHWDetailVO(
-    val homeworkId: Long? = null,
-    val subject: String? = null,
-    val homeworkName: String? = null,
-    val homeworkContent: String? = null,
-    val deadTime: String? = null,
-    val createdTime: String? = null,
-    val updateTime: String? = null,
-    val imageUrls: List<String>? = null
-)
 
 //上传课件请求类
 data class UploadCourseWareRequest(
@@ -200,7 +236,6 @@ data class ClassInfo(
     val classId: Int? = null,
     val className: String? = null
 )
-
 
 
 

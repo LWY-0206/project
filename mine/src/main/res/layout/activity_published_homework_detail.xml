@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".teacherhomework.PublishedHomeworkDetailActivity">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:title="作业详情" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 作业标题 -->
+            <TextView
+                android:id="@+id/tv_homework_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="16dp"
+                tools:text="日语作业" />
+
+            <!-- 科目信息 -->
+            <LinearLayout
+                android:id="@+id/layout_subject"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📚 科目："
+                    android:textSize="16sp"
+                    android:textColor="@color/text_secondary" />
+                <TextView
+                    android:id="@+id/tv_subject"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="@color/text_primary"
+                    tools:text="日语" />
+            </LinearLayout>
+
+            <!-- 发布时间 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📅 发布时间："
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary" />
+                <TextView
+                    android:id="@+id/tv_send_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_primary"
+                    tools:text="2025-10-09 15:04:48" />
+            </LinearLayout>
+
+            <!-- 截止时间 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="20dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⏰ 截止时间："
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary" />
+                <TextView
+                    android:id="@+id/tv_dead_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:textColor="@color/red_600"
+                    tools:text="2025-10-11 14:16:23" />
+            </LinearLayout>
+
+            <!-- 分割线 -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/gray_200"
+                android:layout_marginBottom="20dp" />
+
+            <!-- 作业内容标题 -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📝 作业内容"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="12dp" />
+
+            <!-- 作业内容 -->
+            <TextView
+                android:id="@+id/tv_homework_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@color/text_primary"
+                android:lineSpacingExtra="4dp"
+                android:layout_marginBottom="20dp"
+                android:background="@drawable/bg_content_card"
+                android:padding="16dp"
+                tools:text="完成教材第25页练习题1-10题，要求写出详细的解题步骤和计算过程，重点关注极限的ε-δ定义证明。" />
+
+            <!-- 附件图片标题 -->
+            <TextView
+                android:id="@+id/tv_images_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🖼️ 附件图片"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone" />
+
+            <!-- 图片列表 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_images"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="20dp"
+                android:visibility="gone"
+                tools:layout_height="120dp"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_image_preview" />
+
+            <!-- 学生提交情况（预留） -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="👥 学生提交情况（功能开发中）"
+                android:textSize="16sp"
+                android:textStyle="italic"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="20dp"
+                android:gravity="center" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

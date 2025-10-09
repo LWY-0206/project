@@ -58,6 +58,18 @@
         <activity
             android:name=".teacherhomework.ReviewHomeworkActivity"
             android:exported="false" />
+        <activity
+            android:name=".teacherhomework.CreateHomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.EditHomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.AiCreateHomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.PublishedHomeworkDetailActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

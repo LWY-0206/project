@@ -3,8 +3,8 @@ package com.jxdx.classroom.activity
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
+import android.content.Intent
 import android.os.Build
-import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowInsets
@@ -19,6 +19,7 @@ import com.example.corekit.common.BaseActivity
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.jxdx.classroom.databinding.ClassActivityBinding
+import com.jxdx.classroom.group.GroupSeatActivity
 
 
 class ClassActivity : BaseActivity<ClassActivityBinding>() {
@@ -27,8 +28,10 @@ class ClassActivity : BaseActivity<ClassActivityBinding>() {
     // 这个用来控制直播播放
     private var currentSession: FFmpegSession? = null
     private var isPlaying = false
+    private var subjectId=1
     private lateinit var player: ExoPlayer
     private lateinit var viewModel: ClassDetailsViewModel
+
 
     // 面板滑动相关变量
     private var isPanelOpen = false
@@ -259,7 +262,9 @@ class ClassActivity : BaseActivity<ClassActivityBinding>() {
         
         // 小组讨论按钮
         view.btnTaolun.setOnClickListener {
-            // TODO: 实现小组讨论功能
+            val intent = Intent(this, GroupSeatActivity::class.java)
+            intent.putExtra("subjectid", subjectId.toString())
+            startActivity(intent)
             Log.d(TAG, "小组讨论被点击")
         }
         
@@ -274,7 +279,7 @@ class ClassActivity : BaseActivity<ClassActivityBinding>() {
         
         // 答题按钮
         view.btnAnswerSheet.setOnClickListener {
-            // TODO: 实现答题功能
+
             Log.d(TAG, "答题按钮被点击")
         }
     }

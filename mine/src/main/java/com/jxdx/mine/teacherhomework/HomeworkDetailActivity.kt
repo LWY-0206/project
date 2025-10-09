@@ -3,8 +3,11 @@ package com.jxdx.mine.teacherhomework
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,7 +17,7 @@ import com.jxdx.mine.StudentSubmission
 import com.jxdx.mine.databinding.ActivityHomeworkDetailBinding
 import com.jxdx.mine.http.ApiService
 import com.jxdx.mine.http.RetrofitClient
-import com.jxdx.mine.http.TeachCreateHWDetailVO
+import com.jxdx.mine.http.vo.TeachCreateHWDetailVO
 import com.jxdx.mine.adapter.ImageAdapter
 import com.jxdx.mine.teacherhomework.adapter.StudentSubmissionAdapter
 import retrofit2.Call
@@ -27,6 +30,11 @@ class HomeworkDetailActivity : AppCompatActivity() {
     private lateinit var imageAdapter: ImageAdapter
     private val submissions = mutableListOf<StudentSubmission>()
     private val imageUrls = mutableListOf<String>()
+    private var currentHomeworkDetail: TeachCreateHWDetailVO? = null
+    
+    companion object {
+        private const val REQUEST_EDIT_HOMEWORK = 1002
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +44,15 @@ class HomeworkDetailActivity : AppCompatActivity() {
         val homeworkId = intent.getStringExtra("homeworkId")
         val homeworkTitle = intent.getStringExtra("homeworkTitle")
         
-        supportActionBar?.title = "$homeworkTitle - 学生作业"
+        // 设置MaterialToolbar
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.title = homeworkTitle ?: "作业详情"
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        
+        // 设置返回按钮点击事件
+        binding.toolbar.setNavigationOnClickListener {
+            finish()
+        }
         
         // 初始化图片适配器
         imageAdapter = ImageAdapter(this)
@@ -50,9 +66,44 @@ class HomeworkDetailActivity : AppCompatActivity() {
             getHomeworkDetail(homeworkId)
         }
 
+
         initRecyclerView()
         loadSubmissions(homeworkId)
+        
+        // 设置发布按钮点击事件
+        binding.btnPublishHomework.setOnClickListener {
+            publishHomework(homeworkId)
+        }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(com.jxdx.mine.R.menu.menu_homework_detail, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            com.jxdx.mine.R.id.action_edit_homework -> {
+                // 跳转到编辑作业页面
+                if (currentHomeworkDetail != null) {
+                    val intent = Intent(this, EditHomeworkActivity::class.java)
+                    intent.putExtra("homeworkId", currentHomeworkDetail?.homeworkId?.toString())
+                    intent.putExtra("homeworkTitle", currentHomeworkDetail?.homeworkName)
+                    intent.putExtra("homeworkContent", currentHomeworkDetail?.homeworkContent)
+                    intent.putExtra("deadTime", currentHomeworkDetail?.deadTime)
+                    intent.putExtra("subjectId", currentHomeworkDetail?.subject)
+                    intent.putExtra("subjectName", currentHomeworkDetail?.subject) // 添加subjectName参数
+                    intent.putExtra("imageUrls", currentHomeworkDetail?.imageUrls?.toTypedArray())
+                    startActivityForResult(intent, REQUEST_EDIT_HOMEWORK)
+                } else {
+                    Toast.makeText(this, "作业数据加载中，请稍后再试", Toast.LENGTH_SHORT).show()
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
 
     private fun initRecyclerView() {
         adapter = StudentSubmissionAdapter(submissions) { submission ->
@@ -117,6 +168,9 @@ class HomeworkDetailActivity : AppCompatActivity() {
     }
     
     private fun updateUIWithHomeworkDetail(homeworkDetail: TeachCreateHWDetailVO?) {
+        // 保存作业详情数据
+        currentHomeworkDetail = homeworkDetail
+        
         binding.tvHomeworkId.text = homeworkDetail?.homeworkId.toString()
         binding.tvHomeworkTitle.text = homeworkDetail?.homeworkName ?: "未命名作业"
         binding.tvSubject.text = homeworkDetail?.subject ?: ""
@@ -282,6 +336,64 @@ class HomeworkDetailActivity : AppCompatActivity() {
                     adapter.notifyDataSetChanged()
                 }
             }
+        } else if (requestCode == REQUEST_EDIT_HOMEWORK && resultCode == RESULT_OK) {
+            // 编辑作业成功，重新加载作业详情
+            val homeworkId = intent.getStringExtra("homeworkId")
+            if (homeworkId != null) {
+                getHomeworkDetail(homeworkId)
+            }
         }
+    }
+    
+    private fun publishHomework(homeworkId: String?) {
+        if (homeworkId == null) {
+            Toast.makeText(this, "作业ID无效", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // 显示确认对话框
+        AlertDialog.Builder(this)
+            .setTitle("发布作业")
+            .setMessage("确定要发布这个作业吗？发布后学生将可以看到并提交作业。")
+            .setPositiveButton("发布") { _, _ ->
+                performPublishHomework(homeworkId)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    private fun performPublishHomework(homeworkId: String) {
+        // 显示加载状态
+        binding.btnPublishHomework.isEnabled = false
+        binding.btnPublishHomework.text = "发布中..."
+        
+        // 调用发布作业API
+        RetrofitClient.apiService.publishHomework(homeworkId).enqueue(object : Callback<BaseResp<String>> {
+            override fun onResponse(
+                call: Call<BaseResp<String>>,
+                response: Response<BaseResp<String>>
+            ) {
+                binding.btnPublishHomework.isEnabled = true
+                binding.btnPublishHomework.text = "发布作业"
+                
+                if (response.isSuccessful && response.body()?.code == 0) {
+                    Toast.makeText(this@HomeworkDetailActivity, "作业发布成功！", Toast.LENGTH_SHORT).show()
+                    // 返回上一页
+                    finish()
+                } else {
+                    val errorMsg = response.body()?.message ?: "发布失败"
+                    Toast.makeText(this@HomeworkDetailActivity, "发布失败: $errorMsg", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onFailure(
+                call: Call<BaseResp<String>>,
+                t: Throwable
+            ) {
+                binding.btnPublishHomework.isEnabled = true
+                binding.btnPublishHomework.text = "发布作业"
+                Toast.makeText(this@HomeworkDetailActivity, "网络异常，发布失败", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }

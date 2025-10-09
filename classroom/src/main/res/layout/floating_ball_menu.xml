@@ -84,7 +84,7 @@
 
     </LinearLayout>
 
-    <!-- 签到 -->
+    <!-- 资料 -->
     <LinearLayout
         android:id="@+id/menu_attendance"
         android:layout_width="wrap_content"
@@ -99,12 +99,12 @@
             android:layout_height="24dp"
             android:src="@drawable/ic_attendance"
             android:layout_marginEnd="12dp"
-            android:contentDescription="签到" />
+            android:contentDescription="资料" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="签到"
+            android:text="资料"
             android:textSize="14sp"
             android:textColor="@android:color/black" />
 
