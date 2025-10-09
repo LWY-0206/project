@@ -3,19 +3,22 @@ package com.jxdx.mine.teacherhomework
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.mine.HomeworkDetail
 import com.jxdx.mine.PageData
+import com.jxdx.mine.R
 import com.jxdx.mine.StudentSubmission
 import com.jxdx.mine.databinding.ActivityHomeworkListBinding
-import com.jxdx.mine.http.ApiService
-import com.jxdx.mine.http.CreateHomeworkRequest
 import com.jxdx.mine.http.RetrofitClient
-import com.jxdx.mine.http.TeachCreateHWSimpleVO
+import com.jxdx.mine.http.request.CreateHomeworkRequest
+import com.jxdx.mine.http.vo.TeachCreateHWSimpleVO
 import com.jxdx.mine.teacherhomework.adapter.HomeworkAdapter
 import retrofit2.Call
 import retrofit2.Callback
@@ -25,10 +28,21 @@ class HomeworkListActivity: AppCompatActivity() {
     private lateinit var binding: ActivityHomeworkListBinding
     private lateinit var homeworkAdapter: HomeworkAdapter
     private val homeworkList = mutableListOf<HomeworkDetail>()
+    private val homeworkLibraryList = mutableListOf<HomeworkDetail>() // 作业库列表
     private var courseId: String? = null
     private var courseName: String? = null
     private var currentPage = 1
-    private val pageSize = 5
+    private val pageSize = 10
+    private var isLoading = false
+    private var hasMoreData = true
+    private var isDeleteMode = false // 是否处于删除模式
+    private val selectedHomeworkIds = mutableSetOf<String>() // 选中的作业ID
+    private var currentTab = 0 // 0: 已发放, 1: 作业库
+    private var isCreateMenuExpanded = false // 创建菜单是否展开
+    
+    companion object {
+        private const val REQUEST_CREATE_HOMEWORK = 1001
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,18 +53,243 @@ class HomeworkListActivity: AppCompatActivity() {
         courseId = intent.getStringExtra("courseId")
         courseName = intent.getStringExtra("courseName")
         
-        supportActionBar?.title = "$courseName - 作业列表"
+        initViews()
+        setupListeners()
+        loadHomework(true)
+    }
 
+    private fun initViews() {
         initRecyclerView()
         initCreateHomeworkButton()
-        loadHomework()
+        // 初始化默认选中"已发放"标签
+        switchTab(0)
+    }
+
+    private fun setupListeners() {
+        // 返回按钮
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
+
+        // 分段控制器
+        binding.tabIssued.setOnClickListener {
+            switchTab(0)
+        }
+        
+        binding.tabLibrary.setOnClickListener {
+            switchTab(1)
+        }
+
+        // 删除按钮
+        binding.btnDelete.setOnClickListener {
+            if (isDeleteMode) {
+                confirmDelete()
+            } else {
+                enterDeleteMode()
+            }
+        }
+    }
+
+    private fun switchTab(tabIndex: Int) {
+        currentTab = tabIndex
+        
+        // 切换标签时退出删除模式和隐藏创建菜单
+        if (isDeleteMode) {
+            exitDeleteMode()
+        }
+        if (isCreateMenuExpanded) {
+            hideCreateMenu()
+        }
+        
+        if (tabIndex == 0) {
+            // 已发放 - 显示已发布的作业
+            binding.tabIssued.setBackgroundResource(R.drawable.bg_tab_selected)
+            binding.tabIssued.setTextColor(getColor(android.R.color.white))
+            binding.tabLibrary.setBackgroundResource(R.drawable.bg_tab_unselected)
+            binding.tabLibrary.setTextColor(getColor(R.color.primary_color))
+            binding.fabCreateHomework.visibility = android.view.View.GONE
+            // 显示已发放的作业（已发布的作业）
+            homeworkAdapter.updateData(homeworkList)
+        } else {
+            // 作业库 - 显示您之前创建的所有作业
+            binding.tabLibrary.setBackgroundResource(R.drawable.bg_tab_selected)
+            binding.tabLibrary.setTextColor(getColor(android.R.color.white))
+            binding.tabIssued.setBackgroundResource(R.drawable.bg_tab_unselected)
+            binding.tabIssued.setTextColor(getColor(R.color.primary_color))
+            binding.fabCreateHomework.visibility = android.view.View.VISIBLE
+            // 显示作业库的作业（您之前创建的所有作业）
+            homeworkAdapter.updateData(homeworkLibraryList)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(com.jxdx.mine.R.menu.menu_homework_list, menu)
+        
+        // 根据删除模式动态显示菜单项
+        menu?.findItem(com.jxdx.mine.R.id.action_delete_homework)?.isVisible = !isDeleteMode
+        menu?.findItem(com.jxdx.mine.R.id.action_confirm_delete)?.isVisible = isDeleteMode
+        
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            com.jxdx.mine.R.id.action_delete_homework -> {
+                // 进入删除模式
+                enterDeleteMode()
+                true
+            }
+            com.jxdx.mine.R.id.action_confirm_delete -> {
+                // 确认删除
+                confirmDelete()
+                true
+            }
+            com.jxdx.mine.R.id.action_homework_library -> {
+                // 跳转到作业库页面
+                val intent = Intent(this, HomeworkLibraryActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun enterDeleteMode() {
+        isDeleteMode = true
+        selectedHomeworkIds.clear()
+        // 更新菜单显示
+        invalidateOptionsMenu()
+        // 通知适配器进入删除模式
+        homeworkAdapter.setDeleteMode(true)
+        Toast.makeText(this, "请选择要删除的作业", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun confirmDelete() {
+        if (selectedHomeworkIds.isNotEmpty()) {
+            // 显示确认对话框
+            AlertDialog.Builder(this)
+                .setTitle("确认删除")
+                .setMessage("确定要删除选中的 ${selectedHomeworkIds.size} 个作业吗？删除后无法恢复。")
+                .setPositiveButton("删除") { _, _ ->
+                    performDelete()
+                }
+                .setNegativeButton("取消") { _, _ ->
+                    exitDeleteMode()
+                }
+                .show()
+        } else {
+            Toast.makeText(this, "请先选择要删除的作业", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun performDelete() {
+        if (selectedHomeworkIds.isNotEmpty()) {
+            // 显示加载状态
+            Toast.makeText(this, "正在删除作业...", Toast.LENGTH_SHORT).show()
+            
+            // 将选中的作业ID用逗号连接
+            val homeworkIdString = selectedHomeworkIds.joinToString(",")
+            
+            // 调用删除API
+            RetrofitClient.apiService.deleteHomework(homeworkIdString).enqueue(object : Callback<BaseResp<String>> {
+                override fun onResponse(
+                    call: Call<BaseResp<String>>,
+                    response: Response<BaseResp<String>>
+                ) {
+                    if (response.isSuccessful && response.body()?.code == 0) {
+                        Toast.makeText(this@HomeworkListActivity, "成功删除 ${selectedHomeworkIds.size} 个作业", Toast.LENGTH_SHORT).show()
+                        // 重新加载数据
+                        loadHomework(true)
+                    } else {
+                        val errorMsg = response.body()?.message ?: "删除失败"
+                        Toast.makeText(this@HomeworkListActivity, "删除失败: $errorMsg", Toast.LENGTH_SHORT).show()
+                    }
+                    exitDeleteMode()
+                }
+
+                override fun onFailure(call: Call<BaseResp<String>>, t: Throwable) {
+                    Toast.makeText(this@HomeworkListActivity, "网络异常，删除失败", Toast.LENGTH_SHORT).show()
+                    exitDeleteMode()
+                }
+            })
+        } else {
+            Toast.makeText(this, "请先选择要删除的作业", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun exitDeleteMode() {
+        isDeleteMode = false
+        selectedHomeworkIds.clear()
+        // 更新菜单显示
+        invalidateOptionsMenu()
+        // 通知适配器退出删除模式
+        homeworkAdapter.setDeleteMode(false)
+    }
+
+    fun onHomeworkSelected(homeworkId: String, isSelected: Boolean) {
+        if (isSelected) {
+            selectedHomeworkIds.add(homeworkId)
+        } else {
+            selectedHomeworkIds.remove(homeworkId)
+        }
+        // 更新确认删除按钮的可用状态
+        invalidateOptionsMenu()
     }
     
     private fun initCreateHomeworkButton() {
         binding.fabCreateHomework.setOnClickListener {
-            // 调用创建作业API
-            createHomework()
+            if (currentTab == 1) { // 只在作业库模式下工作
+                toggleCreateMenu()
+            }
         }
+        
+        // AI创建选项点击
+        binding.optionAiCreate.setOnClickListener {
+            hideCreateMenu()
+            // 跳转到AI创建作业界面
+            val intent = Intent(this, AiCreateHomeworkActivity::class.java)
+            intent.putExtra("subjectId", courseId?.toIntOrNull() ?: 1)
+            startActivityForResult(intent, REQUEST_CREATE_HOMEWORK)
+        }
+        
+        // 手动创建选项点击
+        binding.optionManualCreate.setOnClickListener {
+            hideCreateMenu()
+            // 跳转到手动创建作业界面
+            val intent = Intent(this, CreateHomeworkActivity::class.java)
+            intent.putExtra("courseId", courseId)
+            intent.putExtra("courseName", courseName)
+            startActivityForResult(intent, REQUEST_CREATE_HOMEWORK)
+        }
+    }
+
+    private fun toggleCreateMenu() {
+        if (isCreateMenuExpanded) {
+            hideCreateMenu()
+        } else {
+            showCreateMenu()
+        }
+    }
+
+    private fun showCreateMenu() {
+        isCreateMenuExpanded = true
+        binding.createMenuContainer.visibility = android.view.View.VISIBLE
+        binding.createMenuContainer.alpha = 0f
+        binding.createMenuContainer.animate()
+            .alpha(1f)
+            .setDuration(200)
+            .start()
+    }
+
+    private fun hideCreateMenu() {
+        isCreateMenuExpanded = false
+        binding.createMenuContainer.animate()
+            .alpha(0f)
+            .setDuration(200)
+            .withEndAction {
+                binding.createMenuContainer.visibility = android.view.View.GONE
+            }
+            .start()
     }
 
     private fun initRecyclerView() {
@@ -60,51 +299,132 @@ class HomeworkListActivity: AppCompatActivity() {
             intent.putExtra("homeworkTitle", homework.title)
             startActivity(intent)
         }
+        
+        // 设置选择变化监听器
+        homeworkAdapter.setOnSelectionChangeListener { homeworkId, isSelected ->
+            onHomeworkSelected(homeworkId, isSelected)
+        }
+        
         binding.recyclerViewHomework.apply {
             layoutManager = LinearLayoutManager(this@HomeworkListActivity)
             adapter = homeworkAdapter
+            
+            // 添加滚动监听，实现自动加载更多
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                    val totalItemCount = layoutManager.itemCount
+                    val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
+                    
+                    // 当滚动到倒数第3个item时，开始加载下一页
+                    if (!isLoading && hasMoreData && lastVisibleItem >= totalItemCount - 3) {
+                        loadMoreData()
+                    }
+                }
+            })
         }
+        
+        // 初始化作业库数据
+        initHomeworkLibrary()
+    }
+    
+    private fun loadMoreData() {
+        if (isLoading || !hasMoreData) return
+        
+        // 显示加载更多提示
+        Toast.makeText(this, "正在加载更多...", Toast.LENGTH_SHORT).show()
+        
+        // 加载下一页数据
+        loadHomework(false)
     }
 
-    private fun loadHomework() {
-        // 显示加载状态
+    private fun initHomeworkLibrary() {
+        // 作业库显示您之前创建的所有作业（包括已发布和未发布的）
+        // 这里应该从API获取您创建的所有作业
+        // 暂时使用现有的homeworkList作为作业库数据
+        homeworkLibraryList.clear()
+        homeworkLibraryList.addAll(homeworkList)
+        
+        // 可以添加更多您之前创建的作业
+        // 这里可以根据实际需求从数据库或API获取
+    }
+
+    private fun loadHomework(isRefresh: Boolean = false) {
+        if (isLoading) return
+        
+        if (isRefresh) {
+            currentPage = 1
+            hasMoreData = true
+            homeworkList.clear()
+            homeworkLibraryList.clear()
+        }
+        
+        if (!hasMoreData) return
+        
+        isLoading = true
+        
         // 调用API获取作业列表 (@GET /api/teach/homework/create/list)
         RetrofitClient.apiService.getTeacherHomeworkList(
             page = currentPage,
             size = pageSize
         ).enqueue(object : Callback<BaseResp<PageData<TeachCreateHWSimpleVO>>> {
             override fun onResponse(call: Call<BaseResp<PageData<TeachCreateHWSimpleVO>>>, response: Response<BaseResp<PageData<TeachCreateHWSimpleVO>>>) {
+                isLoading = false
                 
-                if (response.isSuccessful && response.body()?.code == 200) {
+                if (response.isSuccessful && response.body()?.code == 0) {
                     val data = response.body()?.data
                     data?.records?.let { records ->
-                        homeworkList.clear()
                         // 将API返回的数据转换为HomeworkDetail对象
                         records.forEach { hw ->
-                            homeworkList.add(
-                                HomeworkDetail(
-                                    id = hw.homeworkId?.toString() ?: "",
-                                    title = hw.homeworkName ?: "未命名作业",
-                                    description = "", // 详情API获取
-                                    dueDate = hw.deadTime ?: "",
-                                    submissions = mutableListOf()
-                                )
+                            val homework = HomeworkDetail(
+                                id = hw.homeworkId?.toString() ?: "",
+                                title = hw.homeworkName ?: "未命名作业",
+                                description = "", // 详情API获取
+                                dueDate = hw.deadTime ?: "",
+                                submissions = mutableListOf()
                             )
+                            
+                            // 所有作业都加入作业库
+                            homeworkLibraryList.add(homework)
+                            
+                            // 只有已发布的作业加入已发放列表
+                            // 这里可以根据实际业务逻辑判断是否已发布
+                            // 暂时假设所有作业都已发布
+                            homeworkList.add(homework)
                         }
-                        homeworkAdapter.notifyDataSetChanged()
+                        
+                        // 检查是否还有更多数据
+                        hasMoreData = currentPage < (data?.pages ?: 0)
+                        currentPage++
+                        
+                        // 根据当前标签显示对应数据
+                        if (currentTab == 0) {
+                            homeworkAdapter.updateData(homeworkList)
+                        } else {
+                            homeworkAdapter.updateData(homeworkLibraryList)
+                        }
                     }
                 } else {
+                    hasMoreData = false
                     // API调用失败，显示模拟数据
-                    showMockData()
+                    if (currentPage == 1) {
+                        showMockData()
+                    }
                     // 显示错误信息
                     Toast.makeText(this@HomeworkListActivity, "获取作业列表失败: ${response.body()?.message ?: "未知错误"}", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<BaseResp<PageData<TeachCreateHWSimpleVO>>>, t: Throwable) {
+                isLoading = false
+                hasMoreData = false
                 Log.e("HomeworkList", "Failed to load homework: ${t.message}")
                 // 网络失败，显示模拟数据
-                showMockData()
+                if (currentPage == 1) {
+                    showMockData()
+                }
                 // 显示错误信息
                 Toast.makeText(this@HomeworkListActivity, "网络异常，获取作业列表失败", Toast.LENGTH_SHORT).show()
             }
@@ -114,6 +434,7 @@ class HomeworkListActivity: AppCompatActivity() {
     private fun showMockData() {
         // 模拟数据 - 根据课程ID显示不同的大学作业
         homeworkList.clear()
+        homeworkLibraryList.clear()
         
         when (courseId) {
             "1" -> {
@@ -220,13 +541,22 @@ class HomeworkListActivity: AppCompatActivity() {
                 )
             }
         }
-        homeworkAdapter.notifyDataSetChanged()
+        
+        // 将所有作业也加入作业库
+        homeworkLibraryList.addAll(homeworkList)
+        
+        // 根据当前标签显示对应数据
+        if (currentTab == 0) {
+            homeworkAdapter.updateData(homeworkList)
+        } else {
+            homeworkAdapter.updateData(homeworkLibraryList)
+        }
     }
     
     private fun createHomework() {
-        // 创建一个示例作业请求
+        // 创建一个示例作业请求 - 按照新的API格式
         val request = CreateHomeworkRequest(
-            subjectId = courseId?.toInt(),
+            subjectId = courseId?.toInt(), // 使用课程ID
             homeworkName = "新创建的作业",
             homeworkContent = "这是作业内容",
             deadTime = "2025-12-31",
@@ -236,10 +566,10 @@ class HomeworkListActivity: AppCompatActivity() {
         // 调用API创建作业 (@POST /api/teach/homework/create)
         RetrofitClient.apiService.createHomework(request).enqueue(object : Callback<BaseResp<String>> {
             override fun onResponse(call: Call<BaseResp<String>>, response: Response<BaseResp<String>>) {
-                if (response.isSuccessful && response.body()?.code == 200) {
+                if (response.isSuccessful && response.body()?.code == 0) {
                     Toast.makeText(this@HomeworkListActivity, "作业创建成功", Toast.LENGTH_SHORT).show()
                     // 重新加载作业列表
-                    loadHomework()
+                    loadHomework(true)
                 } else {
                     Toast.makeText(this@HomeworkListActivity, "作业创建失败: ${response.body()?.message ?: "未知错误"}", Toast.LENGTH_SHORT).show()
                 }
@@ -250,5 +580,13 @@ class HomeworkListActivity: AppCompatActivity() {
                 Toast.makeText(this@HomeworkListActivity, "网络异常，作业创建失败", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+    
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CREATE_HOMEWORK && resultCode == RESULT_OK) {
+            // 创建作业成功，重新加载作业列表
+            loadHomework(true)
+        }
     }
 }

@@ -149,13 +149,34 @@
 
 
 
-                        <View
-                            android:id="@+id/video_3"
+                        <LinearLayout
+                            android:id="@+id/btn_exercise_preparation"
                             android:layout_width="0dp"
                             android:layout_height="120dp"
                             android:layout_weight="1"
-                            android:background="#E0E0E0"
-                            android:layout_marginStart="4dp"/>
+                            android:layout_marginStart="4dp"
+                            android:background="@drawable/function_button_selector"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/ic_pdf_preview"
+                                android:scaleType="centerInside"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="资源准备"
+                                android:textSize="12sp"
+                                android:textColor="#333333"
+                                android:gravity="center"/>
+                        </LinearLayout>
                     </LinearLayout>
 
                     <!-- 第二行 -->
@@ -164,13 +185,34 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
-                        <View
-                            android:id="@+id/video_4"
+                        <LinearLayout
+                            android:id="@+id/btn_preview_check"
                             android:layout_width="0dp"
                             android:layout_height="120dp"
                             android:layout_weight="1"
-                            android:background="#E0E0E0"
-                            android:layout_marginEnd="4dp"/>
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/function_button_selector"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:padding="8dp">
+
+                            <ImageView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:src="@drawable/ic_pdf_preview"
+                                android:scaleType="centerInside"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="预习查看"
+                                android:textSize="12sp"
+                                android:textColor="#333333"
+                                android:gravity="center"/>
+                        </LinearLayout>
 
                         <View
                             android:id="@+id/video_5"

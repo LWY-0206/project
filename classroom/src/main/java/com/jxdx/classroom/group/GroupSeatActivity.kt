@@ -60,11 +60,12 @@ class GroupSeatActivity : AppCompatActivity() {
         subjectId = intent.getIntExtra("subjectId", 1)
         // 获取老师ID
         teacherId = intent.getIntExtra("teacherId", 6)
-        
+
         // 尝试获取当前学生的头像URL
         // 注意：在实际应用中，应该从用户登录信息或API中获取真实的头像URL
         // 这里使用一个模拟的头像URL作为示例
-        currentStudentAvatar = "https://tc-new.z.wiki/autoupload/f/d9oSIkypaT4MX13ceI-M6PmYtDrGvPpsluM_NdUVaNGyl5f0KlZfm6UsKj-HyTuv/20250905/Jr96/458X300/90.jpg"
+        currentStudentAvatar =
+            "https://tc-new.z.wiki/autoupload/f/d9oSIkypaT4MX13ceI-M6PmYtDrGvPpsluM_NdUVaNGyl5f0KlZfm6UsKj-HyTuv/20250905/Jr96/458X300/90.jpg"
         
         // 生成默认的小组数据
         generateGroups()

@@ -64,6 +64,8 @@ class ClassEnterAdapter : SingleTypeAdapter<ClassLive>() {
                     val intent = Intent(context, ClassActivity::class.java)
                     // 传递liveId
                     intent.putExtra("liveId", entity.liveId)
+                    intent.putExtra("isTeacher", false)
+
                     context.startActivity(intent)
                 } else {
                     // 显示提示信息

@@ -9,9 +9,20 @@ import com.jxdx.mine.PageData
 import com.jxdx.mine.StuHomeWorkDetailVO
 import com.jxdx.mine.SubjectsVO
 import com.jxdx.mine.UserInfo
+import com.jxdx.mine.http.request.SubmitHomeworkRequest
+import com.jxdx.mine.http.request.CreateHomeworkRequest
+import com.jxdx.mine.http.request.EditHomeworkRequest
+import com.jxdx.mine.http.vo.TeachCreateHWSimpleVO
+import com.jxdx.mine.http.vo.TeachCreateHWDetailVO
 import retrofit2.Call
 import retrofit2.http.Body
-
+import retrofit2.http.Multipart
+import retrofit2.http.Part
+import okhttp3.MultipartBody
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -70,10 +81,25 @@ interface ApiService {
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<String>>
     
+    //图片上传接口
+    @Multipart
+    @POST("/common/upload")
+    fun uploadImage(
+        @Part file: MultipartBody.Part,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<List<String>>>
+    
     //老师创建作业
     @POST("/api/teach/homework/create")
     fun createHomework(
         @Body request: CreateHomeworkRequest,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
+    
+    //老师编辑作业
+    @POST("/api/teach/homework/create/edit")
+    fun editHomework(
+        @Body request: EditHomeworkRequest,
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<String>>
     
@@ -107,46 +133,30 @@ interface ApiService {
     fun getTeacherSubject(
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<List<SubjectsVO>>>
+    
+    //删除作业（支持批量删除）
+    @DELETE("/api/teach/homework/send/del")
+    fun deleteHomework(
+        @Query("homeworkId") homeworkId: String,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
+    
+    //AI创建作业
+    @POST("/api/teach/homework/create/ai")
+    fun createHomeworkWithAi(
+        @Query("msg") msg: String,
+        @Query("subjectId") subjectId: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
+    
+    //发布作业
+    @POST("/api/teach/homework/send")
+    fun publishHomework(
+        @Query("homeworkId") homeworkId: String,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
 }
 
-//作业提交请求类
-data class SubmitHomeworkRequest(
-    val homeworkId: Long? = null,
-    val subjectId: Int? = null,
-    val studentId: Long? = null,
-    val studentContent: List<String>? = null
-)
-
-//创建作业请求类
-data class CreateHomeworkRequest(
-    val homeworkId: Long? = null,
-    val subjectId: Int? = null,
-    val homeworkName: String? = null,
-    val deadTime: String? = null,
-    val homeworkContent: String? = null,
-    val imageUrls: List<String>? = null
-)
-
-//老师作业简单信息VO
-data class TeachCreateHWSimpleVO(
-    val homeworkId: Long? = null,
-    val subjectName: String? = null,
-    val homeworkName: String? = null,
-    val deadTime: String? = null,
-    val createTime: String? = null
-)
-
-//老师作业详情VO
-data class TeachCreateHWDetailVO(
-    val homeworkId: Long? = null,
-    val subject: String? = null,
-    val homeworkName: String? = null,
-    val homeworkContent: String? = null,
-    val deadTime: String? = null,
-    val createdTime: String? = null,
-    val updateTime: String? = null,
-    val imageUrls: List<String>? = null
-)
 
 
 

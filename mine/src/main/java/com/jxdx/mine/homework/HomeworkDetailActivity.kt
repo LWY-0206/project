@@ -18,6 +18,7 @@ import com.jxdx.mine.adapter.ImageAdapter
 import com.jxdx.mine.databinding.ActivityHomeworkDetailBinding
 import com.jxdx.mine.http.ApiService
 import com.jxdx.mine.http.RetrofitClient
+import com.jxdx.mine.http.request.SubmitHomeworkRequest
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -260,7 +261,7 @@ class HomeworkDetailActivity : BaseActivity<ActivityHomeworkDetailBinding>() {
         }
         
         // 准备提交数据
-        val submitRequest = com.jxdx.mine.http.SubmitHomeworkRequest(
+        val submitRequest = SubmitHomeworkRequest(
             homeworkId = homeworkId.toLong(),
             studentContent = if (content.isEmpty()) null else listOf(content)
             // 注意：这里简化了图片上传逻辑，实际项目中需要先上传图片获取URL
