@@ -31,6 +31,7 @@ import com.tencent.smtt.export.external.interfaces.JsResult
 import com.tencent.smtt.export.external.interfaces.MediaAccessPermissionsCallback
 import com.tencent.smtt.sdk.QbSdk
 import com.tencent.smtt.sdk.QbSdk.PreInitCallback
+import java.net.URLEncoder
 import java.util.HashMap
 
 class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
@@ -81,7 +82,7 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         when (detectFileType()) {
             FileType.IMAGE -> showImage()
             FileType.VIDEO -> showVideo()
-            FileType.PDF -> showPdf()
+            FileType.PDF -> showPdfWithOfficeOnline()
             else -> showWebView()
         }
 
@@ -174,6 +175,139 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         }
     }
 
+    /**
+     * 使用Microsoft Office Online Viewer显示PDF
+     */
+    private fun showPdfWithOfficeOnline() {
+        // 显示WebView
+        view.x5WebView.visibility = View.VISIBLE
+        view.videoContainer.visibility = View.GONE
+        view.imageView.visibility = View.GONE
+
+        // 配置WebView设置
+        setupWebViewForPdf()
+
+        try {
+            // 对PDF URL进行编码
+            val encodedPdfUrl = URLEncoder.encode(currentUrl, "UTF-8")
+
+            // 使用Microsoft Office Online Viewer
+            val officeViewerUrl = "https://view.officeapps.live.com/op/embed.aspx?src=$encodedPdfUrl"
+
+            Log.d("PDF_VIEWER", "Loading PDF with Office Online: $officeViewerUrl")
+            view.x5WebView.loadUrl(officeViewerUrl)
+
+        } catch (e: Exception) {
+            Log.e("PDF_VIEWER", "Error loading PDF with Office Online", e)
+            "PDF加载失败，尝试其他方式".toast(false)
+
+            // 备选方案：直接加载PDF URL（依赖X5内核的PDF支持）
+            try {
+                view.x5WebView.loadUrl(currentUrl)
+            } catch (e2: Exception) {
+                Log.e("PDF_VIEWER", "Error loading PDF directly", e2)
+                "PDF加载失败: ${e2.message}".toast(false)
+            }
+        }
+    }
+
+    /**
+     * 为PDF显示配置WebView
+     */
+    private fun setupWebViewForPdf() {
+        view.x5WebView.apply {
+            settings.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                allowFileAccess = true
+                allowContentAccess = true
+                setSupportZoom(true)
+                builtInZoomControls = true
+                displayZoomControls = false
+                loadWithOverviewMode = true
+                useWideViewPort = true
+                setSupportMultipleWindows(false)
+            }
+
+            // 设置WebView客户端
+            webViewClient = object : com.tencent.smtt.sdk.WebViewClient() {
+                override fun onPageFinished(view: com.tencent.smtt.sdk.WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    this@WebViewActivity.view.progressBar.visibility = View.GONE
+
+                    // 检查是否成功加载PDF
+                    if (url?.contains("view.officeapps.live.com") == true) {
+                        Log.d("PDF_VIEWER", "Office Online Viewer loaded successfully")
+                    }
+                }
+
+                override fun onPageStarted(view: com.tencent.smtt.sdk.WebView?, url: String?, favicon: android.graphics.Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    this@WebViewActivity.view.progressBar.visibility = View.VISIBLE
+                    currentUrl = url ?: ""
+                }
+
+                override fun shouldOverrideUrlLoading(view: com.tencent.smtt.sdk.WebView?, url: String?): Boolean {
+                    url?.let {
+                        if (it.startsWith("http://") || it.startsWith("https://") || it.startsWith("file://")) {
+                            view?.loadUrl(it)
+                        } else {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                                startActivity(intent)
+                            } catch (e: Exception) {
+                                "无法打开链接: $it".toast(false)
+                            }
+                        }
+                    }
+                    return true
+                }
+
+                override fun onReceivedError(
+                    view: com.tencent.smtt.sdk.WebView?,
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String?
+                ) {
+                    super.onReceivedError(view, errorCode, description, failingUrl)
+                    Log.e("PDF_VIEWER", "WebView error: $errorCode, $description, $failingUrl")
+
+                    if (failingUrl?.contains("view.officeapps.live.com") == true) {
+                        "Office Online Viewer加载失败，尝试直接加载PDF".toast(false)
+                        // 备选方案：直接加载PDF
+                        try {
+                            view?.loadUrl(currentUrl)
+                        } catch (e: Exception) {
+                            Log.e("PDF_VIEWER", "Error loading PDF directly as fallback", e)
+                        }
+                    }
+                }
+            }
+
+            // 设置Chrome客户端
+            webChromeClient = object : com.tencent.smtt.sdk.WebChromeClient() {
+                override fun onProgressChanged(view: com.tencent.smtt.sdk.WebView?, newProgress: Int) {
+                    super.onProgressChanged(view, newProgress)
+                    this@WebViewActivity.view.progressBar.progress = newProgress
+                    if (newProgress == 100) {
+                        this@WebViewActivity.view.progressBar.visibility = View.GONE
+                    }
+                }
+
+                override fun onReceivedTitle(view: com.tencent.smtt.sdk.WebView?, title: String?) {
+                    super.onReceivedTitle(view, title)
+                    // 保持原始标题，不覆盖
+                    if (title?.contains("Office") != true) {
+                        this@WebViewActivity.view.toolbar.title = title ?: this@WebViewActivity.title
+                    }
+                }
+            }
+
+            // Chrome客户端扩展
+            webChromeClientExtension = createWebChromeClientExtension()
+        }
+    }
+
     private fun adjustVideoSize() {
         if (videoWidth == 0 || videoHeight == 0) return
 
@@ -192,7 +326,7 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         }
 
         val screenWidth = display.x
-        val screenHeight = display.y - getToolbarHeight() - getControlLayoutHeight()
+        val screenHeight = display.y - getToolbarHeight()
 
         val videoRatio = videoWidth.toFloat() / videoHeight.toFloat()
         val screenRatio = screenWidth.toFloat() / screenHeight.toFloat()
@@ -218,10 +352,6 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         return view.toolbar.height
     }
 
-    private fun getControlLayoutHeight(): Int {
-        return view.controlLayout.height
-    }
-
     private fun enterFullscreenMode() {
         isVideoFullscreen = true
 
@@ -241,9 +371,8 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
 
-        // 隐藏工具栏和底部控制栏
+        // 隐藏工具栏和进度条
         view.toolbar.visibility = View.GONE
-        view.controlLayout.visibility = View.GONE
         view.progressBar.visibility = View.GONE
         view.fullscreenExitButton.visibility = View.VISIBLE
 
@@ -296,13 +425,9 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         // 清除全屏标志
         window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
 
-        // 显示工具栏和底部控制栏
+        // 显示工具栏
         view.toolbar.visibility = View.VISIBLE
-        view.controlLayout.visibility = View.VISIBLE
         view.fullscreenExitButton.visibility = View.GONE
-
-        // 退出全屏时重新调整视频尺寸
-        adjustVideoSize()
     }
 
     private fun setupWebViewForVideo() {
@@ -342,25 +467,11 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         view.x5WebView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
     }
 
-    private fun showPdf() {
-        // 显示WebView用于加载PDF
-        view.x5WebView.visibility = View.VISIBLE
-        view.videoContainer.visibility = View.GONE
-
-        // 配置WebView以支持PDF显示
-        view.x5WebView.settings.apply {
-            allowFileAccess = true
-            allowContentAccess = true
-        }
-
-        // 加载PDF
-        view.x5WebView.loadUrl("file:///android_asset/pdfjs/web/viewer.html?file=$currentUrl")
-    }
-
     private fun showWebView() {
         // 显示WebView
         view.x5WebView.visibility = View.VISIBLE
         view.videoContainer.visibility = View.GONE
+        view.imageView.visibility = View.GONE
 
         // 初始化WebView设置
         setupWebView()
@@ -386,6 +497,15 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
                 loadWithOverviewMode = true
                 useWideViewPort = true
                 setSupportMultipleWindows(false)
+
+                // 针对微信公众号的特殊设置
+                cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+                mediaPlaybackRequiresUserGesture = false
+
+                // 设置User-Agent，确保微信公众号内容正常显示
+                val originalUserAgent = getUserAgentString()
+                val wechatUserAgent = "$originalUserAgent WeChat"
+                setUserAgentString(wechatUserAgent)
             }
 
             // 设置WebView客户端
@@ -393,7 +513,12 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
                 override fun onPageFinished(view: com.tencent.smtt.sdk.WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     this@WebViewActivity.view.progressBar.visibility = View.GONE
-                    updateNavigationButtons()
+
+                    // 针对微信公众号文章的特殊处理
+                    if (url?.contains("mp.weixin.qq.com") == true) {
+                        // 注入CSS优化微信公众号文章显示
+                        injectWeChatCSS()
+                    }
                 }
 
                 override fun onPageStarted(view: com.tencent.smtt.sdk.WebView?, url: String?, favicon: android.graphics.Bitmap?) {
@@ -404,9 +529,22 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
 
                 override fun shouldOverrideUrlLoading(view: com.tencent.smtt.sdk.WebView?, url: String?): Boolean {
                     url?.let {
+                        // 处理微信公众号文章内的链接
                         if (it.startsWith("http://") || it.startsWith("https://") || it.startsWith("file://")) {
-                            view?.loadUrl(it)
+                            // 如果是微信公众号域名内的链接，在当前WebView打开
+                            if (it.contains("mp.weixin.qq.com")) {
+                                view?.loadUrl(it)
+                            } else {
+                                // 其他外部链接，使用系统浏览器打开
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
+                                    startActivity(intent)
+                                } catch (e: Exception) {
+                                    "无法打开链接: $it".toast(false)
+                                }
+                            }
                         } else {
+                            // 处理其他协议
                             try {
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
                                 startActivity(intent)
@@ -416,6 +554,18 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
                         }
                     }
                     return true
+                }
+
+                override fun onReceivedError(
+                    view: com.tencent.smtt.sdk.WebView?,
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String?
+                ) {
+                    super.onReceivedError(view, errorCode, description, failingUrl)
+                    if (failingUrl?.contains("mp.weixin.qq.com") == true) {
+                        "微信公众号文章加载失败".toast(false)
+                    }
                 }
             }
 
@@ -435,45 +585,82 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
                 }
             }
 
-            // 设置Chrome客户端扩展
-            webChromeClientExtension = object : IX5WebChromeClientExtension {
-                override fun getX5WebChromeClientInstance(): Any? = null
-                override fun getVideoLoadingProgressView(): View? = null
-                override fun onAllMetaDataFinished(p0: IX5WebViewExtension?, p1: HashMap<String, String>?) {}
-                override fun onBackforwardFinished(p0: Int) {}
-                override fun onHitTestResultForPluginFinished(p0: IX5WebViewExtension?, p1: IX5WebViewBase.HitTestResult?, p2: Bundle?) {}
-                override fun onHitTestResultFinished(p0: IX5WebViewExtension?, p1: IX5WebViewBase.HitTestResult?) {}
-                override fun onPromptScaleSaved(p0: IX5WebViewExtension?) {}
-                override fun onPromptNotScalable(p0: IX5WebViewExtension?) {}
-                override fun onAddFavorite(p0: IX5WebViewExtension?, p1: String?, p2: String?, p3: JsResult?): Boolean = false
-                override fun onPrepareX5ReadPageDataFinished(p0: IX5WebViewExtension?, p1: HashMap<String, String>?) {}
-                override fun onSavePassword(p0: String?, p1: String?, p2: String?, p3: Boolean, p4: Message?): Boolean = false
-                override fun onSavePassword(p0: ValueCallback<String>?, p1: String?, p2: String?, p3: String?, p4: String?, p5: String?, p6: Boolean): Boolean = false
-                override fun onX5ReadModeAvailableChecked(p0: HashMap<String, String>?) {}
-                override fun addFlashView(p0: View?, p1: ViewGroup.LayoutParams?) {}
-                override fun h5videoRequestFullScreen(p0: String?) {}
-                override fun h5videoExitFullScreen(p0: String?) {}
-                override fun requestFullScreenFlash() {}
-                override fun exitFullScreenFlash() {}
-                override fun jsRequestFullScreen() {}
-                override fun jsExitFullScreen() {}
-                override fun acquireWakeLock() {}
-                override fun releaseWakeLock() {}
-                override fun getApplicationContex(): Context? = null
-                override fun onPageNotResponding(p0: Runnable?): Boolean = false
-                override fun onMiscCallBack(p0: String?, p1: Bundle?): Any? = null
-                override fun openFileChooser(p0: ValueCallback<Array<Uri>>?, p1: String?, p2: String?) {}
-                override fun onPrintPage() {}
-                override fun onColorModeChanged(p0: Long) {}
+            webChromeClientExtension = createWebChromeClientExtension()
+        }
+    }
 
-                override fun onPermissionRequest(
-                    p0: String?,
-                    p1: Long,
-                    p2: MediaAccessPermissionsCallback?
-                ): Boolean {
-                    p2?.invoke(p0, p1, true)
-                    return true
-                }
+    /**
+     * 注入CSS优化微信公众号文章显示
+     */
+    private fun injectWeChatCSS() {
+        val css = """
+            javascript:(function() {
+                var style = document.createElement('style');
+                style.type = 'text/css';
+                style.innerHTML = `
+                    /* 优化微信公众号文章显示 */
+                    .rich_media_content {
+                        max-width: 100% !important;
+                    }
+                    img {
+                        max-width: 100% !important;
+                        height: auto !important;
+                    }
+                    /* 隐藏一些不必要的元素 */
+                    .qr_code_pc, .reward_area, .article_bottom_ad {
+                        display: none !important;
+                    }
+                    /* 优化文字显示 */
+                    body {
+                        font-size: 16px !important;
+                        line-height: 1.6 !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            })()
+        """.trimIndent()
+
+        view.x5WebView.loadUrl(css)
+    }
+
+    private fun createWebChromeClientExtension(): IX5WebChromeClientExtension {
+        return object : IX5WebChromeClientExtension {
+            override fun getX5WebChromeClientInstance(): Any? = null
+            override fun getVideoLoadingProgressView(): View? = null
+            override fun onAllMetaDataFinished(p0: IX5WebViewExtension?, p1: HashMap<String, String>?) {}
+            override fun onBackforwardFinished(p0: Int) {}
+            override fun onHitTestResultForPluginFinished(p0: IX5WebViewExtension?, p1: IX5WebViewBase.HitTestResult?, p2: Bundle?) {}
+            override fun onHitTestResultFinished(p0: IX5WebViewExtension?, p1: IX5WebViewBase.HitTestResult?) {}
+            override fun onPromptScaleSaved(p0: IX5WebViewExtension?) {}
+            override fun onPromptNotScalable(p0: IX5WebViewExtension?) {}
+            override fun onAddFavorite(p0: IX5WebViewExtension?, p1: String?, p2: String?, p3: JsResult?): Boolean = false
+            override fun onPrepareX5ReadPageDataFinished(p0: IX5WebViewExtension?, p1: HashMap<String, String>?) {}
+            override fun onSavePassword(p0: String?, p1: String?, p2: String?, p3: Boolean, p4: Message?): Boolean = false
+            override fun onSavePassword(p0: ValueCallback<String>?, p1: String?, p2: String?, p3: String?, p4: String?, p5: String?, p6: Boolean): Boolean = false
+            override fun onX5ReadModeAvailableChecked(p0: HashMap<String, String>?) {}
+            override fun addFlashView(p0: View?, p1: ViewGroup.LayoutParams?) {}
+            override fun h5videoRequestFullScreen(p0: String?) {}
+            override fun h5videoExitFullScreen(p0: String?) {}
+            override fun requestFullScreenFlash() {}
+            override fun exitFullScreenFlash() {}
+            override fun jsRequestFullScreen() {}
+            override fun jsExitFullScreen() {}
+            override fun acquireWakeLock() {}
+            override fun releaseWakeLock() {}
+            override fun getApplicationContex(): Context? = null
+            override fun onPageNotResponding(p0: Runnable?): Boolean = false
+            override fun onMiscCallBack(p0: String?, p1: Bundle?): Any? = null
+            override fun openFileChooser(p0: ValueCallback<Array<Uri>>?, p1: String?, p2: String?) {}
+            override fun onPrintPage() {}
+            override fun onColorModeChanged(p0: Long) {}
+
+            override fun onPermissionRequest(
+                p0: String?,
+                p1: Long,
+                p2: MediaAccessPermissionsCallback?
+            ): Boolean {
+                p2?.invoke(p0, p1, true)
+                return true
             }
         }
     }
@@ -485,50 +672,6 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
                 onBackPressed()
             }
 
-            // 设置刷新按钮 - 根据当前显示的内容类型刷新
-            refreshButton.setOnClickListener {
-                when (detectFileType()) {
-                    FileType.IMAGE -> showImage()
-                    FileType.VIDEO -> showVideo()
-                    FileType.PDF -> showPdf()
-                    else -> {
-                        if (x5WebView.visibility == View.VISIBLE) {
-                            x5WebView.reload()
-                        } else {
-                            // 重新加载当前类型的内容
-                            when (detectFileType()) {
-                                FileType.IMAGE -> showImage()
-                                FileType.VIDEO -> showVideo()
-                                else -> showWebView()
-                            }
-                        }
-                    }
-                }
-                "刷新中...".toast(false)
-            }
-
-            // 设置前进后退按钮 - 仅对WebView有效
-            backButton.setOnClickListener {
-                if (x5WebView.visibility == View.VISIBLE && x5WebView.canGoBack()) {
-                    x5WebView.goBack()
-                } else {
-                    "无法后退".toast(false)
-                }
-            }
-
-            forwardButton.setOnClickListener {
-                if (x5WebView.visibility == View.VISIBLE && x5WebView.canGoForward()) {
-                    x5WebView.goForward()
-                } else {
-                    "无法前进".toast(false)
-                }
-            }
-
-            // 设置分享按钮
-            shareButton.setOnClickListener {
-                shareUrl(currentUrl)
-            }
-
             // 设置全屏退出按钮（仅在视频全屏时显示）
             fullscreenExitButton.setOnClickListener {
                 exitFullscreenMode()
@@ -536,6 +679,7 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
             }
         }
     }
+
     override fun subscribeUi() {
         // 可以添加其他UI订阅逻辑
     }
@@ -560,26 +704,6 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             // 如果没有权限，则请求权限
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1001)
-        }
-    }
-
-    private fun updateNavigationButtons() {
-        view.apply {
-            backButton.isEnabled = x5WebView.canGoBack()
-            forwardButton.isEnabled = x5WebView.canGoForward()
-        }
-    }
-
-    private fun shareUrl(url: String) {
-        try {
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, url)
-                type = "text/plain"
-            }
-            startActivity(Intent.createChooser(shareIntent, "分享链接"))
-        } catch (e: Exception) {
-            "分享失败".toast(false)
         }
     }
 

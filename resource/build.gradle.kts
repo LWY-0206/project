@@ -40,14 +40,12 @@ android {
 }
 
 dependencies {
+    implementation("com.github.barteksc:android-pdf-viewer:3.2.0-beta.1")
     implementation ("com.google.auto.service:auto-service-annotations:1.0.1")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-    implementation("com.github.mhiew:android-pdf-viewer:3.2.0-beta.1") {
-        exclude(group = "com.github.barteksc", module = "pdfium-android")
-    }
     implementation("com.drakeet.multitype:multitype:4.3.0")
     implementation(project(":common"))
     implementation(libs.core.ktx)

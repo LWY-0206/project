@@ -5,6 +5,7 @@ import Schedule.FirstPage.ScheduleItem
 import com.jxdx.resource.Schedule.ScheduleViewModel
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -19,6 +20,7 @@ import com.google.gson.Gson
 import com.jxdx.resource.News.NewsAdapter
 import com.jxdx.resource.News.NewsItem
 import com.jxdx.resource.News.NewVIewModel
+import com.jxdx.resource.R
 import com.jxdx.resource.Recommendation.RecommendationItem
 import com.jxdx.resource.Recommendation.RecommendationResponse
 import com.jxdx.resource.Recommendation.RecommendationViewModel
@@ -66,12 +68,10 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
     override fun bindLayout(): FragmentFirstBinding {
         return FragmentFirstBinding.inflate(layoutInflater)
     }
-
     override fun initView() {
         scheduleViewModel = ViewModelProvider(this)[ScheduleViewModel::class.java]
         newsViewModel = ViewModelProvider(this)[NewVIewModel::class.java]
         recommendationViewModel = ViewModelProvider(this)[RecommendationViewModel::class.java]
-
         // 初始化Banner
         topBanner = find.topBanner
         val imageUrls: MutableList<String?> = ArrayList<String?>()
@@ -161,6 +161,13 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
                 Log.d("NewsViewModel", "Error loading news data: $error")
                 updateNewsUI(emptyList(), find.newsSection)
                 showMessage("加载新闻失败")
+            }
+        }
+        newsViewModel.detailLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    WebViewActivity.actionStart(requireActivity(), data.summary, data.title)
+                }
             }
         }
     }
@@ -432,8 +439,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (!recyclerView.canScrollVertically(1)) {
-                    // 到达底部，加载更多数据
-                    loadMoreData()
+                    showMessage("已经到底啦！！！")
                 }
             }
         })
@@ -474,34 +480,6 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         // 这里可以添加实际的收藏/取消收藏API调用
         // callFavoriteApi(item.id, item.isFavorited)
     }
-
-    private fun loadMoreData() {
-        // 模拟加载更多数据
-        val newItems = listOf(
-            RecommendationItem(
-                id = "7",
-                title = "新添加的内容1",
-                description = "这是加载更多的测试内容",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
-                type = "video",
-                duration = "10:15",
-                viewCount = 500,
-                likeCount = 23
-            ),
-            RecommendationItem(
-                id = "8",
-                title = "新添加的内容2",
-                description = "这是另一个加载更多的测试内容",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
-                type = "article",
-                viewCount = 300,
-                likeCount = 15
-            )
-        )
-
-        waterfallAdapter.addData(newItems)
-    }
-
     private fun showMessage(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
@@ -570,18 +548,11 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
     }
 
     private fun openNewsList() {
-        // 跳转到新闻列表页面
-        showMessage("查看所有新闻")
-        // val intent = Intent(requireContext(), NewsListActivity::class.java)
-        // startActivity(intent)
     }
 
     private fun openNewsDetail(newsItem: NewsItem) {
         // 跳转到新闻详情页面
-        showMessage("打开新闻: ${newsItem.title}")
-        // val intent = Intent(requireContext(), NewsDetailActivity::class.java)
-        // intent.putExtra("news_id", newsItem.id)
-        // startActivity(intent)
+        newsViewModel.getNewsDetail(newsItem.id)
     }
 
     // 清理资源
