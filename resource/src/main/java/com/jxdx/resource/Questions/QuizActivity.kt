@@ -2,17 +2,14 @@
 package com.jxdx.resource.Questions
 import android.content.Intent
 import android.os.Bundle
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.core.os.postDelayed
 import androidx.lifecycle.ViewModelProvider
 import com.example.corekit.common.BaseActivity
 import com.jxdx.resource.databinding.ActivityQuizBinding
-import java.util.logging.Handler
 
 class QuizActivity : BaseActivity<ActivityQuizBinding>() {
 
@@ -30,10 +27,9 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
     private var isLoadingMore = false
     private var hasMoreQuestions = true
 
-    // 新增练习会话相关变量
-    private var isComprehensiveMode = false // 是否为综合刷题模式
+    // 练习会话相关变量
+    private var isPracticeMode = true // 现在所有题型都使用练习模式
     private var currentSessionId: Int? = null // 当前会话ID
-    private var currentQuestionId: Int? = null // 当前题目ID
     private var remainingQuestions = mutableListOf<Int>() // 剩余题目ID列表
     private var isSubmitting = false // 是否正在提交答案
     private var isAnswerSubmitted = false // 当前题目是否已提交
@@ -53,44 +49,33 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 获取传递的题型参数
 
     }
 
     override fun initView() {
         viewModel = ViewModelProvider(this)[ErrorQuizViewModel::class.java]
+
         val questionTypeName = intent.getStringExtra("QUESTION_TYPE")
+        Log.d("QuizActivity", "QuestionType: $questionTypeName")
         selectedQuestionType = if (questionTypeName != null) {
             QuestionType.valueOf(questionTypeName)
         } else {
-            null
+            QuestionType.COMPREHENSIVE // 默认为综合题
         }
-
-        // 判断是否为综合刷题模式
-        isComprehensiveMode = selectedQuestionType == null
-
         // 设置题型标题
         view.tvQuestionType.text = getQuestionTypeTitle(selectedQuestionType)
 
-        // 如果是综合刷题模式，修改标题
-        if (isComprehensiveMode) {
-            view.tvQuestionType.text = "综合刷题"
-            // 隐藏加载更多按钮，在综合模式下不需要
-            view.btnLoadMore.visibility = View.GONE
-        }
+        // 隐藏加载更多按钮，在练习模式下不需要
+        view.btnLoadMore.visibility = View.GONE
 
         setupButtonListeners()
+// 获取传递的题型参数
 
-        if (isComprehensiveMode) {
-            // 综合刷题模式：开始循环刷题
-            startComprehensiveQuiz()
-        } else {
-            // 错题模式：原有逻辑
-            resetAndLoadQuestions()
-        }
+        // 所有题型都使用练习模式
+        startPracticeSession()
     }
 
-    private fun startComprehensiveQuiz() {
+    private fun startPracticeSession() {
         // 清空当前题目
         currentQuestions.clear()
         filteredQuestions = emptyList()
@@ -109,137 +94,77 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
     }
 
     private fun resumePractice() {
-        Log.d("QuizActivity", "开始或恢复练习，题目数量: $DEFAULT_QUESTION_COUNT")
-        viewModel.resumePractice(subjectId, DEFAULT_QUESTION_COUNT)
+        val questionTypeValue = selectedQuestionType?.value ?: QuestionType.COMPREHENSIVE.value
+        Log.d("QuizActivity", "开始或恢复练习，题型: $selectedQuestionType, 题目数量: $DEFAULT_QUESTION_COUNT")
+        viewModel.resumePractice(subjectId,DEFAULT_QUESTION_COUNT,questionTypeValue)
     }
 
     override fun subscribeUi() {
-        // 观察错题列表（错题模式使用）
-        viewModel.errorQuizLiveData.observe(this) { resource ->
-            if (!isComprehensiveMode) {
-                resource
-                    .onSuccess { data ->
-                        view.progressBar.visibility = View.GONE
-                        isLoadingMore = false
+        // 观察练习会话（所有题型都使用练习模式）
+        viewModel.practiceSessionLiveData.observe(this) { resource ->
+            resource
+                .onSuccess { data ->
+                    view.progressBar.visibility = View.GONE
+                    isSubmitting = false
 
-                        data?.let { quizData ->
-                            currentQuestions.addAll(quizData.records)
-                            totalPages = quizData.pages
+                    data?.let { session ->
+                        // 保存会话信息
+                        currentSessionId = session.sessionId
+                        currentBatch = session.currentBatch
+                        totalBatches = session.totalBatches
 
-                            applyQuestionFilter()
+                        // 处理待处理队列
+                        if (session.pendingQueue.isNotEmpty()) {
+                            // 清空当前题目并添加新题目
+                            currentQuestions.clear()
+                            currentQuestions.addAll(session.pendingQueue)
+                            filteredQuestions = currentQuestions
 
-                            if (filteredQuestions.size < MIN_QUESTIONS_REQUIRED && currentPage < totalPages) {
-                                currentPage++
-                                isLoadingMore = true
-                                view.progressBar.visibility = View.VISIBLE
-                                loadErrorQuestions()
-                            } else {
-                                updatePageInfo()
-                                if (filteredQuestions.isNotEmpty()) {
-                                    displayQuestion(0)
-                                    initAnswerResults()
-                                    view.noQuestionsView.visibility = View.GONE
-                                } else {
-                                    showNoQuestionsMessage()
-                                }
-                            }
-                        }
-                    }
-                    .onError { error, data ->
-                        view.progressBar.visibility = View.GONE
-                        isLoadingMore = false
+                            // 重置提交状态
+                            isAnswerSubmitted = false
 
-                        if (data != null) {
-                            currentQuestions.addAll(data.records)
-                            totalPages = data.pages
-
-                            applyQuestionFilter()
+                            // 显示第一题
+                            displayQuestion(0)
+                            initAnswerResults()
+                            view.noQuestionsView.visibility = View.GONE
                             updatePageInfo()
-                            if (filteredQuestions.isNotEmpty()) {
-                                displayQuestion(0)
-                                initAnswerResults()
-                                view.noQuestionsView.visibility = View.GONE
-                            } else {
-                                showNoQuestionsMessage()
-                            }
-                            Toast.makeText(this, "注意: ${error?.message}", Toast.LENGTH_SHORT).show()
+
+                            // 启用选项
+                            enableAnswerOptions(true)
+                            Log.d("QuizActivity", "练习会话加载成功，题目数量: ${session.pendingQueue.size}")
                         } else {
                             showNoQuestionsMessage()
-                            Toast.makeText(this, "加载失败: ${error?.message}", Toast.LENGTH_SHORT).show()
                         }
                     }
-            }
+                }
+                .onError { error, data ->
+                    view.progressBar.visibility = View.GONE
+                    isSubmitting = false
+                    showNoQuestionsMessage()
+                    Toast.makeText(this, "加载练习失败: ${error?.message}", Toast.LENGTH_SHORT).show()
+                    // 启用选项允许重试
+                    enableAnswerOptions(true)
+                }
         }
 
-        // 观察练习会话（综合模式使用）
-        viewModel.practiceSessionLiveData.observe(this) { resource ->
-            if (isComprehensiveMode) {
-                resource
-                    .onSuccess { data ->
-                        view.progressBar.visibility = View.GONE
-                        isSubmitting = false
-
-                        data?.let { session ->
-                            // 保存会话信息
-                            currentSessionId = session.sessionId
-                            currentBatch = session.currentBatch
-                            totalBatches = session.totalBatches
-
-                            // 处理待处理队列
-                            if (session.pendingQueue.isNotEmpty()) {
-                                // 清空当前题目并添加新题目
-                                currentQuestions.clear()
-                                currentQuestions.addAll(session.pendingQueue)
-                                filteredQuestions = currentQuestions
-
-                                // 重置提交状态
-                                isAnswerSubmitted = false
-
-                                // 显示第一题
-                                displayQuestion(0)
-                                initAnswerResults()
-                                view.noQuestionsView.visibility = View.GONE
-                                updatePageInfo()
-
-                                // 启用选项
-                                enableAnswerOptions(true)
-                                Log.d("QuizActivity", "练习会话加载成功，题目数量: ${session.pendingQueue.size}")
-                            } else {
-                                showNoQuestionsMessage()
-                            }
-                        }
-                    }
-                    .onError { error, data ->
-                        view.progressBar.visibility = View.GONE
-                        isSubmitting = false
-                        showNoQuestionsMessage()
-                        Toast.makeText(this, "加载练习失败: ${error?.message}", Toast.LENGTH_SHORT).show()
-                        // 启用选项允许重试
-                        enableAnswerOptions(true)
-                    }
-            }
-        }
-
-        // 观察提交结果（综合模式使用）
+        // 观察提交结果
         viewModel.submitQuestionLiveData.observe(this) { resource ->
-            if (isComprehensiveMode) {
-                resource
-                    .onSuccess { data ->
-                        isSubmitting = false
-                        view.progressBar.visibility = View.GONE
-                        data?.let { response ->
-                            // 处理提交结果
-                            handleSubmitResponse(response)
-                        }
+            resource
+                .onSuccess { data ->
+                    isSubmitting = false
+                    view.progressBar.visibility = View.GONE
+                    data?.let { response ->
+                        // 处理提交结果
+                        handleSubmitResponse(response)
                     }
-                    .onError { error, data ->
-                        isSubmitting = false
-                        view.progressBar.visibility = View.GONE
-                        Toast.makeText(this, "提交答案失败: ${error?.message}", Toast.LENGTH_SHORT).show()
-                        // 即使提交失败，也允许继续答题
-                        enableAnswerOptions(true)
-                    }
-            }
+                }
+                .onError { error, data ->
+                    isSubmitting = false
+                    view.progressBar.visibility = View.GONE
+                    Toast.makeText(this, "提交答案失败: ${error?.message}", Toast.LENGTH_SHORT).show()
+                    // 即使提交失败，也允许继续答题
+                    enableAnswerOptions(true)
+                }
         }
     }
 
@@ -295,30 +220,17 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         }
 
         view.btnNext.setOnClickListener {
-            if (isComprehensiveMode) {
-                if (currentQuestionIndex < filteredQuestions.size - 1) {
-                    displayQuestion(currentQuestionIndex + 1)
-                } else {
-                    // 综合模式：获取更多题目
-                    resumePractice()
-                }
+            if (currentQuestionIndex < filteredQuestions.size - 1) {
+                displayQuestion(currentQuestionIndex + 1)
             } else {
-                if (currentQuestionIndex < filteredQuestions.size - 1) {
-                    displayQuestion(currentQuestionIndex + 1)
-                } else {
-                    Toast.makeText(this, "已经是最后一题了", Toast.LENGTH_SHORT).show()
-                }
+                // 获取更多题目
+                resumePractice()
             }
         }
 
         view.btnSubmit.setOnClickListener {
-            if (isComprehensiveMode) {
-                // 综合模式：提交当前题目答案
-                submitCurrentQuestion()
-            } else {
-                // 错题模式：跳转到答题卡
-                submitAnswersAndNavigate()
-            }
+            // 提交当前题目答案
+            submitCurrentQuestion()
         }
 
         view.btnBackToSelection.setOnClickListener {
@@ -327,10 +239,8 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         }
 
         view.btnLoadMore.setOnClickListener {
-            if (currentPage < totalPages && !isLoadingMore) {
-                currentPage++
-                loadErrorQuestions()
-            }
+            // 练习模式下不需要加载更多
+            Toast.makeText(this, "练习模式下会自动加载题目", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -448,41 +358,27 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
 
     private fun getQuestionTypeTitle(questionType: QuestionType?): String {
         return when (questionType) {
-            QuestionType.SINGLE_CHOICE -> "单选题错题"
-            QuestionType.MULTIPLE_CHOICE -> "多选题错题"
-            QuestionType.TRUE_FALSE -> "判断题错题"
-            QuestionType.FILL_BLANK -> "填空题错题"
-            else -> "全部错题"
-        }
-    }
-
-    private fun loadErrorQuestions() {
-        if (!isLoadingMore) {
-            view.progressBar.visibility = View.VISIBLE
-            isLoadingMore = true
-        }
-        viewModel.getErrorQuestions(subjectId, currentPage, pageSize)
-    }
-
-    private fun applyQuestionFilter() {
-        filteredQuestions = if (selectedQuestionType == null) {
-            currentQuestions
-        } else {
-            currentQuestions.filter { it.getQuestionType() == selectedQuestionType }
+            QuestionType.COMPREHENSIVE -> "综合刷题"
+            QuestionType.SINGLE_CHOICE -> "单选题练习"
+            QuestionType.MULTIPLE_CHOICE -> "多选题练习"
+            QuestionType.TRUE_FALSE -> "判断题练习"
+            QuestionType.FILL_BLANK -> "填空题练习"
+            else -> "全部练习"
         }
     }
 
     private fun showNoQuestionsMessage() {
         view.noQuestionsView.visibility = View.VISIBLE
-        view.tvNoQuestions.text = if (selectedQuestionType == null) {
+        view.tvNoQuestions.text = if (selectedQuestionType == QuestionType.COMPREHENSIVE) {
             "暂无题目"
         } else {
-            "暂无${getQuestionTypeName(selectedQuestionType)}错题"
+            "暂无${getQuestionTypeName(selectedQuestionType)}题目"
         }
     }
 
     private fun getQuestionTypeName(type: QuestionType?): String {
         return when (type) {
+            QuestionType.COMPREHENSIVE -> "综合题"
             QuestionType.SINGLE_CHOICE -> "单选题"
             QuestionType.MULTIPLE_CHOICE -> "多选题"
             QuestionType.TRUE_FALSE -> "判断题"
@@ -647,23 +543,17 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
 
     private fun updateButtonStates() {
         view.btnPrevious.isEnabled = currentQuestionIndex > 0
-        view.btnNext.isEnabled = currentQuestionIndex < filteredQuestions.size - 1 || isComprehensiveMode
-        view.btnLoadMore.isEnabled = currentPage < totalPages && !isLoadingMore
-        view.btnLoadMore.visibility = if (currentPage < totalPages && !isComprehensiveMode) View.VISIBLE else View.GONE
+        view.btnNext.isEnabled = currentQuestionIndex < filteredQuestions.size - 1
+        view.btnLoadMore.isEnabled = false
+        view.btnLoadMore.visibility = View.GONE
 
-        // 综合模式下修改按钮文本和状态
-        if (isComprehensiveMode) {
-            view.btnSubmit.text = "提交答案"
-            view.btnSubmit.isEnabled = !isAnswerSubmitted
-        }
+        // 修改按钮文本和状态
+        view.btnSubmit.text = "提交答案"
+        view.btnSubmit.isEnabled = !isAnswerSubmitted
     }
 
     private fun updatePageInfo() {
-        if (isComprehensiveMode) {
-            view.tvPageInfo.text = "综合刷题模式 | 批次: $currentBatch/$totalBatches | 剩余: ${filteredQuestions.size - currentQuestionIndex - 1}题"
-        } else {
-            view.tvPageInfo.text = "已加载: ${filteredQuestions.size}题 | 页码: $currentPage/$totalPages"
-        }
+        view.tvPageInfo.text = "${getQuestionTypeTitle(selectedQuestionType)} | 批次: $currentBatch/$totalBatches | 剩余: ${filteredQuestions.size - currentQuestionIndex - 1}题"
     }
 
     private fun showCorrectAnswer() {
@@ -672,13 +562,6 @@ class QuizActivity : BaseActivity<ActivityQuizBinding>() {
         val question = filteredQuestions[currentQuestionIndex]
         view.tvCorrectAnswer.text = "正确答案: ${question.correctOption}"
         view.tvCorrectAnswer.visibility = View.VISIBLE
-    }
-
-    private fun resetAndLoadQuestions() {
-        currentQuestions.clear()
-        currentPage = 1
-        hasMoreQuestions = true
-        loadErrorQuestions()
     }
 
     override fun onBackPressed() {

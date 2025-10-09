@@ -51,9 +51,10 @@ class QuestionSelectionActivity : BaseActivity<ActivityQuestionSelectionBinding>
         }
     }
 
+    // 在 QuestionSelectionActivity.kt 中修改 navigateToErrorQuiz 方法
     private fun navigateToErrorQuiz(questionType: QuestionType?) {
         val intent = Intent(this, QuizActivity::class.java).apply {
-            putExtra("QUESTION_TYPE", questionType?.name)
+            putExtra("QUESTION_TYPE", questionType?.name ?: QuestionType.COMPREHENSIVE.name)
         }
         startActivity(intent)
         finish() // 结束选择页面

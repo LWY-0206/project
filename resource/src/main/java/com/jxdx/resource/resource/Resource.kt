@@ -1,6 +1,7 @@
 package com.jxdx.resource.resource
 
 import android.content.Intent
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.corekit.common.BaseFragment
@@ -9,6 +10,8 @@ import com.jxdx.resource.Questions.QuestionSelectionActivity
 import com.jxdx.resource.Schools.SchoolListActivity
 import com.jxdx.resource.databinding.FragmentResourceBinding
 import com.youth.banner.Banner
+import org.jxxy.debug.h5.activity.GeoGebraActivity
+import org.jxxy.debug.h5.activity.ToolActivity
 
 
 class Resource : BaseFragment<FragmentResourceBinding>() {
@@ -43,14 +46,27 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
         rvStaggered.setLayoutManager(layoutManager)
         val famous = find.tvFamous.setOnClickListener {
             val intent = Intent(requireContext(), FamousListActivity::class.java)
+            Log.d("Resource", "跳转名人")
             startActivity(intent)
         }
         val quiz = find.tvQuiz.setOnClickListener {
             val intent = Intent(requireContext(), QuestionSelectionActivity::class.java)
+            Log.d("Resource", "跳转错题")
             startActivity(intent)
         }
         val test = find.tvSchools.setOnClickListener {
             val intent = Intent(requireContext(), SchoolListActivity::class.java)
+            Log.d("Resource", "跳转学校")
+            startActivity(intent)
+        }
+        val Math=find.tvMath.setOnClickListener {
+            val intent = Intent(requireContext(), GeoGebraActivity::class.java)
+            Log.d("Resource", "跳转工具")
+            startActivity(intent)
+        }
+        val chem=find.tvChem.setOnClickListener {
+            val intent = Intent(requireContext(), ToolActivity::class.java)
+            Log.d("Resource", "跳转工具")
             startActivity(intent)
         }
     }

@@ -72,7 +72,7 @@ class ErrorQuizViewModel(application: Application) : BaseViewModel(application) 
     }
 
     // 恢复或开始练习
-    fun resumePractice(subjectId: Int, questionCount: Int) {
+    fun resumePractice(subjectId: Int, questionCount: Int,questionType:Int) {
         Log.d("ErrorQuizViewModel", "resumePractice called with subjectId=$subjectId, questionCount=$questionCount")
 
         request(
@@ -109,7 +109,7 @@ class ErrorQuizViewModel(application: Application) : BaseViewModel(application) 
             }
         ) {
             Log.d("ErrorQuizViewModel", "Executing resume practice repository call")
-            repository.resumePractice(subjectId, questionCount)
+            repository.resumePractice(subjectId,questionCount,questionType)
         }
     }
 

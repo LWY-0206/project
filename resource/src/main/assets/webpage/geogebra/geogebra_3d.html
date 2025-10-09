@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://www.geogebra.org/scripts/deployggb.js"></script>
+</head>
+<body style="margin:0;">
+<div id="ggb-element" style="width: 100%; height: 100vh;"></div>
+<script>
+    var params = {
+        "appName": "3d",
+        "borderColor": "#FFFFFF",
+        "showToolBar": true,
+        "showAlgebraInput": true,
+        "showMenuBar": false
+    };
+    var applet = new GGBApplet(params, true);
+    window.addEventListener("load", function() {
+        applet.inject('ggb-element');
+    });
+</script>
+</body>
+</html>

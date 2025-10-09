@@ -110,10 +110,12 @@ data class ErrorQuizItem(
     }
 }
 
-enum class QuestionType {
-    SINGLE_CHOICE,  // 单选题
-    MULTIPLE_CHOICE, // 多选题
-    TRUE_FALSE,     // 判断题
-    FILL_BLANK,     // 填空题
-    UNKNOWN         // 未知类型
+// 在 ErrorQuizResponse.kt 中修改 QuestionType 枚举
+enum class QuestionType(val value: Int) {
+    COMPREHENSIVE(1),    // 综合题
+    SINGLE_CHOICE(2),    // 单选题
+    MULTIPLE_CHOICE(3),  // 多选题
+    TRUE_FALSE(4),       // 判断题
+    FILL_BLANK(5),       // 填空题
+    UNKNOWN(0)           // 未知类型
 }

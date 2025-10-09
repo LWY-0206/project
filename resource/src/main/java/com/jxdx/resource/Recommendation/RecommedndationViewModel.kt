@@ -17,11 +17,14 @@ class RecommendationViewModel(application: Application) : BaseViewModel(applicat
     val recommendationLiveData: ResLiveData<List<RecommendationItem>> by lazy {
         ResLiveData()
     }
+    val recommendationDetailLiveData: ResLiveData<RecommendationDetail> by lazy{
+        ResLiveData()
+    }
 
     /**
      * 获取推荐列表
      */
-    fun getRecommendationList() {
+    fun getRecommendationList(modelType: Int) {
         request(recommendationLiveData, object : LiveDataCallback<List<RecommendationItem>, List<RecommendationItem>> {
             override fun success(
                 emit: ResLiveData<List<RecommendationItem>>,
@@ -54,7 +57,7 @@ class RecommendationViewModel(application: Application) : BaseViewModel(applicat
                 emit.error(e)
             }
         }) {
-            repository.getRecommendation()
+            repository.getRecommendation(modelType)
         }
     }
 
@@ -62,10 +65,40 @@ class RecommendationViewModel(application: Application) : BaseViewModel(applicat
      * 刷新推荐列表
      */
     fun refreshRecommendationList() {
-        getRecommendationList()
+        getRecommendationList(1)
     }
+    fun getRecommendationDetail(resourceId:Int){
+        request(recommendationDetailLiveData, object : LiveDataCallback<RecommendationDetail, RecommendationDetail> {
+            override fun success(
+                emit: ResLiveData<RecommendationDetail>,
+                msg: String?,
+                data: RecommendationDetail?
+            ) {
+                data?.let{
+                    Log.d("获取资源详情","成功")
+                    emit.success(data)
 
-    /**
-     * 处理收藏点击
-     */
+                }
+            }
+
+            override fun otherCode(
+                emit: ResLiveData<RecommendationDetail>,
+                code: Int?,
+                msg: String?,
+                data: RecommendationDetail?
+            ) {
+                Log.d("获取资源详情","失败")
+            }
+
+            override fun error(
+                emit: ResLiveData<RecommendationDetail>,
+                e: ErrorResponse
+            ) {
+                Log.d("获取资源详情","失败")
+            }
+
+        }){
+            repository.getRecommeddationDetail(resourceId)
+        }
+    }
 }
