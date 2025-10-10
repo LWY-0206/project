@@ -87,4 +87,13 @@ dependencies {
     
     // OkHttp依赖
     implementation("com.squareup.okhttp3:okhttp:5.1.0")
+    
+    // XPopup依赖
+    implementation("com.github.li-xiaojun:XPopup:2.9.1")
+    
+    // 腾讯X5 WebView依赖
+    implementation("com.tencent.tbs:tbssdk:44286")
+    
+    // CircleImageView依赖
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 }

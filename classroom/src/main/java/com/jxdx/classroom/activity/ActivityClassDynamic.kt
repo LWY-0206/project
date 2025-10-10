@@ -87,14 +87,28 @@ class ActivityClassDynamic: BaseActivity<ActivityClassdynamicBinding>() {
             Log.d("ClassDynamic", "点击了习题准备按钮，teacherId=$teacherId, subjectId=$subjectId")
         }
         
-        // 预习查看按钮点击事件
-        view.btnPreviewCheck.setOnClickListener {
-            // 这里可以实现跳转到预习查看相关的页面
-            // 目前先显示一个提示信息
-            Toast.makeText(this, "预习查看功能开发中", Toast.LENGTH_SHORT).show()
+        // 工具准备按钮点击事件
+        view.btnToolPreparation.setOnClickListener {
+            val intent = Intent(this, ToolSelectionActivity::class.java)
+            intent.putExtra("subjectId", subjectId)
+            intent.putExtra("teacherId", teacherId)
+            intent.putExtra("subjectName", subjectName)
+            startActivity(intent)
             
             // 日志记录
-            Log.d("ClassDynamic", "点击了预习查看按钮，teacherId=$teacherId, subjectId=$subjectId")
+            Log.d("ClassDynamic", "跳转到工具准备页面，teacherId=$teacherId, subjectId=$subjectId")
+        }
+        
+        // 课堂设置按钮点击事件
+        view.btnClassroomSettings.setOnClickListener {
+            val intent = Intent(this, ClassroomSettingsActivity::class.java)
+            intent.putExtra("subjectId", subjectId)
+            intent.putExtra("teacherId", teacherId)
+            intent.putExtra("subjectName", subjectName)
+            startActivity(intent)
+            
+            // 日志记录
+            Log.d("ClassDynamic", "跳转到课堂设置页面，teacherId=$teacherId, subjectId=$subjectId")
         }
         
         // 初始化RecyclerView和适配器

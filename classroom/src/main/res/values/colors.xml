@@ -36,4 +36,10 @@
     <color name="black">#000000</color>
     <color name="light_gray">#F5F5F5</color>
     <color name="dark_gray">#424242</color>
+    
+    <!-- 预习状态颜色 -->
+    <color name="excellent_color">#FF9800</color>
+    <color name="good_color">#4CAF50</color>
+    <color name="average_color">#FF9800</color>
+    <color name="poor_color">#F44336</color>
 </resources>

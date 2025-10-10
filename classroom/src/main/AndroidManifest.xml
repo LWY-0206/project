@@ -63,6 +63,18 @@
             android:name=".activity.ResourceSelectionActivity"
             android:exported="false"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".activity.GeoGebraActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.PreviewCheckActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.ToolSelectionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.ClassroomSettingsActivity"
+            android:exported="false" />
 
     </application>
 
