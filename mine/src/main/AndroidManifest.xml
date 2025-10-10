@@ -70,6 +70,18 @@
         <activity
             android:name=".teacherhomework.PublishedHomeworkDetailActivity"
             android:exported="false" />
+        <activity
+            android:name=".teacherhomework.TeacherReviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.UncorrectedHomeworkDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.ReviewHomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.CorrectedHomeworkDetailActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

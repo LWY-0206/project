@@ -90,6 +90,11 @@ class HomeworkListActivity: AppCompatActivity() {
                 enterDeleteMode()
             }
         }
+
+        // 批改作业按钮
+        binding.fabReviewHomework.setOnClickListener {
+            goToReviewHomework()
+        }
     }
 
     private fun switchTab(tabIndex: Int) {
@@ -114,6 +119,7 @@ class HomeworkListActivity: AppCompatActivity() {
             binding.tabLibrary.setBackgroundResource(R.drawable.bg_tab_unselected)
             binding.tabLibrary.setTextColor(getColor(R.color.primary_color))
             binding.fabCreateHomework.visibility = android.view.View.GONE
+            binding.fabReviewHomework.visibility = android.view.View.VISIBLE
             
             // 显示已发放的作业（已发布的作业）
             showPublishedHomework()
@@ -124,6 +130,7 @@ class HomeworkListActivity: AppCompatActivity() {
             binding.tabIssued.setBackgroundResource(R.drawable.bg_tab_unselected)
             binding.tabIssued.setTextColor(getColor(R.color.primary_color))
             binding.fabCreateHomework.visibility = android.view.View.VISIBLE
+            binding.fabReviewHomework.visibility = android.view.View.GONE
             // 显示作业库的作业（您之前创建的所有作业）
             homeworkAdapter.updateData(homeworkLibraryList)
         }
@@ -241,6 +248,12 @@ class HomeworkListActivity: AppCompatActivity() {
         }
         // 更新确认删除按钮的可用状态
         invalidateOptionsMenu()
+    }
+
+    private fun goToReviewHomework() {
+        // 直接跳转到批改作业页面
+        val intent = Intent(this, TeacherReviewActivity::class.java)
+        startActivity(intent)
     }
     
     private fun initCreateHomeworkButton() {

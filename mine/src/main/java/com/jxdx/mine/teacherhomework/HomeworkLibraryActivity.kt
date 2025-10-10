@@ -4,12 +4,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.corekit.http.bean.BaseResp
 import com.jxdx.mine.HomeworkDetail
 import com.jxdx.mine.R
 import com.jxdx.mine.databinding.ActivityHomeworkLibraryBinding
+import com.jxdx.mine.http.RetrofitClient
 import com.jxdx.mine.teacherhomework.adapter.HomeworkLibraryAdapter
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class HomeworkLibraryActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeworkLibraryBinding
@@ -121,14 +127,52 @@ class HomeworkLibraryActivity : AppCompatActivity() {
             return
         }
         
-        // 这里可以添加确认删除的对话框
-        performDelete()
+        // 显示确认删除的对话框
+        AlertDialog.Builder(this)
+            .setTitle("确认删除")
+            .setMessage("确定要删除选中的 ${selectedHomeworkIds.size} 个作业吗？删除后无法恢复。")
+            .setPositiveButton("删除") { _, _ ->
+                performDelete()
+            }
+            .setNegativeButton("取消") { _, _ ->
+                exitDeleteMode()
+            }
+            .show()
     }
 
     private fun performDelete() {
-        // 实现删除逻辑
-        Toast.makeText(this, "删除功能待实现", Toast.LENGTH_SHORT).show()
-        exitDeleteMode()
+        if (selectedHomeworkIds.isNotEmpty()) {
+            // 显示加载状态
+            Toast.makeText(this, "正在删除作业...", Toast.LENGTH_SHORT).show()
+            
+            // 将选中的作业ID用逗号连接
+            val homeworkIdsString = selectedHomeworkIds.joinToString(",")
+            
+            // 调用作业库删除API
+            RetrofitClient.apiService.deleteCreatedHomework(homeworkIdsString).enqueue(object : Callback<BaseResp<String>> {
+                override fun onResponse(
+                    call: Call<BaseResp<String>>,
+                    response: Response<BaseResp<String>>
+                ) {
+                    if (response.isSuccessful && response.body()?.code == 0) {
+                        Toast.makeText(this@HomeworkLibraryActivity, "成功删除 ${selectedHomeworkIds.size} 个作业", Toast.LENGTH_SHORT).show()
+                        // 重新加载数据
+                        loadHomeworkData()
+                    } else {
+                        val errorMsg = response.body()?.message ?: "删除失败"
+                        Toast.makeText(this@HomeworkLibraryActivity, "删除失败: $errorMsg", Toast.LENGTH_SHORT).show()
+                    }
+                    exitDeleteMode()
+                }
+
+                override fun onFailure(call: Call<BaseResp<String>>, t: Throwable) {
+                    Toast.makeText(this@HomeworkLibraryActivity, "网络异常，删除失败", Toast.LENGTH_SHORT).show()
+                    exitDeleteMode()
+                }
+            })
+        } else {
+            Toast.makeText(this, "请先选择要删除的作业", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun exitDeleteMode() {

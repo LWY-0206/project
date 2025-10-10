@@ -12,8 +12,14 @@ import com.jxdx.mine.UserInfo
 import com.jxdx.mine.http.request.EditHomeworkRequest
 import com.jxdx.mine.http.request.CreateHomeworkRequest
 import com.jxdx.mine.http.request.SubmitHomeworkRequest
+import com.jxdx.mine.http.request.ReviewHomeworkRequest
+import com.jxdx.mine.http.request.AiReviewHomeworkRequest
 import com.jxdx.mine.http.vo.TeachCreateHWSimpleVO
 import com.jxdx.mine.http.vo.TeachCreateHWDetailVO
+import com.jxdx.mine.http.vo.UncorrectedHomeworkVO
+import com.jxdx.mine.http.vo.UncorrectedHomeworkDetailVO
+import com.jxdx.mine.http.vo.CorrectedHomeworkDetailVO
+import com.jxdx.mine.http.vo.AiReviewResultVO
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.http.Body
@@ -177,6 +183,13 @@ interface ApiService {
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<String>>
 
+    //删除已创建的作业（作业库删除，支持批量删除）
+    @DELETE("/api/teach/homework/create/del")
+    fun deleteCreatedHomework(
+        @Query("homeworkIds") homeworkIds: String,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
+
     //AI创建作业
     @POST("/api/teach/homework/create/ai")
     fun createHomeworkWithAi(
@@ -199,6 +212,52 @@ interface ApiService {
         @Query("size") size: Int,
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
     ): Call<BaseResp<PageData<TeachCreateHWSimpleVO>>>
+
+    //获取未批改作业列表
+    @GET("/api/teach/homework/uncorrect/sim/list")
+    fun getUncorrectedHomeworkList(
+        @Query("page") page: Int,
+        @Query("size") size: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<List<UncorrectedHomeworkVO>>>
+
+    //获取已批改作业列表
+    @GET("/api/teach/homework/correct/sim/list")
+    fun getCorrectedHomeworkList(
+        @Query("page") page: Int,
+        @Query("size") size: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<List<UncorrectedHomeworkVO>>>
+
+    //获取已批改作业详情
+    @GET("/api/teach/homework/correct/list")
+    fun getCorrectedHomeworkDetail(
+        @Query("subjectId") subjectId: Int,
+        @Query("homeworkId") homeworkId: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<List<CorrectedHomeworkDetailVO>>>
+
+    //获取未批改作业详情
+    @GET("/api/teach/homework/uncorrect/list")
+    fun getUncorrectedHomeworkDetail(
+        @Query("subjectId") subjectId: Int,
+        @Query("homeworkId") homeworkId: Int,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<List<UncorrectedHomeworkDetailVO>>>
+
+    //批改作业
+    @POST("/api/teach/homework/correct")
+    fun reviewHomework(
+        @Body request: ReviewHomeworkRequest,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<String>>
+
+    //AI批改作业
+    @POST("/api/teach/homework/correct/ai")
+    fun aiReviewHomework(
+        @Body request: AiReviewHomeworkRequest,
+        @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
+    ): Call<BaseResp<AiReviewResultVO>>
 
     //获取已发布作业详情
     @GET("/api/teach/homework/send/find")

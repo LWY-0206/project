@@ -2,101 +2,350 @@ package com.jxdx.mine.teacherhomework
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
+import android.util.Log
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import com.example.corekit.common.BaseActivity
 import com.example.corekit.http.bean.BaseResp
+import com.jxdx.mine.R
 import com.jxdx.mine.databinding.ActivityReviewHomeworkBinding
 import com.jxdx.mine.http.RetrofitClient
+import com.jxdx.mine.http.request.ReviewHomeworkRequest
+import com.jxdx.mine.http.request.AiReviewHomeworkRequest
+import com.jxdx.mine.http.vo.UncorrectedHomeworkDetailVO
+import com.jxdx.mine.http.vo.AiReviewResultVO
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class ReviewHomeworkActivity: AppCompatActivity() {
-    private lateinit var binding: ActivityReviewHomeworkBinding
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityReviewHomeworkBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        val studentName = intent.getStringExtra("studentName")
-        val content = intent.getStringExtra("content")
-        val oldScore = intent.getIntExtra("score", -1)
-        val oldComment = intent.getStringExtra("comment")
-        val homeworkId = intent.getStringExtra("homeworkId")
-        val studentId = intent.getStringExtra("studentId")
-
-        supportActionBar?.title = "批改 - $studentName"
-
-        binding.tvStudentName.text = studentName
-        binding.tvHomeworkContent.text = "作业内容：$content"
-        if (oldScore != -1) binding.etScore.setText(oldScore.toString())
-        binding.etComment.setText(oldComment)
-
-        binding.btnSaveReview.setOnClickListener {
-            val scoreStr = binding.etScore.text.toString()
-            val score = scoreStr.toIntOrNull()
-            val comment = binding.etComment.text.toString()
-
-            if (scoreStr.isEmpty()) {
-                Toast.makeText(this, "请输入分数", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+class ReviewHomeworkActivity : BaseActivity<ActivityReviewHomeworkBinding>() {
+    
+    private var homeworkDetail: UncorrectedHomeworkDetailVO? = null
+    private var homeworkId: Long = 0
+    private var studentId: Long = 0
+    private var subjectId: Int = 0
+    
+    override fun bindLayout(): ActivityReviewHomeworkBinding {
+        Log.d("ReviewHomeworkActivity", "bindLayout 开始")
+        try {
+            val binding = ActivityReviewHomeworkBinding.inflate(layoutInflater)
+            Log.d("ReviewHomeworkActivity", "bindLayout 成功")
+            return binding
+        } catch (e: Exception) {
+            Log.e("ReviewHomeworkActivity", "bindLayout 失败", e)
+            throw e
+        }
+    }
+    
+    override fun initView() {
+        Log.d("ReviewHomeworkActivity", "========== initView 开始 ==========")
+        try {
+            // 获取传递的参数
+            homeworkId = intent.getLongExtra("homeworkId", 0)
+            studentId = intent.getLongExtra("studentId", 0)
+            subjectId = intent.getIntExtra("subjectId", 0)
+            homeworkDetail = intent.getSerializableExtra("homeworkDetail") as? UncorrectedHomeworkDetailVO
+            
+            Log.d("ReviewHomeworkActivity", "接收参数 - homeworkId: $homeworkId, studentId: $studentId, subjectId: $subjectId")
+            
+            // 设置标题
+            supportActionBar?.title = "批改作业"
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            Log.d("ReviewHomeworkActivity", "ActionBar设置完成")
+            
+            // 初始化界面数据
+            initData()
+            
+            Log.d("ReviewHomeworkActivity", "========== initView 完成 ==========")
+        } catch (e: Exception) {
+            Log.e("ReviewHomeworkActivity", "initView失败", e)
+            e.printStackTrace()
+            finish()
+        }
+    }
+    
+    override fun subscribeUi() {
+        Log.d("ReviewHomeworkActivity", "========== subscribeUi 开始 ==========")
+        try {
+            // 设置返回按钮点击事件
+            view.btnBack.setOnClickListener {
+                Log.d("ReviewHomeworkActivity", "返回按钮点击")
+                finish()
             }
             
-            if (score == null || score < 0 || score > 100) {
-                Toast.makeText(this, "请输入0-100之间的有效分数", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+            // 设置AI批改按钮点击事件
+            view.btnAiReview.setOnClickListener {
+                Log.d("ReviewHomeworkActivity", "AI批改按钮点击")
+                performAiReview()
             }
-
-            // 显示加载状态
-            binding.btnSaveReview.isEnabled = false
-            binding.btnSaveReview.text = "保存中..."
             
-            // 调用保存批改结果的API
-            RetrofitClient.apiService.submitHomeworkReview(
-                homeworkId = homeworkId?.toLong() ?: 0,
-                studentId = studentId?.toLong() ?: 0,
-                score = score,
-                comment = comment
-            ).enqueue(object : Callback<BaseResp<Any>> {
-                override fun onResponse(call: Call<BaseResp<Any>>, response: Response<BaseResp<Any>>) {
-                    binding.btnSaveReview.isEnabled = true
-                    binding.btnSaveReview.text = "保存批改结果"
-                    
-                    if (response.isSuccessful && response.body() != null) {
-                        val result = response.body()
-                        if (result?.code == 200) {
-                            Toast.makeText(this@ReviewHomeworkActivity, "已保存批改结果", Toast.LENGTH_SHORT).show()
-                            
-                            // 返回上一页并传递批改结果
-                            val resultIntent = Intent()
-                            resultIntent.putExtra("score", score)
-                            resultIntent.putExtra("comment", comment)
-                            resultIntent.putExtra("studentId", studentId)
-                            setResult(RESULT_OK, resultIntent)
-                            finish()
+            // 设置提交批改按钮点击事件
+            view.btnSubmit.setOnClickListener {
+                Log.d("ReviewHomeworkActivity", "提交批改按钮点击")
+                submitReview()
+            }
+            
+            // 设置分数输入监听
+            view.etScore.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    validateScore()
+                }
+            }
+            
+            Log.d("ReviewHomeworkActivity", "========== subscribeUi 完成 ==========")
+        } catch (e: Exception) {
+            Log.e("ReviewHomeworkActivity", "subscribeUi失败", e)
+            e.printStackTrace()
+        }
+    }
+    
+    private fun initData() {
+        Log.d("ReviewHomeworkActivity", "========== initData 开始 ==========")
+        try {
+            homeworkDetail?.let { detail ->
+                // 设置学生信息
+                view.tvStudentName.text = detail.studentName ?: "未知学生"
+                view.tvSubmitTime.text = if (detail.submitTime != null) {
+                    "提交时间: ${detail.submitTime}"
+                } else {
+                    "未提交"
+                }
+                
+                // 设置提交内容
+                val submitContent = detail.submitContent
+                if (submitContent != null && submitContent.isNotEmpty()) {
+                    view.tvSubmitContent.text = submitContent.joinToString("\n")
+                } else {
+                    view.tvSubmitContent.text = "暂无提交内容"
+                }
+                
+                // 设置当前分数和评语（如果有的话）
+                detail.score?.let { score ->
+                    view.etScore.setText(score.toString())
+                }
+                detail.comment?.let { comment ->
+                    view.etComment.setText(comment)
+                }
+                
+                Log.d("ReviewHomeworkActivity", "数据初始化完成")
+            } ?: run {
+                Log.e("ReviewHomeworkActivity", "作业详情数据为空")
+                Toast.makeText(this, "作业数据异常", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            
+            Log.d("ReviewHomeworkActivity", "========== initData 完成 ==========")
+        } catch (e: Exception) {
+            Log.e("ReviewHomeworkActivity", "initData失败", e)
+            e.printStackTrace()
+        }
+    }
+    
+    private fun validateScore(): Boolean {
+        Log.d("ReviewHomeworkActivity", "验证分数")
+        try {
+            val scoreText = view.etScore.text.toString().trim()
+            if (scoreText.isEmpty()) {
+                view.tilScore.error = "请输入分数"
+                return false
+            }
+            
+            val score = scoreText.toIntOrNull()
+            if (score == null) {
+                view.tilScore.error = "分数必须是数字"
+                return false
+            }
+            
+            if (score < 0 || score > 100) {
+                view.tilScore.error = "分数必须在0-100之间"
+                return false
+            }
+            
+            view.tilScore.error = null
+            return true
+        } catch (e: Exception) {
+            Log.e("ReviewHomeworkActivity", "验证分数失败", e)
+            return false
+        }
+    }
+    
+    private fun performAiReview() {
+        Log.d("ReviewHomeworkActivity", "========== performAiReview 开始 ==========")
+        try {
+            homeworkDetail?.let { detail ->
+                val submitContent = detail.submitContent
+                if (submitContent.isNullOrEmpty()) {
+                    Toast.makeText(this, "学生没有提交内容，无法进行AI批改", Toast.LENGTH_SHORT).show()
+                    return
+                }
+                
+                // 显示加载状态
+                view.btnAiReview.isEnabled = false
+                view.btnAiReview.text = "AI批改中..."
+                
+                // 创建AI批改请求
+                val request = AiReviewHomeworkRequest(
+                    homeworkId = homeworkId,
+                    subjectId = subjectId,
+                    studentId = studentId,
+                    studentContent = submitContent
+                )
+                
+                Log.d("ReviewHomeworkActivity", "AI批改请求: $request")
+                
+                // 调用AI批改API
+                RetrofitClient.apiService.aiReviewHomework(request).enqueue(object : Callback<BaseResp<AiReviewResultVO>> {
+                    override fun onResponse(
+                        call: Call<BaseResp<AiReviewResultVO>>,
+                        response: Response<BaseResp<AiReviewResultVO>>
+                    ) {
+                        view.btnAiReview.isEnabled = true
+                        view.btnAiReview.text = "AI批改"
+                        
+                        Log.d("ReviewHomeworkActivity", "AI批改API响应: ${response.code()}")
+                        
+                        if (response.isSuccessful && response.body()?.code == 0) {
+                            val aiResult = response.body()?.data
+                            if (aiResult != null) {
+                                Log.d("ReviewHomeworkActivity", "AI批改成功: $aiResult")
+                                
+                                // 填充AI批改结果
+                                aiResult.score?.let { score ->
+                                    view.etScore.setText(score.toString())
+                                }
+                                aiResult.comment?.let { comment ->
+                                    view.etComment.setText(comment)
+                                }
+                                
+                                Toast.makeText(this@ReviewHomeworkActivity, "AI批改完成", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Log.e("ReviewHomeworkActivity", "AI批改结果为空")
+                                Toast.makeText(this@ReviewHomeworkActivity, "AI批改失败，请重试", Toast.LENGTH_SHORT).show()
+                            }
                         } else {
-                            Toast.makeText(this@ReviewHomeworkActivity, "保存失败: ${result?.message ?: "未知错误"}", Toast.LENGTH_SHORT).show()
+                            Log.e("ReviewHomeworkActivity", "AI批改API返回错误: ${response.body()?.message}")
+                            Toast.makeText(this@ReviewHomeworkActivity, "AI批改失败: ${response.body()?.message}", Toast.LENGTH_SHORT).show()
                         }
+                    }
+                    
+                    override fun onFailure(
+                        call: Call<BaseResp<AiReviewResultVO>>,
+                        t: Throwable
+                    ) {
+                        view.btnAiReview.isEnabled = true
+                        view.btnAiReview.text = "AI批改"
+                        
+                        Log.e("ReviewHomeworkActivity", "AI批改网络请求失败", t)
+                        Toast.makeText(this@ReviewHomeworkActivity, "网络请求失败: ${t.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
+            } ?: run {
+                Log.e("ReviewHomeworkActivity", "作业详情数据为空")
+                Toast.makeText(this, "作业数据异常", Toast.LENGTH_SHORT).show()
+            }
+            
+        } catch (e: Exception) {
+            view.btnAiReview.isEnabled = true
+            view.btnAiReview.text = "AI批改"
+            
+            Log.e("ReviewHomeworkActivity", "performAiReview失败", e)
+            e.printStackTrace()
+            Toast.makeText(this, "AI批改失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    private fun submitReview() {
+        Log.d("ReviewHomeworkActivity", "========== submitReview 开始 ==========")
+        try {
+            // 验证输入
+            if (!validateScore()) {
+                return
+            }
+            
+            val scoreText = view.etScore.text.toString().trim()
+            val score = scoreText.toInt()
+            val comment = view.etComment.text.toString().trim()
+            
+            if (comment.isEmpty()) {
+                Toast.makeText(this, "请输入评语", Toast.LENGTH_SHORT).show()
+                return
+            }
+            
+            // 显示加载状态
+            view.btnSubmit.isEnabled = false
+            view.btnSubmit.text = "提交中..."
+            
+            // 创建请求对象
+            val request = ReviewHomeworkRequest(
+                homeworkId = homeworkId,
+                studentId = studentId,
+                teacherComment = comment,
+                score = score
+            )
+            
+            Log.d("ReviewHomeworkActivity", "提交批改请求: $request")
+            
+            // 调用API
+            RetrofitClient.apiService.reviewHomework(request).enqueue(object : Callback<BaseResp<String>> {
+                override fun onResponse(
+                    call: Call<BaseResp<String>>,
+                    response: Response<BaseResp<String>>
+                ) {
+                    view.btnSubmit.isEnabled = true
+                    view.btnSubmit.text = "提交批改"
+                    
+                    Log.d("ReviewHomeworkActivity", "API响应: ${response.code()}")
+                    
+                    if (response.isSuccessful && response.body()?.code == 0) {
+                        Log.d("ReviewHomeworkActivity", "批改成功")
+                        Toast.makeText(this@ReviewHomeworkActivity, "批改成功", Toast.LENGTH_SHORT).show()
+                        
+                        // 返回结果
+                        val resultIntent = Intent()
+                        resultIntent.putExtra("reviewed", true)
+                        setResult(RESULT_OK, resultIntent)
+                        finish()
                     } else {
-                        Toast.makeText(this@ReviewHomeworkActivity, "网络请求失败", Toast.LENGTH_SHORT).show()
+                        Log.e("ReviewHomeworkActivity", "API返回错误: ${response.body()?.message}")
+                        Toast.makeText(this@ReviewHomeworkActivity, "批改失败: ${response.body()?.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
                 
-                override fun onFailure(call: Call<BaseResp<Any>>, t: Throwable) {
-                    binding.btnSaveReview.isEnabled = true
-                    binding.btnSaveReview.text = "保存批改结果"
-                    Toast.makeText(this@ReviewHomeworkActivity, "网络异常: ${t.message}", Toast.LENGTH_SHORT).show()
+                override fun onFailure(
+                    call: Call<BaseResp<String>>,
+                    t: Throwable
+                ) {
+                    view.btnSubmit.isEnabled = true
+                    view.btnSubmit.text = "提交批改"
+                    
+                    Log.e("ReviewHomeworkActivity", "网络请求失败", t)
+                    Toast.makeText(this@ReviewHomeworkActivity, "网络请求失败: ${t.message}", Toast.LENGTH_SHORT).show()
                 }
             })
             
-            // 如果API调用失败，仍然模拟成功（作为备用方案）
-            // val resultIntent = Intent()
-            // resultIntent.putExtra("score", score)
-            // resultIntent.putExtra("comment", comment)
-            // setResult(RESULT_OK, resultIntent)
-            // finish()
+        } catch (e: Exception) {
+            view.btnSubmit.isEnabled = true
+            view.btnSubmit.text = "提交批改"
+            
+            Log.e("ReviewHomeworkActivity", "submitReview失败", e)
+            e.printStackTrace()
+            Toast.makeText(this, "提交失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    override fun onSupportNavigateUp(): Boolean {
+        Log.d("ReviewHomeworkActivity", "ActionBar返回按钮点击")
+        finish()
+        return true
+    }
+    
+    companion object {
+        fun start(context: android.content.Context, homeworkId: Long, studentId: Long, subjectId: Int, homeworkDetail: UncorrectedHomeworkDetailVO) {
+            val intent = Intent(context, ReviewHomeworkActivity::class.java)
+            intent.putExtra("homeworkId", homeworkId)
+            intent.putExtra("studentId", studentId)
+            intent.putExtra("subjectId", subjectId)
+            intent.putExtra("homeworkDetail", homeworkDetail)
+            context.startActivity(intent)
         }
     }
 }

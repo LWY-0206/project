@@ -171,6 +171,19 @@
 
         </LinearLayout>
 
+        <!-- 批改作业按钮 -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabReviewHomework"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_edit"
+            android:backgroundTint="@color/orange"
+            android:contentDescription="前往批改"
+            android:visibility="gone"/>
+
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabCreateHomework"
             android:layout_width="wrap_content"
