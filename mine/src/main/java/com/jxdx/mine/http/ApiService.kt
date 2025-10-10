@@ -90,7 +90,7 @@ interface ApiService {
     fun getCourseDetail(
         @Query("subjectId") subjectId: Int,
         @Header ("satoken") satoken: String? = TokenManager.getToken() ?: ""
-    ): Call<BaseResp<CourseDetail>>
+    ): Call<BaseResp<List<CourseDetail>>>
 
 
 

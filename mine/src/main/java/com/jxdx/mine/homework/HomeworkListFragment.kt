@@ -71,6 +71,14 @@ class HomeworkListFragment : Fragment() {
         // 设置作业项点击事件
         adapter.setOnItemClickListener { 
             val homeworkId = it.homeworkId.toIntOrNull() ?: return@setOnItemClickListener
+            val statusText = when (it.completeAndCorrect) {
+                0 -> "未提交"
+                1 -> "待批改"
+                2 -> "已完成"
+                else -> "未知状态"
+            }
+            Log.d("HomeworkListFragment", "作业项点击 - ID: $homeworkId, 标题: ${it.homeworkName}, 状态: $statusText")
+            
             val intent = Intent(requireContext(), HomeworkDetailActivity::class.java)
             intent.putExtra("homeworkId", homeworkId)
             // 使用launcher启动Activity，而不是直接startActivity
@@ -85,13 +93,16 @@ class HomeworkListFragment : Fragment() {
             Log.d("HomeworkListFragment", "LiveData observed: ${it?.size ?: 0} groups received")
             if (it != null) {
                 // 打印每个分组的详细信息用于调试
+                var totalHomeworkCount = 0
                 it.forEachIndexed { index, group ->
                     Log.d("HomeworkListFragment", "Group $index: ${group.subjectName}, expanded: ${group.isExpanded}, homework count: ${group.homeworkList.size}")
+                    totalHomeworkCount += group.homeworkList.size
                 }
                 adapter.setData(it)
-                Log.d("HomeworkListFragment", "Data set to adapter, item count: ${adapter.itemCount}")
+                Log.d("HomeworkListFragment", "Data set to adapter, 分组数: ${it.size}, 总作业数: $totalHomeworkCount, 适配器项数: ${adapter.itemCount}")
             } else {
                 Log.d("HomeworkListFragment", "No homework data received")
+                adapter.setData(emptyList())
             }
         }
 
@@ -100,7 +111,13 @@ class HomeworkListFragment : Fragment() {
         Log.d("HomeworkListFragment", "Received status parameter: $status")
         
         val finalStatus = if (status in 0..2) status else 0
-        Log.d("HomeworkListFragment", "Loading homework with status: $finalStatus")
+        val statusText = when (finalStatus) {
+            0 -> "未提交"
+            1 -> "待批改"
+            2 -> "已完成"
+            else -> "未知状态"
+        }
+        Log.d("HomeworkListFragment", "Loading homework with status: $finalStatus($statusText)")
         viewModel.loadHomework(finalStatus)
         
         // 滚动监听，滑动到底部加载更多
@@ -113,6 +130,7 @@ class HomeworkListFragment : Fragment() {
 
                 if (lastVisibleItem >= totalItemCount - 1 && dy > 0) {
                     // 加载下一页
+                    Log.d("HomeworkListFragment", "滑动到底部，触发加载更多 - 状态: $finalStatus($statusText)")
                     viewModel.loadHomework(finalStatus, isLoadMore = true)
                 }
             }

@@ -18,62 +18,71 @@ class CourseListViewModel : ViewModel() {
     val studyReport = MutableLiveData<StudyReport>()
 
     fun loadCourseDetail(subjectId: Int) {
+        Log.d("CourseListViewModel", "开始加载课程详情，subjectId: $subjectId")
         //获取本学科课件
         RetrofitClient.apiService.getCourseDetail(subjectId)
-            .enqueue(object : Callback<BaseResp<CourseDetail>> {
+            .enqueue(object : Callback<BaseResp<List<CourseDetail>>> {
 
                 override fun onResponse(
-                    call: Call<BaseResp<CourseDetail>?>,
-                    response: Response<BaseResp<CourseDetail>?>?
+                    call: Call<BaseResp<List<CourseDetail>>?>,
+                    response: Response<BaseResp<List<CourseDetail>>?>?
                 ) {
+                    Log.d("CourseListViewModel", "响应状态: ${response?.code()}, 是否成功: ${response?.isSuccessful}")
                     
                     if (response != null) {
                         val baseResp = response.body()
+                        Log.d("CourseListViewModel", "响应体: $baseResp")
 
-                        if (response.isSuccessful && baseResp != null && baseResp.code == 0) {
-                            val coursedDetail = baseResp.data
-                            if (coursedDetail != null) {
-                                Log.d("CourseListViewModel", "Response data: $coursedDetail")//如果有返回数据，则更新MutableLiveData
-                                courseDetailList.value = listOf(coursedDetail)                          //保存一个CourseDetail类型的
-                                Log.d("CourseListViewModel", "courseDetailList: ${courseDetailList.value}")
-                                val fileMap = baseResp.data?.file                                       //CourseDetail中的file为Map提出来单独保存
-                                Log.d("CourseListViewModel", "File map: $fileMap")
-                                if (fileMap != null && fileMap.isNotEmpty()) {
-                                    val coursewares = fileMap.map {
-                                        Courseware(
-                                            CoursewareName = it.key,
-                                            url = it.value
-                                        )
-                                    }
-                                    courseWareList.value = coursewares                                  //保存一个Courseware类型的
-                                } else {
-                                    // 如果fileMap为空，设置一个空列表以触发Observer
-                                    courseWareList.value = emptyList()
+                        if (response.isSuccessful && baseResp != null) {
+                            Log.d("CourseListViewModel", "响应码: ${baseResp.code}, 响应消息: ${baseResp.message}")
+                            
+                            if (baseResp.code == 0) {
+                                val detailList = baseResp.data
+                                Log.d("CourseListViewModel", "课程详情列表数据: $detailList")
+                                Log.d("CourseListViewModel", "课程详情列表长度: ${detailList?.size}")
+                                
+                                if (detailList != null) {
+                                    //更新课程详情列表
+                                    courseDetailList.value = detailList
+                                    Log.d("CourseListViewModel", "更新后的courseDetailList: ${courseDetailList.value}")
+                                
+                                    //处理课件数据
+                                    processCoursewareData(detailList)
                                 }
+                                    else {
+                                        Log.w("CourseListViewModel", "课程详情列表数据为空")
+                                        // 设置空列表以触发Observer
+                                        courseWareList.value = emptyList()
+                                        courseDetailList.value = emptyList()
+                                    }
                             } else {
-                                // 如果coursedDetail为空，设置一个空列表以触发Observer
+                                Log.w("CourseListViewModel", "API返回错误码: ${baseResp.code}, 错误消息: ${baseResp.message}")
+                                // API返回错误码，设置空列表
                                 courseWareList.value = emptyList()
+                                courseDetailList.value = emptyList()
                             }
                         } else {
-                            Log.d("CourseListViewModel", "Response not successful or code != 0")
-                            // API返回不成功，设置一个空列表以触发Observer
+                            Log.e("CourseListViewModel", "响应不成功或响应体为空")
+                            // 设置空列表以触发Observer
                             courseWareList.value = emptyList()
+                            courseDetailList.value = emptyList()
                         }
                     } else {
-                        Log.d("CourseListViewModel", "Response is null")
-                        // Response为空，设置一个空列表以触发Observer
+                        Log.e("CourseListViewModel", "Response对象为空")
+                        // Response为空，设置空列表以触发Observer
                         courseWareList.value = emptyList()
+                        courseDetailList.value = emptyList()
                     }
                 }
 
                 override fun onFailure(
-                    call: Call<BaseResp<CourseDetail>?>,
+                    call: Call<BaseResp<List<CourseDetail>>?>,
                     t: Throwable
                 ) {
-                    Log.d("CourseListViewModel", "onFailure: ${t.message}")
-                    t.printStackTrace()
-                    // API调用失败，设置一个空列表以触发Observer
+                    Log.e("CourseListViewModel", "请求失败: ${t.message}", t)
+                    // API调用失败，设置空列表以触发Observer
                     courseWareList.value = emptyList()
+                    courseDetailList.value = emptyList()
                 }
             })
 
@@ -85,5 +94,32 @@ class CourseListViewModel : ViewModel() {
             totalHomework = 8,
             averageScore = 85
         )
+    }
+    
+    /**
+     * 处理课件数据
+     */
+    private fun processCoursewareData(detailList: List<CourseDetail>?) {
+        val allCoursewares = mutableListOf<Courseware>()
+        
+        if (detailList != null && detailList.isNotEmpty()) {
+            for (courseDetail in detailList) {
+                val fileMap = courseDetail.file
+                Log.d("CourseListViewModel", "课程${courseDetail.subjectName}的文件map: $fileMap")
+                
+                if (fileMap != null && fileMap.isNotEmpty()) {
+                    val coursewares = fileMap.map {
+                        Courseware(
+                            CoursewareName = it.key,
+                            url = it.value
+                        )
+                    }
+                    allCoursewares.addAll(coursewares)
+                }
+            }
+        }
+        
+        Log.d("CourseListViewModel", "处理后的课件总数: ${allCoursewares.size}")
+        courseWareList.value = if (allCoursewares.isNotEmpty()) allCoursewares else emptyList()
     }
 }

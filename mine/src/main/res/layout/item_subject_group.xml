@@ -1,10 +1,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp"
+    android:padding="16dp"
     android:orientation="horizontal"
     android:background="@drawable/bg_card"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginTop="12dp"
+    android:layout_marginBottom="4dp">
+
+    <!-- 科目图标 -->
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/homework"
+        android:tint="@color/primary_color"
+        android:layout_marginEnd="12dp"
+        android:contentDescription="科目图标" />
 
     <TextView
         android:id="@+id/tv_subject_name"
@@ -12,8 +24,9 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="数学"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary" />
 
     <TextView
         android:id="@+id/tv_homework_count"
@@ -22,11 +35,17 @@
         android:text="3份"
         android:textSize="14sp"
         android:textColor="@color/gray_600"
-        android:layout_marginEnd="8dp"/>
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/rounded_tag"
+        android:paddingHorizontal="8dp"
+        android:paddingVertical="2dp"/>
 
     <ImageView
         android:id="@+id/iv_expand"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/ic_expand_more"/>
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_expand_more"
+        android:tint="@color/gray_600"
+        android:transitionName="expand_arrow"
+        android:scaleType="center"/>
 </LinearLayout>

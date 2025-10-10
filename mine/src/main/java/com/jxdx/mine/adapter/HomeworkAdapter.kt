@@ -170,17 +170,17 @@ class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             tvDeadTime.text = "截止日期：${homework.deadTime}"
 
             when (homework.completeAndCorrect) {
-                0-> {
+                1-> {
                     tvStatus.text = "未提交"
-                    tvStatus.setTextColor(context.resources.getColor(R.color.red_600))
-                }
-                1 -> {
-                    tvStatus.text = "待批改"
-                    tvStatus.setTextColor(context.resources.getColor(R.color.red_600))
+                    tvStatus.setBackgroundResource(R.drawable.status_tag)
                 }
                 2 -> {
+                    tvStatus.text = "待批改"
+                    tvStatus.setBackgroundResource(R.drawable.status_tag_pending)
+                }
+                3 -> {
                     tvStatus.text = "已完成"
-                    tvStatus.setTextColor(context.resources.getColor(R.color.green_dark))
+                    tvStatus.setBackgroundResource(R.drawable.status_tag_completed)
                 }
             }
 
