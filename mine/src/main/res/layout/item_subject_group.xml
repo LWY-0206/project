@@ -14,7 +14,6 @@
         android:layout_width="32dp"
         android:layout_height="32dp"
         android:src="@drawable/homework"
-        android:tint="@color/primary_color"
         android:layout_marginEnd="12dp"
         android:contentDescription="科目图标" />
 
@@ -45,7 +44,6 @@
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/ic_expand_more"
-        android:tint="@color/gray_600"
         android:transitionName="expand_arrow"
         android:scaleType="center"/>
 </LinearLayout>
