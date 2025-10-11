@@ -55,13 +55,25 @@ class GradeActivity : AppCompatActivity() {
         // Section: 老师
         list.add(Member("section_teacher", "老师", "","",0))
         list.add(Member("t1", "张老师", "https://example.com/teacher1.png", "班主任", 1))
-        list.add(Member("t2", "李老师", "https://example.com/teacher2.png", "数学老师", 1))
+        list.add(Member("t2", "李老师", "https://tc-new.z.wiki/autoupload/f/d9oSIkypaT4MX13ceI-M6PmYtDrGvPpsluM_NdUVaNGyl5f0KlZfm6UsKj-HyTuv/20250905/Jr98/458X300/92.jpg", "数学老师", 1))
 
         // Section: 学生
         list.add(Member("section_student", "学生", "","",0))
-        list.add(Member("s1", "王小明", "https://example.com/student1.png", "",2))
+        list.add(Member("s1", "王小明", "https://tongue-srt.oss-cn-hangzhou.aliyuncs.com/2025/09/05/b7c3d5e8-f9a2-4b3c-d4e5-f6a7b8c9d0e1.jpg", "",2))
         list.add(Member("s2", "李华", "https://example.com/student2.png","",2))
         list.add(Member("s3", "赵六", "https://example.com/student2.png", "",2))
+        // 添加更多学生数据，使用实际网络图片URL
+        list.add(Member("s4", "陈晨", "https://tc-new.z.wiki/autoupload/f/d9oSIkypaT4MX13ceI-M6PmYtDrGvPpsluM_NdUVaNGyl5f0KlZfm6UsKj-HyTuv/20250905/Jr96/458X300/90.jpg", "",2))
+        list.add(Member("s5", "刘芳", "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/8dadc437-9f67-412c-b057-6a902b25e438.png", "",2))
+        list.add(Member("s6", "张伟", "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/f97fba60-a22b-431d-a55b-a5c182963bc5.png", "",2))
+        list.add(Member("s7", "王丽", "https://tongue-srt.oss-cn-hangzhou.aliyuncs.com/2025/09/05/a0bf2736-b843-4505-ad82-36c38a925f7c.jpg", "",2))
+        // 继续添加更多学生数据
+        list.add(Member("s8", "刘伟", "https://tc-new.z.wiki/autoupload/f/d9oSIkypaT4MX13ceI-M6PmYtDrGvPpsluM_NdUVaNGyl5f0KlZfm6UsKj-HyTuv/20250905/Jr97/458X300/91.jpg", "",2))
+        list.add(Member("s9", "张明", "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/425f8c39-7a21-4f3e-b2c1-8d7e3a92b45f.png", "",2))
+        list.add(Member("s10", "李娜", "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/a63b9d24-5f1d-4e2c-a8b7-9c5d2e8f1a3b.png", "",2))
+        list.add(Member("s11", "赵阳", "https://tongue-srt.oss-cn-hangzhou.aliyuncs.com/2025/09/05/b7c3d5e8-f9a2-4b3c-d4e5-f6a7b8c9d0e1.jpg", "",2))
+        list.add(Member("s12", "黄琳", "https://tc-new.z.wiki/autoupload/f/d9oSIkypaT4MX13ceI-M6PmYtDrGvPpsluM_NdUVaNGyl5f0KlZfm6UsKj-HyTuv/20250905/Jr98/458X300/92.jpg", "",2))
+
 
         adapter.submitList(list)
     }

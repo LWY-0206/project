@@ -1,5 +1,6 @@
 package com.jxdx.classroom.fragment
 
+import android.app.AlertDialog
 import android.content.Intent
 import androidx.lifecycle.lifecycleScope
 import com.example.corekit.common.BaseFragment
@@ -8,9 +9,11 @@ import com.jxdx.classroom.activity.ClassActivity
 import com.jxdx.classroom.activity.ClassEnterFragment
 
 import com.jxdx.classroom.databinding.ClassroomFragmentBinding
+import com.jxdx.classroom.entrance.EntranceActivity
 import com.jxdx.classroom.http.ApiService
 import com.jxdx.classroom.http.RetrofitClient
 import com.jxdx.common.http.service.ClassService
+import com.jxdx.common.http.service.ResourceService
 import com.jxdx.common.http.service.ServiceRegistry
 import com.luck.picture.lib.utils.ToastUtils.showToast
 import kotlinx.coroutines.Job
@@ -60,6 +63,9 @@ class ClassRoomFragment : BaseFragment<ClassroomFragmentBinding>() {
         // 启动自动切换
         startAutoSwitchTips()
 
+        find.backButton.setOnClickListener {
+            startActivity(Intent(requireContext(), EntranceActivity::class.java))
+        }
         // 点击卡片时也可以手动切换
         find.tvDailyTip.setOnClickListener {
             switchToNextTip()
@@ -81,13 +87,26 @@ class ClassRoomFragment : BaseFragment<ClassroomFragmentBinding>() {
         // 课前小测按钮
         find.btnPreclassChallenge.setOnClickListener {
             showToast(context,"开始课前小测")
-            //
+            // 跳转到课前小测界面
+            ServiceRegistry.get(ResourceService::class.java)?.navigationTOQuizActivity(requireContext())
         }
 
         // 参与投票点击事件
         find.btnVote.setOnClickListener { // 需要给LinearLayout添加id
             showToast(context,"点击参与投票")
-            //
+            // 显示简单的投票对话框作为临时死数据界面
+            val options = arrayOf("非常简单", "简单", "一般", "较难", "非常难")
+            
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("课堂投票")
+            builder.setItems(options) { dialog, which ->
+                // 处理选择结果
+                showToast(context, "你选择了：${options[which]}")
+                dialog.dismiss()
+            }
+            
+            // 直接显示对话框
+            builder.show()
         }
 
         // 进入显示所有课堂直播按钮
