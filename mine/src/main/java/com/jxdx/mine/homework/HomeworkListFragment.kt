@@ -135,6 +135,11 @@ class HomeworkListFragment : Fragment() {
         Log.d("HomeworkListFragment", "Loading homework with status: $finalStatus($statusText)")
         viewModel.loadHomework(finalStatus)
         
+        // 观察分页状态
+        viewModel.hasMoreData.observe(viewLifecycleOwner) { hasMore ->
+            Log.d("HomeworkListFragment", "分页状态更新: 还有更多数据 = $hasMore")
+        }
+        
         // 滚动监听，滑动到底部加载更多
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -143,10 +148,15 @@ class HomeworkListFragment : Fragment() {
                 val lastVisibleItem = layoutManager.findLastVisibleItemPosition()
                 val totalItemCount = layoutManager.itemCount
 
-                if (lastVisibleItem >= totalItemCount - 1 && dy > 0) {
+                // 检查是否还有更多数据可加载
+                val hasMoreData = viewModel.hasMoreData.value ?: false
+                
+                if (lastVisibleItem >= totalItemCount - 1 && dy > 0 && hasMoreData) {
                     // 加载下一页
                     Log.d("HomeworkListFragment", "滑动到底部，触发加载更多 - 状态: $finalStatus($statusText)")
                     viewModel.loadHomework(finalStatus, isLoadMore = true)
+                } else if (lastVisibleItem >= totalItemCount - 1 && dy > 0 && !hasMoreData) {
+                    Log.d("HomeworkListFragment", "已到达底部，但没有更多数据可加载")
                 }
             }
         })

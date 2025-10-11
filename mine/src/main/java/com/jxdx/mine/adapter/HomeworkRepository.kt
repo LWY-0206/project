@@ -36,8 +36,9 @@ class HomeworkRepository {
     /**
      * 获取作业数据并按 subject 分组
      * @param status 作业状态：0 未提交，1 待批改，2 已完成
+     * @return Pair<分组数据, 总页数>
      */
-    suspend fun getHomeworkByStatus(status: Int, page: Int = 1, size: Int = 5): List<SubjectGroup>? {
+    suspend fun getHomeworkByStatus(status: Int, page: Int = 1, size: Int = 5): Pair<List<SubjectGroup>?, Int>? {
         // 输出请求参数日志
         val statusText = when (status) {
             0 -> "未提交"
@@ -96,17 +97,21 @@ class HomeworkRepository {
         // 输出返回数据详情
         val totalRecords = resp.data?.total ?: 0
         val currentRecords = resp.data?.records?.size ?: 0
-        Log.d("HomeworkRepository", "接口请求成功 - 总条数: $totalRecords, 当前页条数: $currentRecords")
+        val totalPages = resp.data?.pages ?: 0
+        Log.d("HomeworkRepository", "接口请求成功 - 总条数: $totalRecords, 当前页条数: $currentRecords, 总页数: $totalPages")
         Log.d("HomeworkRepository", "接口返回数据: ${resp.data?.records}")
+        
         // 按 subject 分组
         val groupedMap = resp.data?.records?.groupBy { it.subject }
 
-        return groupedMap?.map { (subject, list) ->
+        val result = groupedMap?.map { (subject, list) ->
             SubjectGroup(
                 subjectName = subject,
                 isExpanded = true,
                 homeworkList = list.toMutableList()
             )
         }
+        
+        return Pair(result, totalPages)
     }
 }

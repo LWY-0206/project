@@ -13,8 +13,12 @@ class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel(
     private val _homeworkLiveData = MutableLiveData<List<SubjectGroup>?>()
     val homeworkLiveData: LiveData<List<SubjectGroup>> = _homeworkLiveData as LiveData<List<SubjectGroup>>
 
+    private val _hasMoreData = MutableLiveData<Boolean>()
+    val hasMoreData: LiveData<Boolean> = _hasMoreData
+
     private var currentPage = 1
     private val pageSize = 5
+    private var totalPages = 0
 
     /**
      * 加载作业列表
@@ -22,6 +26,12 @@ class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel(
      * @param isLoadMore 是否为加载更多
      */
     fun loadHomework(completeAndCorrect: Int, isLoadMore: Boolean = false) {
+        // 检查是否还有更多数据
+        if (isLoadMore && currentPage > totalPages && totalPages > 0) {
+            Log.d("HomeworkViewModel", "没有更多数据可加载")
+            return
+        }
+        
         // 输出请求参数日志
         val statusText = when (completeAndCorrect) {
             0 -> "未提交"
@@ -35,17 +45,21 @@ class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel(
             try {
                 if (!isLoadMore) {
                     currentPage = 1
+                    totalPages = 0
+                    _hasMoreData.postValue(true)
                     Log.d("HomeworkViewModel", "重新加载数据，重置页码为1")
                 } else {
                     Log.d("HomeworkViewModel", "加载更多数据，当前页码: $currentPage")
                 }
 
                 Log.d("HomeworkViewModel", "调用仓库方法获取作业数据")
-                val homeworkList = repository.getHomeworkByStatus(completeAndCorrect, currentPage, pageSize)
+                val result = repository.getHomeworkByStatus(completeAndCorrect, currentPage, pageSize)
+                val homeworkList = result?.first
+                val pages = result?.second ?: 0
 
                 // 处理返回结果
                 val resultCount = homeworkList?.size ?: 0
-                Log.d("HomeworkViewModel", "获取作业数据成功，返回分组数量: $resultCount")
+                Log.d("HomeworkViewModel", "获取作业数据成功，返回分组数量: $resultCount, 总页数: $pages")
                 
                 if (isLoadMore && homeworkList != null) {
                     val currentList = _homeworkLiveData.value?.toMutableList() ?: mutableListOf()
@@ -60,11 +74,19 @@ class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel(
                     Log.d("HomeworkViewModel", "首次加载完成，返回分组数量: $resultCount")
                 }
 
+                // 更新分页状态
+                totalPages = pages
+                _hasMoreData.postValue(currentPage < totalPages)
+                
+                // 只有在请求成功后才递增页码
                 currentPage++
-                Log.d("HomeworkViewModel", "页码更新为: $currentPage")
+                Log.d("HomeworkViewModel", "页码更新为: $currentPage, 总页数: $totalPages, 还有更多数据: ${currentPage <= totalPages}")
+                
             } catch (e: Exception) {
                 Log.e("HomeworkViewModel", "加载作业失败: ${e.message}", e)
                 _homeworkLiveData.postValue(emptyList())
+                _hasMoreData.postValue(false)
+                // 请求失败时不递增页码
             }
         }
     }
@@ -83,10 +105,16 @@ class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel(
             val existingGroup = existingMap[newGroup.subjectName]
             
             if (existingGroup != null) {
-                // 如果存在相同科目的分组，合并作业列表
+                // 如果存在相同科目的分组，合并作业列表并去重
                 val mergedHomeworkList = mutableListOf<Homework>()
                 mergedHomeworkList.addAll(existingGroup.homeworkList)
-                mergedHomeworkList.addAll(newGroup.homeworkList)
+                
+                // 只添加不重复的作业（根据homeworkId去重）
+                newGroup.homeworkList.forEach { newHomework ->
+                    if (!existingGroup.homeworkList.any { it.homeworkId == newHomework.homeworkId }) {
+                        mergedHomeworkList.add(newHomework)
+                    }
+                }
                 
                 // 创建新的合并分组
                 mergedGroups.add(
