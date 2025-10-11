@@ -32,6 +32,7 @@ class CourseAdapter(
         if (list != null) {
             allTeacherCourses.addAll(list)
         }
+//        items.add(Courseware("第一章 引论","https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/48cd1e0d-f1a4-41ea-b158-9dfbd917f1e2.pptx"))
         notifyDataSetChanged()
     }
 

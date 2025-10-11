@@ -23,7 +23,7 @@ class CourseListAdapter(
         }
         // 无论API返回数据如何，始终添加测试项
 //        items.add(Courseware("第一章 引论","https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/48cd1e0d-f1a4-41ea-b158-9dfbd917f1e2.pptx"))
-//        notifyDataSetChanged()
+        notifyDataSetChanged()
     }
 
     inner class CoursewareViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

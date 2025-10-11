@@ -8,6 +8,16 @@ android {
     compileSdk = 36
     ndkVersion = "22.1.7171670"
 
+    // 解决native库冲突问题
+    packaging {
+        jniLibs {
+            pickFirsts.add("lib/arm64-v8a/libc++_shared.so")
+            pickFirsts.add("lib/armeabi-v7a/libc++_shared.so")
+            pickFirsts.add("lib/x86/libc++_shared.so")
+            pickFirsts.add("lib/x86_64/libc++_shared.so")
+        }
+    }
+
     defaultConfig {
         minSdk = 24
 

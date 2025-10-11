@@ -92,9 +92,24 @@ class HomeworkListFragment : Fragment() {
         viewModel.homeworkLiveData.observe(viewLifecycleOwner) {
             Log.d("HomeworkListFragment", "LiveData observed: ${it?.size ?: 0} groups received")
             if (it != null) {
+                // 保存当前展开状态
+                val expandedStates = mutableMapOf<String, Boolean>()
+                if (::adapter.isInitialized) {
+                    // 假设adapter有获取当前数据的方法getGroups()
+                    // 如果没有该方法，可能需要修改HomeworkAdapter添加此功能
+                    val currentGroups = adapter.getGroups() ?: emptyList()
+                    currentGroups.forEach {
+                        expandedStates[it.subjectName] = it.isExpanded
+                    }
+                }
+
                 // 打印每个分组的详细信息用于调试
                 var totalHomeworkCount = 0
                 it.forEachIndexed { index, group ->
+                    // 恢复展开状态
+                    if (expandedStates.containsKey(group.subjectName)) {
+                        group.isExpanded = expandedStates[group.subjectName]!!
+                    }
                     Log.d("HomeworkListFragment", "Group $index: ${group.subjectName}, expanded: ${group.isExpanded}, homework count: ${group.homeworkList.size}")
                     totalHomeworkCount += group.homeworkList.size
                 }

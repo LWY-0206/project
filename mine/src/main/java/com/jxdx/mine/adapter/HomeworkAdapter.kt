@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jxdx.mine.R
 import com.jxdx.mine.Homework
 import com.jxdx.mine.SubjectGroup
-import com.jxdx.mine.util.HomeworkDiffCallback
+import com.jxdx.mine.homework.HomeworkDiffCallback
 
 class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -70,6 +70,13 @@ class HomeworkAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun getItemCount(): Int {
         return flatList.size
+    }
+    
+    /**
+     * 获取当前的分组数据列表
+     */
+    fun getGroups(): List<SubjectGroup>? {
+        return if (groupList.isEmpty()) null else ArrayList(groupList)
     }
 
     /**

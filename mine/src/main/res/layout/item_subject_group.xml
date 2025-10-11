@@ -45,5 +45,5 @@
         android:layout_height="20dp"
         android:src="@drawable/ic_expand_more"
         android:transitionName="expand_arrow"
-        android:scaleType="center"/>
+        android:scaleType="fitXY"/>
 </LinearLayout>

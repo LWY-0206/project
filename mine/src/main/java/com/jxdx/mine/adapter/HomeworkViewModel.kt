@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jxdx.mine.Homework
 import com.jxdx.mine.SubjectGroup
 import kotlinx.coroutines.launch
 class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel() {
@@ -46,11 +47,14 @@ class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel(
                 val resultCount = homeworkList?.size ?: 0
                 Log.d("HomeworkViewModel", "获取作业数据成功，返回分组数量: $resultCount")
                 
-                if (isLoadMore) {
+                if (isLoadMore && homeworkList != null) {
                     val currentList = _homeworkLiveData.value?.toMutableList() ?: mutableListOf()
-                    homeworkList?.let { currentList.addAll(it) }
-                    _homeworkLiveData.postValue(currentList)
-                    Log.d("HomeworkViewModel", "加载更多完成，当前总分组数量: ${currentList.size}")
+                    
+                    // 合并相同科目的分组
+                    val mergedList = mergeSameSubjectGroups(currentList, homeworkList)
+                    
+                    _homeworkLiveData.postValue(mergedList)
+                    Log.d("HomeworkViewModel", "加载更多完成，合并后分组数量: ${mergedList.size}")
                 } else {
                     _homeworkLiveData.postValue(homeworkList)
                     Log.d("HomeworkViewModel", "首次加载完成，返回分组数量: $resultCount")
@@ -63,5 +67,48 @@ class HomeworkViewModel(private val repository: HomeworkRepository) : ViewModel(
                 _homeworkLiveData.postValue(emptyList())
             }
         }
+    }
+    
+    /**
+     * 合并相同科目的分组
+     */
+    private fun mergeSameSubjectGroups(existingGroups: List<SubjectGroup>, newGroups: List<SubjectGroup>): List<SubjectGroup> {
+        val mergedGroups = mutableListOf<SubjectGroup>()
+        
+        // 创建现有分组的映射，按科目名称索引
+        val existingMap = existingGroups.associateBy { it.subjectName }
+        
+        // 处理新分组
+        newGroups.forEach { newGroup ->
+            val existingGroup = existingMap[newGroup.subjectName]
+            
+            if (existingGroup != null) {
+                // 如果存在相同科目的分组，合并作业列表
+                val mergedHomeworkList = mutableListOf<Homework>()
+                mergedHomeworkList.addAll(existingGroup.homeworkList)
+                mergedHomeworkList.addAll(newGroup.homeworkList)
+                
+                // 创建新的合并分组
+                mergedGroups.add(
+                    SubjectGroup(
+                        subjectName = newGroup.subjectName,
+                        isExpanded = existingGroup.isExpanded, // 保留原有展开状态
+                        homeworkList = mergedHomeworkList
+                    )
+                )
+            } else {
+                // 如果是新科目，直接添加
+                mergedGroups.add(newGroup)
+            }
+        }
+        
+        // 添加未在新分组中的现有分组
+        existingGroups.forEach { existingGroup ->
+            if (!newGroups.any { it.subjectName == existingGroup.subjectName }) {
+                mergedGroups.add(existingGroup)
+            }
+        }
+        
+        return mergedGroups
     }
 }
