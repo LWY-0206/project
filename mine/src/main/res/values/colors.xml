@@ -49,4 +49,17 @@
     <!-- 新增颜色 -->
     <color name="primary_color">#2196F3</color>
     <color name="background_gray">#F5F5F5</color>
+    <color name="common_text_main_black">#212121</color>
+    
+    <!-- 蓝色系列颜色 -->
+    <color name="blue_50">#E3F2FD</color>
+    <color name="blue_100">#BBDEFB</color>
+    <color name="blue_200">#90CAF9</color>
+    <color name="blue_300">#64B5F6</color>
+    <color name="blue_400">#42A5F5</color>
+    <color name="blue_500">#2196F3</color>
+    <color name="blue_600">#1E88E5</color>
+    <color name="blue_700">#1976D2</color>
+    <color name="blue_800">#1565C0</color>
+    <color name="blue_900">#0D47A1</color>
 </resources>

@@ -23,22 +23,31 @@
             android:textStyle="bold" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:orientation="horizontal">
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal" 
+            android:gravity="end">
 
-            <Button
-                android:id="@+id/btn_preview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="预览" />
+            <TextView
+                android:id="@+id/tv_preview"
+                android:layout_width="80dp"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:background="@drawable/bg_button_primary"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:text="预览" 
+                android:layout_marginEnd="8dp"/>
 
-            <Button
-                android:id="@+id/btn_download"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+            <TextView
+                android:id="@+id/tv_download"
+                android:layout_width="80dp"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:background="@drawable/bg_button_secondary"
+                android:textColor="@color/common_text_main_black"
+                android:textSize="14sp"
                 android:text="下载" />
         </LinearLayout>
     </LinearLayout>

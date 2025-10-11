@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,6 +21,7 @@ import androidx.core.content.ContextCompat
 import android.Manifest
 import android.os.Build
 import com.jxdx.mine.R
+import com.example.corekit.R as CoreR
 
 class CourseListActivity : AppCompatActivity() {
 
@@ -36,6 +38,11 @@ class CourseListActivity : AppCompatActivity() {
         setContentView(binding.root)
         binding.tvCourseName.text=intent.getStringExtra("subjectName")
         binding.tvTeacherName.text=intent.getStringExtra("teacherName")
+        
+        // 为返回按钮添加点击事件
+        binding.backButton.setOnClickListener{
+            finish()
+        }
 
 
         var courseId = intent.getIntExtra("courseId", -1)
@@ -150,11 +157,41 @@ class CourseListActivity : AppCompatActivity() {
                     return@launch
                 }
 
+                // 获取文件大小
+                val fileSize = urlConnection.contentLengthLong
+                Log.d("CourseListActivity", "文件大小: $fileSize 字节")
+
+                // 确保文件名有效
+                val safeFileName = if (fileName.isNotEmpty()) fileName else "courseware_${System.currentTimeMillis()}.pdf"
+                
                 // 创建文件输出流（兼容Android 10及以上版本）
-                val outputStream = contentResolver.openOutputStream(
-                    android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI,
-                    "w"
-                )
+                val outputStream = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // Android 10及以上，使用MediaStore
+                    val contentValues = android.content.ContentValues().apply {
+                        put(android.provider.MediaStore.Downloads.DISPLAY_NAME, safeFileName)
+                        put(android.provider.MediaStore.Downloads.MIME_TYPE, getMimeType(safeFileName))
+                        put(android.provider.MediaStore.Downloads.RELATIVE_PATH, "Download/")
+                    }
+                    
+                    val uri = contentResolver.insert(
+                        android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI,
+                        contentValues
+                    )
+                    
+                    if (uri != null) {
+                        contentResolver.openOutputStream(uri)
+                    } else {
+                        null
+                    }
+                } else {
+                    // Android 9及以下，使用传统文件存储
+                    val downloadDir = android.os.Environment.getExternalStoragePublicDirectory(android.os.Environment.DIRECTORY_DOWNLOADS)
+                    if (!downloadDir.exists()) {
+                        downloadDir.mkdirs()
+                    }
+                    val file = java.io.File(downloadDir, safeFileName)
+                    java.io.FileOutputStream(file)
+                }
 
                 if (outputStream == null) {
                     Log.e("CourseListActivity", "无法创建输出流")
@@ -169,23 +206,65 @@ class CourseListActivity : AppCompatActivity() {
                 val buffer = ByteArray(4096)
                 var bytesRead: Int
                 var totalBytesRead = 0
+                
+                // 在UI线程显示下载开始的提示
+                launch(Dispatchers.Main) {
+                    Toast.makeText(this@CourseListActivity, "开始下载: $safeFileName", Toast.LENGTH_SHORT).show()
+                }
+                
                 while (inputStream.read(buffer).also { bytesRead = it } != -1) {
                     outputStream.write(buffer, 0, bytesRead)
                     totalBytesRead += bytesRead
-                    Log.d("CourseListActivity", "已下载: $totalBytesRead 字节")
+                    // 每下载100KB记录一次日志
+                    if (totalBytesRead % 102400 == 0) {
+                        Log.d("CourseListActivity", "已下载: $totalBytesRead 字节")
+                    }
                 }
 
+                outputStream.flush()
                 outputStream.close()
                 inputStream.close()
 
                 launch(Dispatchers.Main) {
-                    Toast.makeText(this@CourseListActivity, "下载完成: $fileName", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@CourseListActivity, "下载完成: $safeFileName\n已保存到Download文件夹", Toast.LENGTH_LONG).show()
                 }
             } catch (e: Exception) {
                 Log.e("CourseListActivity", "下载异常", e)
                 launch(Dispatchers.Main) {
                     Toast.makeText(this@CourseListActivity, "下载失败: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
+            }
+        }
+    }
+    
+    // 根据文件名获取MIME类型
+    private fun getMimeType(fileName: String): String {
+        val extension = fileName.substringAfterLast(".", "").lowercase()
+        return when (extension) {
+            "pdf" -> "application/pdf"
+            "doc", "docx" -> "application/msword"
+            "xls", "xlsx" -> "application/vnd.ms-excel"
+            "ppt", "pptx" -> "application/vnd.ms-powerpoint"
+            "jpg", "jpeg" -> "image/jpeg"
+            "png" -> "image/png"
+            "gif" -> "image/gif"
+            "txt" -> "text/plain"
+            else -> "application/octet-stream"
+        }
+    }
+    
+    // 处理权限请求结果
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // 权限被授予，重新尝试下载
+                if (lastDownloadUrl != null && lastDownloadFileName != null) {
+                    downloadFile(lastDownloadUrl!!, lastDownloadFileName!!)
+                }
+            } else {
+                // 权限被拒绝
+                Toast.makeText(this, "需要存储权限才能下载文件", Toast.LENGTH_SHORT).show()
             }
         }
     }

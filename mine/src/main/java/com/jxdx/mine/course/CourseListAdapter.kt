@@ -3,7 +3,6 @@ package com.jxdx.mine.course
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.jxdx.mine.Courseware
@@ -28,13 +27,13 @@ class CourseListAdapter(
 
     inner class CoursewareViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvTitle: TextView = itemView.findViewById(R.id.tv_course_description)
-        private val btnPreview: Button = itemView.findViewById(R.id.btn_preview)
-        private val btnDownload: Button = itemView.findViewById(R.id.btn_download)
+        private val tvPreview: TextView = itemView.findViewById(R.id.tv_preview)
+        private val tvDownload: TextView = itemView.findViewById(R.id.tv_download)
 
         fun bind(courseware: Courseware) {
             tvTitle.text = courseware.CoursewareName
-            btnPreview.setOnClickListener { onPreviewClick(courseware) }
-            btnDownload.setOnClickListener { onDownloadClick(courseware) }
+            tvPreview.setOnClickListener { onPreviewClick(courseware) }
+            tvDownload.setOnClickListener { onDownloadClick(courseware) }
         }
     }
 
