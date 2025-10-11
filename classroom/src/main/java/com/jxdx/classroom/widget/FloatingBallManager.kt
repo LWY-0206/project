@@ -146,12 +146,12 @@ class FloatingBallManager(private val context: Context) {
         }
         
         menuView.findViewById<LinearLayout>(R.id.menu_view_students).setOnClickListener {
-            Toast.makeText(context, "查看学生列表", Toast.LENGTH_SHORT).show()
+            openGroupListActivity()
             popupWindow?.dismiss()
         }
         
         menuView.findViewById<LinearLayout>(R.id.menu_quiz).setOnClickListener {
-            openQuizActivity()
+            openMathToolActivity()
             popupWindow?.dismiss()
         }
         
@@ -182,6 +182,40 @@ class FloatingBallManager(private val context: Context) {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
         context.startActivity(intent)
+    }
+    
+    /**
+     * 打开小组列表界面
+     */
+    private fun openGroupListActivity() {
+        try {
+            val intent = Intent(context, com.jxdx.classroom.group.TeacherViewActivity::class.java).apply {
+                putExtra("subjectId", 1) // 默认值
+                putExtra("teacherId", 6) // 默认值
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+            Log.d(TAG, "成功启动TeacherViewActivity")
+        } catch (e: Exception) {
+            Log.e(TAG, "启动TeacherViewActivity失败", e)
+            Toast.makeText(context, "启动小组列表界面失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    /**
+     * 打开数学工具界面
+     */
+    private fun openMathToolActivity() {
+        try {
+            val intent = Intent(context, com.jxdx.classroom.activity.GeoGebraActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            context.startActivity(intent)
+            Log.d(TAG, "成功启动GeoGebraActivity")
+        } catch (e: Exception) {
+            Log.e(TAG, "启动GeoGebraActivity失败", e)
+            Toast.makeText(context, "启动数学工具界面失败: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
     
     /**
