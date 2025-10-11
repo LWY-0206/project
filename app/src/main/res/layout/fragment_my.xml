@@ -228,11 +228,12 @@
 
 
 
-                <!-- 添加柱状图区域 -->
+                <!-- 添加图表区域 -->
                 <TextView
+                    android:id="@+id/chartTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="学习时间分布（小时/周）"
+                    android:text="学习时间分布（按课程类别）"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginTop="24dp"
