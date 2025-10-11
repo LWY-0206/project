@@ -27,6 +27,11 @@ class HomeworkActivity : BaseActivity<ActivityHomeworkBinding>() {
         val primaryColor = resources.getColor(R.color.primary_color, null)
         window.statusBarColor = primaryColor
         
+        // 为返回按钮添加点击事件
+        view.backButton.setOnClickListener {
+            finish()
+        }
+        
         val tabLayout = view.tabLayout
         val viewPager = view.viewPager
         Log.d("HomeworkActivity", "TabLayout和ViewPager2初始化完成")
