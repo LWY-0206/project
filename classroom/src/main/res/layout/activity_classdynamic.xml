@@ -230,7 +230,7 @@
                             <ImageView
                                 android:layout_width="48dp"
                                 android:layout_height="48dp"
-                                android:src="@drawable/ic_math_tool"
+                                android:src="@drawable/ic_tool_preparation"
                                 android:scaleType="centerInside"/>
 
                             <TextView
@@ -259,7 +259,7 @@
                             <ImageView
                                 android:layout_width="48dp"
                                 android:layout_height="48dp"
-                                android:src="@drawable/ic_settings"
+                                android:src="@drawable/ic_classroom_settings"
                                 android:scaleType="centerInside"/>
 
                             <TextView
