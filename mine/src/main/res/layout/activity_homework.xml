@@ -10,19 +10,21 @@
     <!-- 顶部标题栏 -->
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="56dp"
         android:background="@color/white"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        android:paddingTop="8dp">
 
         <!-- 返回按钮 -->
         <ImageView
             android:id="@+id/back_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:contentDescription="作业管理"
+            android:contentDescription="返回"
             android:src="@drawable/ic_back"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
+            android:layout_marginLeft="8dp"
             app:tint="@color/black" />
 
         <!-- 标题文本 -->
@@ -30,7 +32,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="课程详情"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/black"
             android:layout_centerInParent="true" />
@@ -40,14 +42,18 @@
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:tabBackground="@color/primary_color"
+            android:layout_height="48dp"
+            android:background="@color/primary_color"
+            app:tabBackground="@android:color/transparent"
             app:tabIndicatorColor="@android:color/white"
-            app:tabIndicatorHeight="3dp"
+            app:tabIndicatorHeight="2dp"
             app:tabSelectedTextColor="@android:color/white"
             app:tabTextColor="@android:color/white"
             app:tabTextAppearance="@style/TabTextStyle"
-            app:tabMode="fixed" />
+            app:tabMode="fixed"
+            app:tabGravity="fill"
+            app:tabPaddingStart="16dp"
+            app:tabPaddingEnd="16dp" />
     <!-- ViewPager2 -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"

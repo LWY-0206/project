@@ -23,9 +23,13 @@ class HomeworkActivity : BaseActivity<ActivityHomeworkBinding>() {
     }
 
     override fun initView() {
-        // 确保状态栏与Toolbar颜色一致，避免视觉重合
-        val primaryColor = resources.getColor(R.color.primary_color, null)
-        window.statusBarColor = primaryColor
+        // 设置状态栏为白色
+        window.statusBarColor = resources.getColor(android.R.color.white, null)
+        
+        // 设置状态栏文字为黑色（因为背景是白色）
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            window.decorView.systemUiVisibility = android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        }
         
         // 为返回按钮添加点击事件
         view.backButton.setOnClickListener {
