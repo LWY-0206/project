@@ -120,6 +120,26 @@
                         android:background="@drawable/bg_content_area"
                         android:padding="12dp" />
 
+                    <!-- 学生提交的图片展示 -->
+                    <TextView
+                        android:id="@+id/tv_images_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="提交图片:"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="8dp"
+                        android:visibility="gone" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_submit_images"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:visibility="gone" />
+
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>

@@ -4,9 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.corekit.common.BaseActivity
 import com.example.corekit.http.bean.BaseResp
 import com.jxdx.mine.R
+import com.jxdx.mine.adapter.ImageAdapter
 import com.jxdx.mine.databinding.ActivityReviewHomeworkBinding
 import com.jxdx.mine.http.RetrofitClient
 import com.jxdx.mine.http.request.ReviewHomeworkRequest
@@ -23,6 +25,7 @@ class ReviewHomeworkActivity : BaseActivity<ActivityReviewHomeworkBinding>() {
     private var homeworkId: Long = 0
     private var studentId: Long = 0
     private var subjectId: Int = 0
+    private lateinit var imageAdapter: ImageAdapter
     
     override fun bindLayout(): ActivityReviewHomeworkBinding {
         Log.d("ReviewHomeworkActivity", "bindLayout 开始")
@@ -101,6 +104,11 @@ class ReviewHomeworkActivity : BaseActivity<ActivityReviewHomeworkBinding>() {
     private fun initData() {
         Log.d("ReviewHomeworkActivity", "========== initData 开始 ==========")
         try {
+            // 初始化图片适配器
+            imageAdapter = ImageAdapter(this)
+            view.rvSubmitImages.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            view.rvSubmitImages.adapter = imageAdapter
+            
             homeworkDetail?.let { detail ->
                 // 设置学生信息
                 view.tvStudentName.text = detail.studentName ?: "未知学生"
@@ -110,12 +118,43 @@ class ReviewHomeworkActivity : BaseActivity<ActivityReviewHomeworkBinding>() {
                     "未提交"
                 }
                 
-                // 设置提交内容
+                // 处理提交内容，分离文本和图片URL
                 val submitContent = detail.submitContent
                 if (submitContent != null && submitContent.isNotEmpty()) {
-                    view.tvSubmitContent.text = submitContent.joinToString("\n")
+                    val textContents = mutableListOf<String>()
+                    val imageUrls = mutableListOf<String>()
+                    
+                    // 识别和分离文本内容与图片URL
+                    submitContent.forEach { content ->
+                        if (isImageUrl(content)) {
+                            imageUrls.add(content)
+                            Log.d("ReviewHomeworkActivity", "识别到图片URL: $content")
+                        } else {
+                            textContents.add(content)
+                        }
+                    }
+                    
+                    // 显示文本内容
+                    if (textContents.isNotEmpty()) {
+                        view.tvSubmitContent.text = textContents.joinToString("\n")
+                    } else {
+                        view.tvSubmitContent.text = "暂无文本内容"
+                    }
+                    
+                    // 显示图片
+                    if (imageUrls.isNotEmpty()) {
+                        view.tvImagesLabel.visibility = android.view.View.VISIBLE
+                        view.rvSubmitImages.visibility = android.view.View.VISIBLE
+                        imageAdapter.setImageUrls(imageUrls)
+                        Log.d("ReviewHomeworkActivity", "显示图片数量: ${imageUrls.size}")
+                    } else {
+                        view.tvImagesLabel.visibility = android.view.View.GONE
+                        view.rvSubmitImages.visibility = android.view.View.GONE
+                    }
                 } else {
                     view.tvSubmitContent.text = "暂无提交内容"
+                    view.tvImagesLabel.visibility = android.view.View.GONE
+                    view.rvSubmitImages.visibility = android.view.View.GONE
                 }
                 
                 // 设置当前分数和评语（如果有的话）
@@ -138,6 +177,24 @@ class ReviewHomeworkActivity : BaseActivity<ActivityReviewHomeworkBinding>() {
             Log.e("ReviewHomeworkActivity", "initData失败", e)
             e.printStackTrace()
         }
+    }
+    
+    /**
+     * 判断字符串是否为图片URL
+     */
+    private fun isImageUrl(content: String): Boolean {
+        if (content.isBlank()) return false
+        
+        // 检查是否以http开头
+        if (!content.startsWith("http://") && !content.startsWith("https://")) {
+            return false
+        }
+        
+        // 检查是否包含图片文件扩展名
+        val imageExtensions = listOf(".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp")
+        val lowerContent = content.lowercase()
+        
+        return imageExtensions.any { lowerContent.contains(it) }
     }
     
     private fun validateScore(): Boolean {

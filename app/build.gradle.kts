@@ -19,6 +19,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 使用固定的debug签名，避免签名冲突
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(

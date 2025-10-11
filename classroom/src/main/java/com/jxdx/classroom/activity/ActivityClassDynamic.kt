@@ -99,6 +99,18 @@ class ActivityClassDynamic: BaseActivity<ActivityClassdynamicBinding>() {
             Log.d("ClassDynamic", "跳转到工具准备页面，teacherId=$teacherId, subjectId=$subjectId")
         }
         
+        // 预习查看按钮点击事件
+        view.btnPreviewCheck.setOnClickListener {
+            val intent = Intent(this, PreviewCheckActivity::class.java)
+            intent.putExtra("subjectId", subjectId)
+            intent.putExtra("teacherId", teacherId)
+            intent.putExtra("subjectName", subjectName)
+            startActivity(intent)
+            
+            // 日志记录
+            Log.d("ClassDynamic", "跳转到预习查看页面，teacherId=$teacherId, subjectId=$subjectId")
+        }
+        
         // 课堂设置按钮点击事件
         view.btnClassroomSettings.setOnClickListener {
             val intent = Intent(this, ClassroomSettingsActivity::class.java)

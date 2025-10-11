@@ -56,8 +56,16 @@ public class MediaProjectionService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        createNotificationChannel();
-        startForeground(NOTIFICATION_ID, createNotification());
+        Log.d(TAG, "MediaProjectionService.onCreate开始");
+        try {
+            createNotificationChannel();
+            Log.d(TAG, "通知渠道创建完成");
+            startForeground(NOTIFICATION_ID, createNotification());
+            Log.d(TAG, "前台服务启动完成");
+        } catch (Exception e) {
+            Log.e(TAG, "MediaProjectionService.onCreate异常", e);
+            // 即使通知创建失败，也不要让服务崩溃
+        }
     }
 
     @Override
@@ -94,13 +102,23 @@ public class MediaProjectionService extends Service {
     }
 
     private Notification createNotification() {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
-                .setContentTitle("正在录制屏幕")
-                .setContentText("正在进行屏幕录制和直播")
-                .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setOngoing(true);
-        
-        return builder.build();
+        try {
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setSmallIcon(android.R.drawable.ic_media_play) // 使用系统图标，避免资源问题
+                    .setContentTitle("正在录制屏幕")
+                    .setContentText("正在进行屏幕录制和直播")
+                    .setPriority(NotificationCompat.PRIORITY_LOW)
+                    .setOngoing(true);
+            
+            return builder.build();
+        } catch (Exception e) {
+            Log.e(TAG, "创建通知失败", e);
+            // 返回一个最简单的通知
+            return new NotificationCompat.Builder(this, CHANNEL_ID)
+                    .setSmallIcon(android.R.drawable.ic_media_play)
+                    .setContentTitle("屏幕录制服务")
+                    .setContentText("服务运行中")
+                    .build();
+        }
     }
 }

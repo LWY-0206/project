@@ -50,6 +50,7 @@ class FloatingBallManager(private val context: Context) {
      * 显示悬浮球
      */
     fun showFloatingBall(roomId: String) {
+        Log.d(TAG, "showFloatingBall被调用，roomId: $roomId")
         this.roomId = roomId
         
         if (isShowing) {
@@ -59,10 +60,12 @@ class FloatingBallManager(private val context: Context) {
         
         // 检查悬浮窗权限
         if (!checkFloatingPermission()) {
+            Log.w(TAG, "没有悬浮窗权限，请求权限")
             requestFloatingPermission()
             return
         }
         
+        Log.d(TAG, "权限检查通过，开始创建悬浮球")
         createFloatingBall()
         isShowing = true
         Log.d(TAG, "悬浮球显示成功")
@@ -90,10 +93,14 @@ class FloatingBallManager(private val context: Context) {
      * 创建悬浮球
      */
     private fun createFloatingBall() {
+        Log.d(TAG, "开始创建悬浮球")
+        
         val inflater = LayoutInflater.from(context)
         floatingBallView = inflater.inflate(R.layout.floating_ball, null)
+        Log.d(TAG, "悬浮球视图创建成功: $floatingBallView")
         
         val floatingBall = floatingBallView?.findViewById<ImageView>(R.id.floating_ball)
+        Log.d(TAG, "悬浮球ImageView: $floatingBall")
         
         // 设置悬浮球参数
         layoutParams = WindowManager.LayoutParams().apply {
@@ -111,14 +118,22 @@ class FloatingBallManager(private val context: Context) {
             x = 50
             y = 200
         }
+        Log.d(TAG, "悬浮球参数设置完成")
         
         // 设置触摸监听器（处理拖拽和点击）
         floatingBallView?.setOnTouchListener { view, event ->
+            Log.d(TAG, "触摸事件被触发: ${event.action}")
             handleTouchEvent(event)
         }
         
+        // 移除ImageView的点击监听器，避免与拖拽冲突
+        // 拖拽和点击都通过OnTouchListener处理
+        
+        Log.d(TAG, "触摸监听器设置完成")
+        
         try {
             windowManager?.addView(floatingBallView, layoutParams)
+            Log.d(TAG, "悬浮球添加到窗口管理器成功")
         } catch (e: Exception) {
             Log.e(TAG, "添加悬浮球失败", e)
         }
@@ -128,48 +143,94 @@ class FloatingBallManager(private val context: Context) {
      * 显示功能菜单
      */
     private fun showFunctionMenu() {
-        val inflater = LayoutInflater.from(context)
-        val menuView = inflater.inflate(R.layout.floating_ball_menu, null)
+        Log.d(TAG, "开始显示功能菜单")
         
-        // 创建PopupWindow
-        popupWindow = PopupWindow(
-            menuView,
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            true
-        )
-        
-        // 设置菜单项点击事件
-        menuView.findViewById<LinearLayout>(R.id.menu_whiteboard).setOnClickListener {
-            openWhiteboardActivity()
-            popupWindow?.dismiss()
+        try {
+            // 创建菜单视图
+            val menuView = LayoutInflater.from(context).inflate(R.layout.floating_ball_menu, null)
+            Log.d(TAG, "菜单视图创建成功")
+            
+            // 创建PopupWindow
+            popupWindow = PopupWindow(
+                menuView,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                true
+            )
+            Log.d(TAG, "PopupWindow创建成功")
+            
+            // 设置背景和属性
+            popupWindow?.setBackgroundDrawable(context.getDrawable(R.drawable.menu_background))
+            popupWindow?.isOutsideTouchable = true
+            popupWindow?.isFocusable = true
+            
+            // 计算显示位置
+            val floatingBall = floatingBallView?.findViewById<ImageView>(R.id.floating_ball)
+            val location = IntArray(2)
+            floatingBall?.getLocationOnScreen(location)
+            
+            val screenWidth = context.resources.displayMetrics.widthPixels
+            val screenHeight = context.resources.displayMetrics.heightPixels
+            
+            // 计算偏移量，确保菜单不会超出屏幕
+            var xOffset = 70
+            var yOffset = 70
+            
+            if (location[0] + xOffset + 200 > screenWidth) {
+                xOffset = -200 // 显示在左侧
+            }
+            if (location[1] + yOffset + 300 > screenHeight) {
+                yOffset = -300 // 显示在上方
+            }
+            
+            Log.d(TAG, "准备显示菜单，anchor: $floatingBallView")
+            Log.d(TAG, "显示菜单 - 悬浮球位置: (${location[0]}, ${location[1]}), 偏移: ($xOffset, $yOffset)")
+            
+            // 显示菜单
+            popupWindow?.showAsDropDown(floatingBallView, xOffset, yOffset)
+            Log.d(TAG, "菜单显示成功")
+            
+            // 设置菜单项点击事件
+            setupMenuClickListeners(menuView)
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "显示功能菜单失败", e)
+            Toast.makeText(context, "显示菜单失败: ${e.message}", Toast.LENGTH_SHORT).show()
         }
-        
-        menuView.findViewById<LinearLayout>(R.id.menu_view_students).setOnClickListener {
-            openGroupListActivity()
-            popupWindow?.dismiss()
-        }
-        
-        menuView.findViewById<LinearLayout>(R.id.menu_quiz).setOnClickListener {
-            openMathToolActivity()
-            popupWindow?.dismiss()
-        }
-        
-        menuView.findViewById<LinearLayout>(R.id.menu_attendance).setOnClickListener {
-            Log.d(TAG, "点击了资料菜单项")
-            Toast.makeText(context, "点击资料菜单", Toast.LENGTH_SHORT).show()
-            openAttendanceActivity()
-            popupWindow?.dismiss()
-        }
-        
-        menuView.findViewById<LinearLayout>(R.id.menu_close).setOnClickListener {
-            hideFloatingBall()
-            popupWindow?.dismiss()
-        }
-        
-        // 显示菜单
-        floatingBallView?.let { anchor ->
-            popupWindow?.showAsDropDown(anchor, -200, -50)
+    }
+    
+    /**
+     * 设置菜单项点击事件
+     */
+    private fun setupMenuClickListeners(menuView: View) {
+        try {
+            val menuItems = listOf<Pair<Int, String>>(
+                R.id.menu_whiteboard to "白板管理",
+                R.id.menu_view_students to "小组列表", 
+                R.id.menu_quiz to "工具",
+                R.id.menu_attendance to "资料",
+                R.id.menu_close to "关闭"
+            )
+            
+            menuItems.forEach { (id: Int, name: String) ->
+                menuView.findViewById<View>(id)?.setOnClickListener {
+                    Log.d(TAG, "点击了菜单项: $name")
+                    
+                    when (name) {
+                        "白板管理" -> openWhiteboardActivity()
+                        "小组列表" -> openGroupListActivity()
+                        "工具" -> openMathToolActivity()
+                        "资料" -> openAttendanceActivity()
+                        "关闭" -> hideFloatingBall()
+                    }
+                    
+                    popupWindow?.dismiss()
+                }
+            }
+            
+            Log.d(TAG, "菜单项点击事件设置完成")
+        } catch (e: Exception) {
+            Log.e(TAG, "设置菜单点击事件失败", e)
         }
     }
     
@@ -223,7 +284,6 @@ class FloatingBallManager(private val context: Context) {
      */
     private fun openQuizActivity() {
         // TODO: 实现答题功能
-        Toast.makeText(context, "答题功能开发中...", Toast.LENGTH_SHORT).show()
         Log.d(TAG, "打开答题界面，房间ID: $roomId")
     }
     
@@ -249,11 +309,13 @@ class FloatingBallManager(private val context: Context) {
      * 检查悬浮窗权限
      */
     private fun checkFloatingPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             Settings.canDrawOverlays(context)
         } else {
             true
         }
+        Log.d(TAG, "悬浮窗权限检查结果: $hasPermission, SDK版本: ${Build.VERSION.SDK_INT}")
+        return hasPermission
     }
     
     /**
@@ -291,10 +353,10 @@ class FloatingBallManager(private val context: Context) {
                 val deltaX = (event.rawX - initialTouchX).toInt()
                 val deltaY = (event.rawY - initialTouchY).toInt()
                 
-                // 如果移动距离超过阈值，开始拖拽
-                if (!isDragging && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
+                // 如果移动距离超过阈值，开始拖拽（降低阈值，更容易拖拽）
+                if (!isDragging && (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3)) {
                     isDragging = true
-                    Log.d(TAG, "开始拖拽")
+                    Log.d(TAG, "开始拖拽 - deltaX: $deltaX, deltaY: $deltaY")
                 }
                 
                 if (isDragging) {
@@ -313,7 +375,7 @@ class FloatingBallManager(private val context: Context) {
                     layoutParams?.x = clampedX
                     layoutParams?.y = clampedY
                     
-                    Log.d(TAG, "移动悬浮球到: x=$clampedX, y=$clampedY")
+                    Log.d(TAG, "拖拽悬浮球到: x=$clampedX, y=$clampedY")
                     
                     try {
                         windowManager?.updateViewLayout(floatingBallView, layoutParams)
@@ -327,8 +389,11 @@ class FloatingBallManager(private val context: Context) {
             MotionEvent.ACTION_UP -> {
                 Log.d(TAG, "触摸结束，拖拽状态: $isDragging")
                 
-                // 如果没有拖拽，则显示菜单
-                if (!isDragging) {
+                if (isDragging) {
+                    // 拖拽结束，悬浮球停在当前位置
+                    Log.d(TAG, "悬浮球停在当前位置: x=${layoutParams?.x}, y=${layoutParams?.y}")
+                } else {
+                    // 如果没有拖拽，则显示菜单
                     showFunctionMenu()
                 }
                 

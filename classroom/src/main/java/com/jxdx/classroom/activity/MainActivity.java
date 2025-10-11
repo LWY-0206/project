@@ -130,114 +130,174 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_updated); // 使用新的布局文件
-
-        // 接收传递的参数
-        String subjectName = "";
-        if (getIntent() != null) {
-            subjectName = getIntent().getStringExtra("subjectName");
-            this.liveId = getIntent().getIntExtra("liveId", 0);
-            Log.d(TAG, "接收到subjectName: " + subjectName + ", liveId: " + this.liveId);
-        }
-
-        // 初始化PDF相关组件
-        initPdfViews();
         
-        // 更新标题显示subjectName
-        TextView titleView = findViewById(R.id.title);
-        if (subjectName != null && !subjectName.isEmpty()) {
-            titleView.setText(subjectName);
-        }
-        
-        // 记录当前屏幕方向
-        Log.d(TAG, "MainActivity创建完成 - 屏幕方向: " + 
-            (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? "横屏" : "竖屏"));
+        try {
+            Log.d(TAG, "MainActivity.onCreate开始");
+            setContentView(R.layout.activity_main_updated); // 使用新的布局文件
+            Log.d(TAG, "布局文件设置完成");
 
+            // 接收传递的参数
+            String subjectName = "";
+            if (getIntent() != null) {
+                subjectName = getIntent().getStringExtra("subjectName");
+                this.liveId = getIntent().getIntExtra("liveId", 0);
+                Log.d(TAG, "接收到subjectName: " + subjectName + ", liveId: " + this.liveId);
+            }
 
-        // 设置推流方式选择监听
-        RadioGroup radioGroup = findViewById(R.id.radio_group_stream_type);
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.radio_ffmpeg_stream) {
-                    useFFmpegLive = true;
-                    Log.i(TAG, "已切换为FFmpeg推流模式");
+            // 初始化PDF相关组件
+            Log.d(TAG, "开始初始化PDF组件");
+            initPdfViews();
+            Log.d(TAG, "PDF组件初始化完成");
+            
+            // 更新标题显示subjectName
+            TextView titleView = findViewById(R.id.title);
+            if (titleView != null && subjectName != null && !subjectName.isEmpty()) {
+                titleView.setText(subjectName);
+                Log.d(TAG, "标题设置完成: " + subjectName);
+            } else {
+                Log.w(TAG, "标题View为null或subjectName为空");
+            }
+            
+            // 记录当前屏幕方向
+            Log.d(TAG, "MainActivity创建完成 - 屏幕方向: " + 
+                (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE ? "横屏" : "竖屏"));
+
+            // 设置推流方式选择监听
+            Log.d(TAG, "开始设置推流方式选择监听");
+            RadioGroup radioGroup = findViewById(R.id.radio_group_stream_type);
+            if (radioGroup != null) {
+                radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(RadioGroup group, int checkedId) {
+                        if (checkedId == R.id.radio_ffmpeg_stream) {
+                            useFFmpegLive = true;
+                            Log.i(TAG, "已切换为FFmpeg推流模式");
+                        } else {
+                            useFFmpegLive = false;
+                            Log.i(TAG, "已切换为Native推流模式");
+                        }
+                        
+                        // 如果当前正在推流，提示用户需要重启推流才能生效
+                        if ((mScreenLive != null || mFFmpegScreenLive != null) && isStreaming()) {
+                            updateStreamStatus("提示：请停止并重新开始推流以应用新的推流方式");
+                        }
+                    }
+                });
+                Log.d(TAG, "推流方式选择监听设置完成");
+            } else {
+                Log.w(TAG, "RadioGroup为null");
+            }
+
+            // 检查前台服务权限
+            Log.d(TAG, "检查前台服务权限");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION) 
+                    != PackageManager.PERMISSION_GRANTED) {
+                    Log.e(TAG, "缺少FOREGROUND_SERVICE_MEDIA_PROJECTION权限");
+                    Toast.makeText(this, "缺少媒体投影前台服务权限，请手动授权", Toast.LENGTH_LONG).show();
+                    // 不启动服务，避免系统强制结束应用
+                    return;
+                }
+            }
+            
+            // 先启动媒体投影前台服务
+            Log.d(TAG, "开始启动媒体投影服务");
+            Intent serviceIntent = new Intent(this, MediaProjectionService.class);
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent);
                 } else {
-                    useFFmpegLive = false;
-                    Log.i(TAG, "已切换为Native推流模式");
+                    startService(serviceIntent);
                 }
-                
-                // 如果当前正在推流，提示用户需要重启推流才能生效
-                if ((mScreenLive != null || mFFmpegScreenLive != null) && isStreaming()) {
-                    updateStreamStatus("提示：请停止并重新开始推流以应用新的推流方式");
+                Log.d(TAG, "媒体投影服务启动完成");
+            } catch (SecurityException e) {
+                Log.e(TAG, "启动媒体投影服务失败，权限不足", e);
+                Toast.makeText(this, "启动媒体投影服务失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                return;
+            }
+            
+            // 绑定到服务
+            Log.d(TAG, "开始绑定服务");
+            bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+            Log.d(TAG, "服务绑定完成");
+            
+            // 初始化MediaProjectionManager
+            Log.d(TAG, "开始初始化MediaProjectionManager");
+            this.mediaProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+            Log.d(TAG, "MediaProjectionManager初始化完成");
+            
+            // 初始化推流码获取助手
+            Log.d(TAG, "开始初始化推流码获取助手");
+            streamKeyHelper = new StreamKeyHelper(this);
+            streamKeyHelper.init();
+            Log.d(TAG, "推流码获取助手初始化完成");
+            
+            // 初始化悬浮球管理器
+            Log.d(TAG, "开始初始化悬浮球管理器");
+            floatingBallManager = new FloatingBallManager(this);
+            Log.d(TAG, "悬浮球管理器初始化完成");
+            
+            // 绑定按钮点击事件
+            Log.d(TAG, "开始绑定按钮点击事件");
+            findViewById(R.id.btn_back).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish();
                 }
-            }
-        });
-
-        // 先启动媒体投影前台服务
-        Intent serviceIntent = new Intent(this, MediaProjectionService.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent);
-        } else {
-            startService(serviceIntent);
-        }
-        
-        // 绑定到服务
-        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-        
-        // 初始化MediaProjectionManager
-        this.mediaProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        
-        // 初始化推流码获取助手
-        streamKeyHelper = new StreamKeyHelper(this);
-        streamKeyHelper.init();
-        
-        // 初始化悬浮球管理器
-        floatingBallManager = new FloatingBallManager(this);
-        
-        // 绑定按钮点击事件
-        findViewById(R.id.btn_back).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
-        
-        findViewById(R.id.btn_select_file).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkPermissionAndPickFile();
-            }
-        });
-        
-        findViewById(R.id.btn_start_live).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startScreenCapture(v);
-            }
-        });
-        
-        findViewById(R.id.btn_end).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                stopLive(v);
-            }
-        });
-        
+            });
+            
+            findViewById(R.id.btn_select_file).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkPermissionAndPickFile();
+                }
+            });
+            
+            findViewById(R.id.btn_start_live).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startScreenCapture(v);
+                }
+            });
+            
+            findViewById(R.id.btn_end).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    stopLive(v);
+                }
+            });
+            
         // 功能按钮
         findViewById(R.id.btn_function).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showFloatingBall();
+                Log.d(TAG, "功能按钮被点击");
+                try {
+                    Log.d(TAG, "准备调用showFloatingBall");
+                    showFloatingBall();
+                    Log.d(TAG, "showFloatingBall调用完成");
+                } catch (Exception e) {
+                    Log.e(TAG, "功能按钮点击异常", e);
+                    Toast.makeText(MainActivity.this, "功能按钮异常: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
             }
         });
-        
-        findViewById(R.id.btn_close).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                hideFloatingBall();
-            }
-        });
+            
+            findViewById(R.id.btn_close).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    hideFloatingBall();
+                }
+            });
+            
+            Log.d(TAG, "所有按钮点击事件绑定完成");
+            Log.d(TAG, "MainActivity.onCreate完成");
+            
+        } catch (Exception e) {
+            Log.e(TAG, "MainActivity.onCreate发生异常", e);
+            Toast.makeText(this, "应用初始化失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            // 不要finish()，让用户看到错误信息
+        }
         
         btnRetry.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -258,6 +318,8 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
         if (requestCode == REQUEST_CODE_SCREEN_CAPTURE) {
             if (resultCode == Activity.RESULT_OK && data != null) {
                 Log.i(TAG, "用户同意屏幕捕获权限");
+                Toast.makeText(this, "屏幕捕获权限已授予", Toast.LENGTH_SHORT).show();
+                
                 // 保存权限结果，等待服务绑定后再开始推流
                 this.screenCaptureResultCode = resultCode;
                 this.screenCaptureData = data;
@@ -265,7 +327,13 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
                 // 如果服务已经绑定，立即开始推流
                 startLiveIfPossible();
             } else {
-                Log.e(TAG, "用户拒绝屏幕捕获权限或操作取消");
+                Log.e(TAG, "用户拒绝屏幕捕获权限或操作取消，resultCode: " + resultCode);
+                String message = "屏幕捕获权限被拒绝";
+                if (resultCode == Activity.RESULT_CANCELED) {
+                    message = "屏幕捕获权限请求被取消";
+                }
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                updateStreamStatus("推流失败：屏幕捕获权限被拒绝");
             }
         }
     }
@@ -284,46 +352,76 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
      * 根据useFFmpegLive标志决定使用哪种推流方式
      */
     private void startLiveIfPossible() {
-        if (mediaProjectionService != null && screenCaptureData != null) {
-            try {
-                // 获取MediaProjection
-                mediaProjection = mediaProjectionManager.getMediaProjection(screenCaptureResultCode, screenCaptureData);
-                if (mediaProjection == null) {
-                    Log.e(TAG, "获取MediaProjection失败");
-                    return;
-                }
-                
-                // 设置到服务中
-                mediaProjectionService.setMediaProjection(mediaProjection);
-                
-                // 开始直播，根据选择的推流方式使用不同的实现
-                if (useFFmpegLive) {
-                    // 使用FFmpeg推流
-                    mFFmpegScreenLive = new FFmpegScreenLive();
-                    // 可选：设置自定义参数
-                    mFFmpegScreenLive.setStreamParameters(1280, 720, 30, 2000000);
-                    boolean started = mFFmpegScreenLive.startLive(url, mediaProjection);
-                    if (started) {
+        Log.d(TAG, "检查是否可以开始推流");
+        
+        // 检查前置条件
+        if (mediaProjectionService == null) {
+            Log.e(TAG, "MediaProjectionService未绑定");
+            Toast.makeText(this, "媒体投影服务未就绪", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (screenCaptureData == null) {
+            Log.e(TAG, "屏幕捕获权限数据为空");
+            Toast.makeText(this, "屏幕捕获权限未授予", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        if (mediaProjectionManager == null) {
+            Log.e(TAG, "MediaProjectionManager为空");
+            Toast.makeText(this, "屏幕捕获管理器未初始化", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        try {
+            Log.d(TAG, "开始获取MediaProjection");
+            // 获取MediaProjection
+            mediaProjection = mediaProjectionManager.getMediaProjection(screenCaptureResultCode, screenCaptureData);
+            if (mediaProjection == null) {
+                Log.e(TAG, "获取MediaProjection失败");
+                Toast.makeText(this, "获取屏幕捕获权限失败", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            Log.d(TAG, "MediaProjection获取成功，设置到服务中");
+            // 设置到服务中
+            mediaProjectionService.setMediaProjection(mediaProjection);
+            
+            Log.d(TAG, "准备开始推流，推流地址: " + url);
+            // 开始直播，根据选择的推流方式使用不同的实现
+            if (useFFmpegLive) {
+                // 使用FFmpeg推流
+                Log.d(TAG, "使用FFmpeg推流");
+                mFFmpegScreenLive = new FFmpegScreenLive();
+                // 可选：设置自定义参数
+                mFFmpegScreenLive.setStreamParameters(1280, 720, 30, 2000000);
+                boolean started = mFFmpegScreenLive.startLive(url, mediaProjection);
+                if (started) {
                     Log.i(TAG, "开始FFmpeg推流到地址：" + url);
                     updateStreamStatus("FFmpeg推流已开始");
-                    } else {
-                        Log.e(TAG, "FFmpeg推流启动失败");
-                        updateStreamStatus("FFmpeg推流启动失败");
-                    }
+                    Toast.makeText(this, "FFmpeg推流已开始", Toast.LENGTH_SHORT).show();
                 } else {
-                    // 使用原生推流
-                    mScreenLive = new ScreenLive();
-                    mScreenLive.startLive(url, mediaProjection);
-                    Log.i(TAG, "开始Native推流到地址：" + url);
-                    updateStreamStatus("Native推流已开始");
+                    Log.e(TAG, "FFmpeg推流启动失败");
+                    updateStreamStatus("FFmpeg推流启动失败");
+                    Toast.makeText(this, "FFmpeg推流启动失败", Toast.LENGTH_SHORT).show();
                 }
-            } catch (SecurityException e) {
-                Log.e(TAG, "开始推流时安全异常", e);
-                updateStreamStatus("推流启动失败：安全异常");
-            } catch (Exception e) {
-                Log.e(TAG, "开始推流时异常", e);
-                updateStreamStatus("推流启动失败：" + e.getMessage());
+            } else {
+                // 使用原生推流
+                Log.d(TAG, "使用Native推流");
+                mScreenLive = new ScreenLive();
+                mScreenLive.startLive(url, mediaProjection);
+                Log.i(TAG, "开始Native推流到地址：" + url);
+                updateStreamStatus("Native推流已开始");
+                Toast.makeText(this, "Native推流已开始", Toast.LENGTH_SHORT).show();
             }
+        } catch (SecurityException e) {
+            Log.e(TAG, "开始推流时安全异常", e);
+            updateStreamStatus("推流启动失败：安全异常");
+            Toast.makeText(this, "推流失败：权限不足 - " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Log.e(TAG, "开始推流时异常", e);
+            updateStreamStatus("推流启动失败：" + e.getMessage());
+            Toast.makeText(this, "推流失败：" + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -397,11 +495,27 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
      * 内部开始屏幕捕获方法
      */
     private void startScreenCaptureInternal() {
-        if (mediaProjectionManager != null) {
-            Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
-            startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE);
-        } else {
-            Log.e(TAG, "MediaProjectionManager未初始化");
+        try {
+            if (mediaProjectionManager != null) {
+                Log.d(TAG, "准备请求屏幕捕获权限");
+                Intent captureIntent = mediaProjectionManager.createScreenCaptureIntent();
+                if (captureIntent != null) {
+                    startActivityForResult(captureIntent, REQUEST_CODE_SCREEN_CAPTURE);
+                    Log.d(TAG, "屏幕捕获权限请求已发送");
+                } else {
+                    Log.e(TAG, "无法创建屏幕捕获Intent");
+                    Toast.makeText(this, "无法创建屏幕捕获权限请求", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Log.e(TAG, "MediaProjectionManager未初始化");
+                Toast.makeText(this, "屏幕捕获管理器未初始化", Toast.LENGTH_SHORT).show();
+            }
+        } catch (SecurityException e) {
+            Log.e(TAG, "请求屏幕捕获权限时发生安全异常", e);
+            Toast.makeText(this, "请求屏幕捕获权限失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Log.e(TAG, "请求屏幕捕获权限时发生异常", e);
+            Toast.makeText(this, "请求屏幕捕获权限异常: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
     
@@ -477,10 +591,22 @@ public class MainActivity extends AppCompatActivity implements MediaProjectionSe
      * 显示悬浮球
      */
     private void showFloatingBall() {
-        if (floatingBallManager != null) {
-            // 使用liveId作为roomId
-            String roomId = String.valueOf(this.liveId);
-            floatingBallManager.showFloatingBall(roomId);
+        Log.d(TAG, "MainActivity.showFloatingBall被调用");
+        
+        try {
+            if (floatingBallManager != null) {
+                // 使用liveId作为roomId
+                String roomId = String.valueOf(this.liveId);
+                Log.d(TAG, "准备显示悬浮球，roomId: " + roomId + ", liveId: " + this.liveId);
+                floatingBallManager.showFloatingBall(roomId);
+                Log.d(TAG, "悬浮球显示调用完成");
+            } else {
+                Log.e(TAG, "floatingBallManager为null");
+                Toast.makeText(this, "悬浮球管理器未初始化", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "显示悬浮球时发生异常", e);
+            Toast.makeText(this, "显示悬浮球失败: " + e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
     
