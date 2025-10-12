@@ -54,7 +54,7 @@
         <activity
             android:name="org.jxxy.debug.h5.activity.ToolActivity"
             android:exported="false" />
-       <activity android:name="org.jxxy.debug.h5.activity.WebViewActivity"
+       <activity android:name="com.jxdx.resource.h5.activity.WebViewActivity"
            android:exported="false">
        </activity>
     </application>

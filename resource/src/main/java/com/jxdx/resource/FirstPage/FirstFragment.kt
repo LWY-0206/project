@@ -34,7 +34,7 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import org.jxxy.debug.h5.activity.WebViewActivity
+import com.jxdx.resource.h5.activity.WebViewActivity
 import java.io.File
 import java.io.IOException
 import java.util.Calendar
@@ -432,8 +432,6 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (!recyclerView.canScrollVertically(1)) {
-                    // 到达底部，加载更多数据
-                    loadMoreData()
                 }
             }
         })

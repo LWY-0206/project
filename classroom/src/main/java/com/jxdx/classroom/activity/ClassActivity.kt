@@ -72,6 +72,12 @@ class ClassActivity : BaseActivity<ClassActivityBinding>() {
         viewModel.rtmpUrlLiveData.observe(this) { result ->
             result.onSuccess { rtmpUrlData ->
                 if(rtmpUrlData != null){
+                    // 设置课程标题
+                    rtmpUrlData.subjectName?.let { subjectName ->
+                        view.courseTitle.text = subjectName
+                        Log.d(TAG, "设置课程标题: $subjectName")
+                    }
+                    
                     val newUrl = rtmpUrlData.rtmpUrl
                     Log.d(TAG, "收到新的RTMP URL: $newUrl")
                     rtmpUrl = newUrl
