@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.fragment.app.Fragment
 import com.jxdx.common.http.service.MineService
 import com.jxdx.common.http.service.ServiceRegistry
+import com.jxdx.mine.MyFragment
 import com.jxdx.mine.course.CourseActivity
 import com.jxdx.mine.grade.GradeActivity
 import com.jxdx.mine.homework.HomeworkActivity
@@ -14,8 +15,8 @@ import com.jxdx.mine.teacherhomework.CourseListActivity
 class MineServiceImpl : MineService{
     override fun getFragment(fragmentName: String): Fragment? {
         return when(fragmentName){
-            "my"-> My()
-            else -> My()
+            "my"-> MyFragment()
+            else -> MyFragment()
         }
     }
 

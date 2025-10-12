@@ -35,7 +35,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var tvResource: TextView
     private lateinit var tvProfile: TextView
 
-    private var currentTab = 0
+    private var currentTab = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

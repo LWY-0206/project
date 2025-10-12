@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- 顶部标题栏 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#FFF9F4"
+        android:elevation="4dp"
+        android:paddingTop="8dp">
+
+        <!-- 返回按钮 -->
+
+        <!-- 标题文本 -->
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/ic_back_arrow" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="课程详情"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_centerInParent="true" />
+    </RelativeLayout>
     <!-- 欢迎文字 -->
     <TextView
         android:layout_width="wrap_content"
@@ -12,13 +42,13 @@
         android:text="下午好！同学"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+        android:paddingStart="25dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="8dp"
+        android:padding="10dp"
         android:background="#FFF9F4"
         android:layout_marginBottom="16dp"
         android:elevation="2dp"
@@ -27,7 +57,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="150dp"
             android:orientation="vertical"
             android:background="#FFF3E0"
             android:padding="12dp"
@@ -39,8 +69,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📚 今日小知识"
-                android:textSize="16sp"
+                android:text="📚 🎉🎉🎉🎉🎇"
+                android:textSize="32sp"
                 android:textStyle="bold"
                 android:textColor="#FF7043"
                 android:layout_marginBottom="8dp" />
@@ -50,12 +80,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="你知道吗？大脑在早晨学习效率最高哦～"
-                android:textSize="14sp"
+                android:textSize="20sp"
                 android:textColor="#444444" />
         </LinearLayout>
 
         <!-- 课堂状态模块 -->
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/btn_enter_class"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -68,38 +98,36 @@
 
             <!-- 左侧图标 -->
             <ImageView
+                android:id="@+id/imageView"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:src="@drawable/live"
-                android:contentDescription="Classroom icon"
                 android:layout_gravity="center_vertical"
-                android:layout_marginRight="12dp" />
+                android:contentDescription="Classroom icon"
+                android:src="@drawable/live"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <!-- 中间状态文字 -->
             <LinearLayout
+                android:id="@+id/linearLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:gravity="center_vertical"
                 android:orientation="vertical"
-                android:gravity="center_vertical">
+                app:layout_constraintEnd_toStartOf="@+id/btn_daily_checkin"
+                app:layout_constraintStart_toEndOf="@+id/imageView"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <TextView
                     android:id="@+id/tv_class_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="××老师正在课堂直播..."
-                    android:textSize="16sp"
-                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp"
+                    android:text="张三老师正在课堂直播..."
                     android:textColor="#1565C0"
-                    android:layout_marginBottom="4dp" />
-
-                <TextView
-                    android:id="@+id/tv_class_countdown"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🎉已开播时间：02:35"
-                    android:textSize="14sp"
-                    android:textColor="#444444" />
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <!-- 右侧签到按钮 -->
@@ -107,15 +135,26 @@
                 android:id="@+id/btn_daily_checkin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:backgroundTint="#FFC107"
+                android:drawablePadding="6dp"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
                 android:text="签到 ✅"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                android:backgroundTint="#FFC107"
-                android:textColor="#000000"
-                android:drawablePadding="6dp"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="8dp"/>
-        </LinearLayout>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/tv_class_countdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎉抓紧时间进入吧~~"
+                android:textColor="#444444"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/imageView" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 课堂小测 / 参与投票 -->
         <LinearLayout

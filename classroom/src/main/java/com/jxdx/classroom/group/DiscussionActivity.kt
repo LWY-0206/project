@@ -75,7 +75,7 @@ class DiscussionActivity : AppCompatActivity() {
     // 视图绑定对象，用于访问XML布局中的UI元素
     private lateinit var binding: ActivityDiscussionBinding
     // 当前用户ID
-    private var currentUserId = "1"
+    private var currentUserId = "6"
     private var currentUserName = "张三"
     // 当前用户头像
     private var currentUserAvatar: String? = null
@@ -91,8 +91,8 @@ class DiscussionActivity : AppCompatActivity() {
     private val messages = mutableListOf<Message>()
     // 消息适配器，用于RecyclerView的数据绑定
     private lateinit var messagesAdapter: MessagesAdapter
-    // 学科ID，用于删除全部小组接口
-    private var subjectId: Int = 0
+    // 学科ID，用于删除全部小组接口 - 设置默认值为无效值，确保必须从Intent获取
+    private var subjectId: Int = -1
     // 消息处理器，用于处理延迟任务
     private val messageHandler = Handler(Looper.getMainLooper())
     // 模拟消息列表
@@ -146,11 +146,15 @@ class DiscussionActivity : AppCompatActivity() {
      */
     private fun initData() {
         // 获取从上一个Activity传递过来的数据
-        groupId = intent.getIntExtra("groupId", 0)
+        groupId = intent.getIntExtra("groupId", 6)
         groupName = intent.getStringExtra("groupName") ?: "讨论组"
         isTeacherMode = intent.getBooleanExtra("isTeacher", false)
+        
         // 获取学科ID，用于删除全部小组接口
-        subjectId = intent.getIntExtra("subjectId", 0)
+        subjectId = intent.getIntExtra("subjectId", 1)
+        if (subjectId <= 0) {
+            Log.w("DiscussionActivity", "从Intent获取的subjectId无效: $subjectId")
+        }
 
         // 尝试获取并解析传递过来的students JSON字符串
             try {
@@ -308,7 +312,7 @@ class DiscussionActivity : AppCompatActivity() {
                     // 根据是否为教师模式设置不同的fromUserId
                     val requestFromUserId = if (isTeacherMode) {
                         // 教师模式下使用特殊标识
-                        -1 // 假设-1代表教师ID
+                        6 // 假设-1代表教师ID
                     } else {
                         currentUserId.toIntOrNull() ?: 1001
                     }
@@ -344,7 +348,7 @@ class DiscussionActivity : AppCompatActivity() {
                             // 保存成功后，再添加到本地消息列表
                             val message = Message(
                                 id = "msg_${System.currentTimeMillis()}",
-                                senderId = if (isTeacherMode) -1 else currentUserId.toIntOrNull() ?: -1,
+                                senderId = if (isTeacherMode) currentUserId.toIntOrNull() ?: 6 else 6,
                                 senderName = if (isTeacherMode) "教师" else currentUserName,
                                 content = content,
                                 timestamp = System.currentTimeMillis(),
@@ -508,21 +512,6 @@ class DiscussionActivity : AppCompatActivity() {
         val actualOnlineCount = groupMembers.count { it.isOnline }
         binding.tvOnlineCount.text = "在线 $actualOnlineCount 人"
     }
-    
-    /**
-     * 更新成员在线状态
-     * 根据用户ID更新指定成员的在线状态
-     * @param memberId 成员ID
-     * @param isOnline 是否在线
-     */
-    private fun updateMemberOnlineStatus(memberId: String, isOnline: Boolean) {
-        val member = groupMembers.find { it.id == memberId }
-        if (member != null && member.isOnline != isOnline) {
-            member.isOnline = isOnline
-            // 在线状态改变时更新显示
-            updateOnlineCount()
-        }
-    }
 
     /**
      * 显示附件选项
@@ -644,24 +633,42 @@ class DiscussionActivity : AppCompatActivity() {
         val token = TokenManager.getToken() ?: ""
         if (token.isEmpty()) {
             Toast.makeText(this, "Token获取失败，无法执行删除操作", Toast.LENGTH_SHORT).show()
+            Log.e("DiscussionActivity", "执行删除全部小组操作失败：Token为空")
+            return
+        }
+
+        // 直接使用固定的用户ID 6
+        val fixedUserId = 6
+        
+        if (subjectId <= 0) {
+            val errorMsg = "学科ID无效，无法删除全部小组"
+            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show()
+            Log.e("DiscussionActivity", "$errorMsg: subjectId=$subjectId")
             return
         }
 
         // 显示加载提示
         Toast.makeText(this, "正在删除全部小组...", Toast.LENGTH_SHORT).show()
+        
+        // 记录删除操作的参数信息
+        Log.d("DiscussionActivity", "开始执行删除全部小组操作：subjectId=$subjectId, createdBy=$fixedUserId")
 
         lifecycleScope.launch {
             try {
-                // 调用删除全部小组接口
+                // 调用删除全部小组接口，使用固定的用户ID 6
                 val response = RetrofitClient.apiService.deleteAllGroups(
                     satoken = token,
                     subjectId = subjectId,
-                    createdBy = currentUserId.toIntOrNull() ?: 0
+                    createdBy = fixedUserId
                 )
+
+                // 记录完整的响应信息
+                Log.d("DiscussionActivity", "删除全部小组接口响应：code=${response.code}, message=${response.message}, data=${response.data}")
 
                 if (response.code == 0) {
                     // 删除成功，显示提示并返回上一页
                     Toast.makeText(this@DiscussionActivity, "全部小组已成功删除", Toast.LENGTH_SHORT).show()
+                    Log.i("DiscussionActivity", "全部小组删除成功：subjectId=$subjectId, createdBy=$fixedUserId")
                     // 添加系统消息到聊天记录
                     addSystemMessage("全部小组已被删除")
                     // 返回上一页
@@ -669,12 +676,12 @@ class DiscussionActivity : AppCompatActivity() {
                 } else {
                     val errorMsg = "删除失败: ${response.message}" ?: "未知错误"
                     Toast.makeText(this@DiscussionActivity, errorMsg, Toast.LENGTH_SHORT).show()
-                    Log.e("DiscussionActivity", errorMsg)
+                    Log.e("DiscussionActivity", "删除全部小组失败：$errorMsg, subjectId=$subjectId, createdBy=$fixedUserId")
                 }
             } catch (e: Exception) {
                 val errorMsg = "删除异常: ${e.message ?: "未知异常"}"
                 Toast.makeText(this@DiscussionActivity, errorMsg, Toast.LENGTH_SHORT).show()
-                Log.e("DiscussionActivity", errorMsg, e)
+                Log.e("DiscussionActivity", "删除全部小组发生异常：subjectId=$subjectId, createdBy=$fixedUserId", e)
             }
         }
     }
@@ -957,56 +964,6 @@ class DiscussionActivity : AppCompatActivity() {
                         addMessage(evaluationMessage)
                     } else {
                         Log.d("DiscussionActivity", "评价消息保存失败: ${saveResponse.message}")
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-        }
-    }
-
-    /**
-     * 干预讨论
-     * 添加教师对讨论的干预指导消息
-     */
-    private fun interveneDiscussion() {
-        // 创建干预消息内容
-        val content = "【指导建议】建议你们考虑一下用户的使用场景和需求痛点"
-        
-        // 通过API保存干预消息到服务器（如果是教师模式）
-        if (isTeacherMode) {
-            lifecycleScope.launch { 
-                try {
-                    // 教师模式下使用特殊标识
-                    val requestFromUserId = -1 // 假设-1代表教师ID
-                    
-                    // 保存消息到服务器
-                    val saveRequest = GroupChatApi.SaveMessage.RequestBody(
-                        teamId = groupId,
-                        fromUserId = requestFromUserId,
-                        content = content,
-                        messageType = GroupChatApi.Broadcast.MessageType.TEXT
-                    )
-                    
-                    val saveResponse = RetrofitClient.apiService.saveGroupChatMessage(
-                        request = saveRequest
-                    )
-                    
-                    if (saveResponse.code == 0 && saveResponse.data != null) {
-                        // 保存成功后，添加到本地消息列表
-                        val interventionMessage = Message(
-                            id = "intervene_${System.currentTimeMillis()}",
-                            senderId = -1,
-                            senderName = "教师",
-                            content = content,
-                            timestamp = System.currentTimeMillis(),
-                            messageType = MessageType.TEXT,
-                            isFromTeacher = true,
-                            senderAvatar = null
-                        )
-                        addMessage(interventionMessage)
-                    } else {
-                        Log.d("DiscussionActivity", "干预消息保存失败: ${saveResponse.message}")
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

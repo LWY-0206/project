@@ -273,15 +273,6 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
                 </LinearLayout>
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="底部"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="8dp"/>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

@@ -1,4 +1,4 @@
-package com.jxdx.mine.service
+package com.jxdx.mine
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -36,11 +36,12 @@ import com.jxdx.mine.databinding.FragmnetMymBinding
 import com.jxdx.mine.grade.GradeActivity
 import com.jxdx.mine.homework.HomeworkActivity
 import com.jxdx.mine.http.RetrofitClient
+import com.jxdx.mine.service.EditProfileActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class My : Fragment() {
+class MyFragment : Fragment() {
 
     private var _binding: FragmnetMymBinding? = null
     private val binding get() = _binding!!
@@ -261,8 +262,10 @@ class My : Fragment() {
 
         //加载用户信息
         loadDate()
-        //加载学习时间分布柱状图
+        //加载学习时间分布饼状图
         setupWebViewChart()
+        
+        // 图表标题已在布局文件中直接设置
         //点击查看个人主页
         binding.navProfile.setOnClickListener {
             var intent= Intent(requireActivity(), ProfileActivity::class.java)
@@ -365,7 +368,7 @@ class My : Fragment() {
 
 
 
-    //柱状图
+    //饼状图
     @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebViewChart() {
         val webView = view?.findViewById<WebView>(R.id.barChartWebView)
@@ -379,8 +382,8 @@ class My : Fragment() {
             displayZoomControls = false
         }
 
-        // 加载本地HTML文件
-        webView?.loadUrl("file:///android_asset/chart.html")
+        // 加载本地HTML文件 - 现在使用饼状图
+        webView?.loadUrl("file:///android_asset/pie_chart.html")
 
         // 可选：设置WebViewClient来处理页面加载
         webView?.webViewClient = object : WebViewClient() {

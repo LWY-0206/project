@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习时间分布饼状图</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .container {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chart-container {
+            position: relative;
+            width: 90%;
+            height: 90%;
+        }
+        .chart-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-title">学习时间分布（按课程类别）</div>
+    <div class="container">
+        <div class="chart-container">
+            <canvas id="pieChart"></canvas>
+        </div>
+    </div>
+    <div id="chartTooltip" class="tooltip"></div>
+    
+    <script>
+        // 创建饼状图
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        const tooltip = document.getElementById('chartTooltip');
+        
+        // 定义数据
+        const data = {
+            labels: ['高等数学', '大学英语', '计算机基础', '概率论与数理统计', '线性代数'],
+            datasets: [{
+                data: [25, 20, 18, 15, 22],
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF'
+                ],
+                borderColor: [
+                    '#FFFFFF',
+                    '#FFFFFF',
+                    '#FFFFFF',
+                    '#FFFFFF',
+                    '#FFFFFF'
+                ],
+                borderWidth: 2,
+                hoverOffset: 10
+            }]
+        };
+        
+        // 配置选项
+        const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    borderColor: '#ddd',
+                    borderWidth: 1,
+                    padding: 10,
+                    displayColors: true,
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value}小时 (${percentage}%)`;
+                        }
+                    }
+                }
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true,
+                duration: 2000,
+                easing: 'easeOutQuart'
+            }
+        };
+        
+        // 创建图表
+        const pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: data,
+            options: options
+        });
+        
+        // 添加交互效果
+        const chartContainer = document.querySelector('.chart-container');
+        chartContainer.addEventListener('mousemove', function(event) {
+            const elements = pieChart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+            if (elements.length > 0) {
+                tooltip.style.opacity = 1;
+                tooltip.style.left = (event.pageX + 10) + 'px';
+                tooltip.style.top = (event.pageY - 28) + 'px';
+            } else {
+                tooltip.style.opacity = 0;
+            }
+        });
+    </script>
+</body>
+</html>
