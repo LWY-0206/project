@@ -47,6 +47,15 @@
             android:name=".course.UploadCoursewareInfoActivity"
             android:exported="false" />
         <activity
+            android:name=".course.StudyReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".course.StudyReportActivitySimple"
+            android:exported="false" />
+        <activity
+            android:name=".course.StudyReportActivityTest"
+            android:exported="false" />
+        <activity
             android:name=".teacherhomework.CourseListActivity"
             android:exported="false" />
         <activity

@@ -101,6 +101,31 @@ data class Courseware(
 )
 
 
+// 图表数据类
+data class ChartData(
+    val label: String,
+    val value: Float
+)
+
+// 学习报告卡片类型枚举
+enum class StudyReportCardType {
+    OVERVIEW,      // 学习概览
+    HOMEWORK,      // 作业完成
+    ATTENDANCE,    // 出勤记录
+    EXAM,          // 考试成绩
+    PARTICIPATION, // 课堂参与
+    SUMMARY        // 学习总结
+}
+
+// 学习报告卡片数据类
+data class StudyReportCard(
+    val type: StudyReportCardType,
+    val title: String,
+    val subtitle: String,
+    val data: Map<String, String>,
+    val chartData: List<ChartData>
+)
+
 // 学习报告
 data class StudyReport(
     val totalStudyTime: String,  // 总学习时长

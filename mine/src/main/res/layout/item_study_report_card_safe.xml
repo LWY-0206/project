@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="@color/card_background_academic">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp">
+
+        <!-- 卡片标题 -->
+        <TextView
+            android:id="@+id/tv_card_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="学习概览"
+            android:textColor="@color/text_academic_primary"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- 卡片副标题 -->
+        <TextView
+            android:id="@+id/tv_card_subtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:alpha="0.7"
+            android:text="Software Engineering Introduction"
+            android:textColor="@color/text_academic_secondary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_card_title" />
+
+        <!-- 数据展示区域 -->
+        <LinearLayout
+            android:id="@+id/data_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_card_subtitle">
+
+            <TextView
+                android:id="@+id/tv_data_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/bg_data_item"
+                android:padding="12dp"
+                android:text="总学习时长: 48小时"
+                android:textColor="@color/text_academic_primary"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_data_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/bg_data_item"
+                android:padding="12dp"
+                android:text="学习天数: 30天"
+                android:textColor="@color/text_academic_primary"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_data_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_data_item"
+                android:padding="12dp"
+                android:text="完成度: 85%"
+                android:textColor="@color/text_academic_primary"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <!-- 简化的图表区域 - 用TextView替换CustomChartView -->
+        <TextView
+            android:id="@+id/tv_chart_info"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_chart_container"
+            android:gravity="center"
+            android:padding="16dp"
+            android:text="图表数据加载中..."
+            android:textColor="@color/text_academic_secondary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/data_container" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

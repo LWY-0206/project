@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 进度指示器尺寸 -->
+    <dimen name="indicator_width">12dp</dimen>
+    <dimen name="indicator_height">6dp</dimen>
+    <dimen name="indicator_margin">8dp</dimen>
+</resources>

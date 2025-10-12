@@ -62,4 +62,31 @@
     <color name="blue_700">#1976D2</color>
     <color name="blue_800">#1565C0</color>
     <color name="blue_900">#0D47A1</color>
+    
+    <!-- 学术风格配色方案 -->
+    <color name="background_academic">#F8F9FA</color>
+    <color name="text_academic_primary">#2C3E50</color>
+    <color name="text_academic_secondary">#7F8C8D</color>
+    <color name="card_background_academic">#FFFFFF</color>
+    
+    <!-- 图表颜色 -->
+    <color name="chart_grid">#E8E8E8</color>
+    <color name="chart_label">#6C757D</color>
+    <color name="chart_bar_1">#3498DB</color>
+    <color name="chart_bar_2">#E74C3C</color>
+    <color name="chart_bar_3">#2ECC71</color>
+    <color name="chart_bar_4">#F39C12</color>
+    <color name="chart_bar_5">#9B59B6</color>
+    
+    <!-- 进度指示器颜色 -->
+    <color name="indicator_active">#3498DB</color>
+    <color name="indicator_inactive">#BDC3C7</color>
+    
+    <!-- 卡片类型颜色 -->
+    <color name="card_overview">#E8F4FD</color>
+    <color name="card_homework">#E8F5E8</color>
+    <color name="card_attendance">#FFF3E0</color>
+    <color name="card_exam">#F3E5F5</color>
+    <color name="card_participation">#E0F2F1</color>
+    <color name="card_summary">#FCE4EC</color>
 </resources>

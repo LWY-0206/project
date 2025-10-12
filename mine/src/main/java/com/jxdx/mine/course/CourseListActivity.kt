@@ -78,6 +78,14 @@ class CourseListActivity : AppCompatActivity() {
             binding.tvHomeworkProgress.text = "已完成作业：${it.completedHomework}/${it.totalHomework}"
             binding.tvAverageScore.text = "平均得分：${it.averageScore}"
         }
+        
+        // 设置学习报告点击事件，跳转到详细报告页面
+        binding.tvTotalStudyTime.setOnClickListener {
+            val courseName = intent.getStringExtra("subjectName") ?: "课程详情"
+            val intent = Intent(this, StudyReportActivitySimple::class.java)
+            intent.putExtra("courseName", courseName)
+            startActivity(intent)
+        }
 
         viewModel.loadCourseDetail(courseId)
         

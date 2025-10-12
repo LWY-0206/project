@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.jxdx.mine.R
 import com.jxdx.mine.databinding.ActivityCreateHomeworkBinding
 import com.jxdx.mine.http.ApiService
 import com.jxdx.mine.http.RetrofitClient
@@ -31,6 +32,10 @@ class CreateHomeworkActivity : AppCompatActivity() {
     private val selectedImages = mutableListOf<Uri>()
     private var courseId: String? = null
     private var courseName: String? = null
+    
+    // AI批改设置
+    private var isAiGradingEnabled = false
+    private var gradingMode = "standard" // standard, detailed, strict
     
     // 日期选择器
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -100,6 +105,9 @@ class CreateHomeworkActivity : AppCompatActivity() {
         binding.btnPublish.setOnClickListener {
             publishHomework()
         }
+        
+        // AI批改设置
+        setupAiGradingListeners()
     }
 
     private fun showDatePicker() {
@@ -123,6 +131,39 @@ class CreateHomeworkActivity : AppCompatActivity() {
     private fun updateImageCount() {
         binding.tvImageCount.text = "已选择 ${selectedImages.size} 张图片"
     }
+    
+    private fun setupAiGradingListeners() {
+        // AI批改开关监听
+        binding.switchAiGrading.setOnCheckedChangeListener { _, isChecked ->
+            isAiGradingEnabled = isChecked
+            if (isChecked) {
+                binding.layoutAiOptions.visibility = android.view.View.VISIBLE
+                Toast.makeText(this, "AI一键批改已开启", Toast.LENGTH_SHORT).show()
+            } else {
+                binding.layoutAiOptions.visibility = android.view.View.GONE
+                Toast.makeText(this, "AI一键批改已关闭", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        // 批改模式选择监听
+        binding.radioGroupGradingMode.setOnCheckedChangeListener { _, checkedId ->
+            gradingMode = when (checkedId) {
+                R.id.radio_standard -> "standard"
+                R.id.radio_detailed -> "detailed"
+                R.id.radio_strict -> "strict"
+                else -> "standard"
+            }
+            
+            val modeText = when (gradingMode) {
+                "standard" -> "标准模式"
+                "detailed" -> "详细模式"
+                "strict" -> "严格模式"
+                else -> "标准模式"
+            }
+            
+            Toast.makeText(this, "已选择${modeText}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun publishHomework() {
         // 验证输入
@@ -142,6 +183,17 @@ class CreateHomeworkActivity : AppCompatActivity() {
         if (selectedDate == null) {
             Toast.makeText(this, "请选择截止日期", Toast.LENGTH_SHORT).show()
             return
+        }
+
+        // 显示AI设置信息
+        if (isAiGradingEnabled) {
+            val modeText = when (gradingMode) {
+                "standard" -> "标准模式"
+                "detailed" -> "详细模式"
+                "strict" -> "严格模式"
+                else -> "标准模式"
+            }
+            Toast.makeText(this, "AI一键批改已开启（${modeText}）", Toast.LENGTH_LONG).show()
         }
 
         // 显示加载状态
