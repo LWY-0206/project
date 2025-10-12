@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="120dp"
+    android:viewportWidth="200"
+    android:viewportHeight="120">
+    
+    <!-- 白板背景 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,0 L200,0 L200,120 L0,120 Z" />
+    
+    <!-- 边框 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#E0E0E0"
+        android:strokeWidth="2"
+        android:pathData="M0,0 L200,0 L200,120 L0,120 Z" />
+    
+    <!-- 标题 -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M20,15 L180,15 L180,25 L20,25 Z" />
+    
+    <!-- 标题文字背景 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M25,17 L175,17 L175,23 L25,23 Z" />
+    
+    <!-- 流程图框1 - 需求收集 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="2"
+        android:pathData="M30,40 L80,40 L80,60 L30,60 Z" />
+    
+    <!-- 流程图框1文字背景 -->
+    <path
+        android:fillColor="#E3F2FD"
+        android:pathData="M32,42 L78,42 L78,58 L32,58 Z" />
+    
+    <!-- 流程图框2 - 需求分析 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#4CAF50"
+        android:strokeWidth="2"
+        android:pathData="M100,40 L150,40 L150,60 L100,60 Z" />
+    
+    <!-- 流程图框2文字背景 -->
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M102,42 L148,42 L148,58 L102,58 Z" />
+    
+    <!-- 连接线 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#666666"
+        android:strokeWidth="2"
+        android:pathData="M80,50 L100,50" />
+    
+    <!-- 箭头 -->
+    <path
+        android:fillColor="#666666"
+        android:pathData="M95,47 L100,50 L95,53 Z" />
+    
+    <!-- 流程图框3 - 需求确认 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF9800"
+        android:strokeWidth="2"
+        android:pathData="M65,70 L115,70 L115,90 L65,90 Z" />
+    
+    <!-- 流程图框3文字背景 -->
+    <path
+        android:fillColor="#FFF3E0"
+        android:pathData="M67,72 L113,72 L113,88 L67,88 Z" />
+    
+    <!-- 连接线2 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#666666"
+        android:strokeWidth="2"
+        android:pathData="M90,60 L90,70" />
+    
+    <!-- 箭头2 -->
+    <path
+        android:fillColor="#666666"
+        android:pathData="M87,67 L90,70 L87,73 Z" />
+    
+    <!-- 底部说明文字背景 -->
+    <path
+        android:fillColor="#F5F5F5"
+        android:pathData="M20,95 L180,95 L180,115 L20,115 Z" />
+    
+    <!-- 底部说明文字 -->
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,100 L175,100 L175,102 L25,102 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,105 L160,105 L160,107 L25,107 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,110 L150,110 L150,112 L25,112 Z" />
+    
+</vector>

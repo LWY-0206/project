@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_gray">
+
+    <!-- 顶部工具栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@color/surface"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_back_arrow"
+            android:layout_marginEnd="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="白板绘画"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/btn_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="清除"
+            android:textColor="@color/primary_color"
+            android:background="@drawable/btn_outline_primary"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/btn_submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="提交"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_primary"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp" />
+
+    </LinearLayout>
+
+    <!-- 白板画布 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_margin="8dp"
+        android:background="@drawable/bg_whiteboard_draw">
+
+        <com.jxdx.classroom.group.WhiteboardDrawView
+            android:id="@+id/whiteboard_draw_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
+
+    <!-- 底部工具栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/surface"
+        android:padding="12dp"
+        android:elevation="4dp">
+
+        <!-- 撤销重做 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/btn_undo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="撤销"
+                android:textColor="@color/text_secondary"
+                android:background="@drawable/btn_outline_gray"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/btn_redo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="重做"
+                android:textColor="@color/text_secondary"
+                android:background="@drawable/btn_outline_gray"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
+
+        </LinearLayout>
+
+        <!-- 颜色选择 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="颜色："
+                android:textSize="14sp"
+                android:textColor="@color/text_primary"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:id="@+id/btn_color_black"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_color_btn_selected"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:id="@+id/btn_color_red"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_color_btn"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:id="@+id/btn_color_blue"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_color_btn"
+                android:layout_marginEnd="8dp" />
+
+            <View
+                android:id="@+id/btn_color_green"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="@drawable/bg_color_btn" />
+
+        </LinearLayout>
+
+        <!-- 画笔大小 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="画笔："
+                android:textSize="14sp"
+                android:textColor="@color/text_primary"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/btn_pen_thin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="细"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:background="@drawable/bg_pen_btn_selected"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/btn_pen_medium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="中"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:background="@drawable/bg_pen_btn"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/btn_pen_thick"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="粗"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:background="@drawable/bg_pen_btn"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -16,7 +16,7 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.Toast
 import com.jxdx.classroom.R
-import com.jxdx.classroom.activity.WhiteboardActivity
+import com.jxdx.classroom.group.WhiteboardDrawActivity
 import com.jxdx.classroom.activity.ResourceSelectionActivity
 
 /**
@@ -238,7 +238,7 @@ class FloatingBallManager(private val context: Context) {
      * 打开白板管理界面
      */
     private fun openWhiteboardActivity() {
-        val intent = Intent(context, WhiteboardActivity::class.java).apply {
+        val intent = Intent(context, WhiteboardDrawActivity::class.java).apply {
             putExtra("roomId", roomId)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }

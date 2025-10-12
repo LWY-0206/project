@@ -1,6 +1,7 @@
 package com.jxdx.classroom.group
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
 import android.os.Handler
@@ -266,6 +267,11 @@ class DiscussionActivity : AppCompatActivity() {
             sendMessage()
         }
 
+        // 白板绘画按钮点击事件
+        binding.ivWhiteboardDraw.setOnClickListener {
+            openWhiteboardDraw()
+        }
+
         // 附件按钮点击事件
         binding.ivAddAttachment.setOnClickListener {
             showAttachmentOptions()
@@ -291,6 +297,14 @@ class DiscussionActivity : AppCompatActivity() {
                 true
             }
         }
+    }
+
+    /**
+     * 打开白板绘画界面
+     */
+    private fun openWhiteboardDraw() {
+        val intent = Intent(this, WhiteboardDrawActivity::class.java)
+        startActivity(intent)
     }
 
     /**
@@ -598,6 +612,12 @@ class DiscussionActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+        // 设置查看讨论结果点击事件
+        view.findViewById<View>(R.id.optionViewSummary).setOnClickListener {
+            viewDiscussionSummary()
+            dialog.dismiss()
+        }
+
         // 设置删除全部小组点击事件
         view.findViewById<View>(R.id.optionDeleteAllGroups).setOnClickListener {
             deleteAllGroups()
@@ -854,12 +874,25 @@ class DiscussionActivity : AppCompatActivity() {
     }
 
     /**
-     * 导出讨论内容
-     * 模拟导出讨论内容
+     * 导出讨论结果
+     * 跳转到讨论结果界面
      */
     private fun exportDiscussion() {
-        // 显示导出成功提示
-        Toast.makeText(this, "讨论内容已导出", Toast.LENGTH_SHORT).show()
+        val intent = Intent(this, DiscussionSummaryActivity::class.java)
+        intent.putExtra("groupId", groupId)
+        intent.putExtra("groupName", groupName)
+        startActivity(intent)
+    }
+
+    /**
+     * 查看讨论结果
+     * 教师端查看当前小组的讨论结果
+     */
+    private fun viewDiscussionSummary() {
+        val intent = Intent(this, DiscussionSummaryActivity::class.java)
+        intent.putExtra("groupId", groupId)
+        intent.putExtra("groupName", groupName)
+        startActivity(intent)
     }
 
     /**

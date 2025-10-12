@@ -90,7 +90,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="导出讨论内容"
+            android:text="导出讨论结果"
             android:textSize="14sp"/>
 
         <ImageView

@@ -65,6 +65,12 @@
             android:name=".group.DiscussionActivity"
             android:exported="false" />
         <activity
+            android:name=".group.WhiteboardDrawActivity"
+            android:exported="false" />
+        <activity
+            android:name=".group.DiscussionSummaryActivity"
+            android:exported="false" />
+        <activity
             android:name=".group.GroupSeatActivity"
             android:exported="false" />
         <activity

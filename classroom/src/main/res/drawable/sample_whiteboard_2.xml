@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="120dp"
+    android:viewportWidth="200"
+    android:viewportHeight="120">
+    
+    <!-- 白板背景 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,0 L200,0 L200,120 L0,120 Z" />
+    
+    <!-- 边框 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#E0E0E0"
+        android:strokeWidth="2"
+        android:pathData="M0,0 L200,0 L200,120 L0,120 Z" />
+    
+    <!-- 标题 -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M20,10 L180,10 L180,20 L20,20 Z" />
+    
+    <!-- 标题文字背景 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M25,12 L175,12 L175,18 L25,18 Z" />
+    
+    <!-- 思维导图中心 -->
+    <path
+        android:fillColor="#FF9800"
+        android:pathData="M100,35 A15,15 0 1,1 100,65 A15,15 0 1,1 100,35 Z" />
+    
+    <!-- 中心文字背景 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M95,48 L105,48 L105,52 L95,52 Z" />
+    
+    <!-- 分支1 - 前端 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="3"
+        android:pathData="M115,50 L150,30" />
+    
+    <path
+        android:fillColor="#2196F3"
+        android:pathData="M150,22 A8,8 0 1,1 150,38 A8,8 0 1,1 150,22 Z" />
+    
+    <!-- 分支1文字背景 -->
+    <path
+        android:fillColor="#E3F2FD"
+        android:pathData="M145,25 L155,25 L155,35 L145,35 Z" />
+    
+    <!-- 分支2 - 后端 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#4CAF50"
+        android:strokeWidth="3"
+        android:pathData="M115,50 L150,70" />
+    
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M150,62 A8,8 0 1,1 150,78 A8,8 0 1,1 150,62 Z" />
+    
+    <!-- 分支2文字背景 -->
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M145,65 L155,65 L155,75 L145,75 Z" />
+    
+    <!-- 分支3 - 数据库 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#F44336"
+        android:strokeWidth="3"
+        android:pathData="M85,50 L50,30" />
+    
+    <path
+        android:fillColor="#F44336"
+        android:pathData="M50,22 A8,8 0 1,1 50,38 A8,8 0 1,1 50,22 Z" />
+    
+    <!-- 分支3文字背景 -->
+    <path
+        android:fillColor="#FFEBEE"
+        android:pathData="M45,25 L55,25 L55,35 L45,35 Z" />
+    
+    <!-- 分支4 - 测试 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#9C27B0"
+        android:strokeWidth="3"
+        android:pathData="M85,50 L50,70" />
+    
+    <path
+        android:fillColor="#9C27B0"
+        android:pathData="M50,62 A8,8 0 1,1 50,78 A8,8 0 1,1 50,62 Z" />
+    
+    <!-- 分支4文字背景 -->
+    <path
+        android:fillColor="#F3E5F5"
+        android:pathData="M45,65 L55,65 L55,75 L45,75 Z" />
+    
+    <!-- 底部说明文字背景 -->
+    <path
+        android:fillColor="#F5F5F5"
+        android:pathData="M20,85 L180,85 L180,115 L20,115 Z" />
+    
+    <!-- 底部说明文字 -->
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,90 L175,90 L175,92 L25,92 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,95 L160,95 L160,97 L25,97 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,100 L150,100 L150,102 L25,102 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,105 L140,105 L140,107 L25,107 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,110 L130,110 L130,112 L25,112 Z" />
+    
+</vector>

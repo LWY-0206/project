@@ -79,6 +79,35 @@
             android:background="@color/divider" />
 
         <LinearLayout
+            android:id="@+id/optionViewSummary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_ai_summary"
+                android:tint="@color/primary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="查看讨论结果"
+                android:textSize="16sp"
+                android:textColor="@color/text_primary"
+                android:layout_marginLeft="16dp" />
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider" />
+
+        <LinearLayout
             android:id="@+id/optionDeleteAllGroups"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="120dp"
+    android:viewportWidth="200"
+    android:viewportHeight="120">
+    
+    <!-- 白板背景 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,0 L200,0 L200,120 L0,120 Z" />
+    
+    <!-- 边框 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#E0E0E0"
+        android:strokeWidth="2"
+        android:pathData="M0,0 L200,0 L200,120 L0,120 Z" />
+    
+    <!-- 标题 -->
+    <path
+        android:fillColor="#333333"
+        android:pathData="M20,8 L180,8 L180,18 L20,18 Z" />
+    
+    <!-- 标题文字背景 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M25,10 L175,10 L175,16 L25,16 Z" />
+    
+    <!-- 架构图 -->
+    <!-- 顶层 - 用户界面 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#2196F3"
+        android:strokeWidth="2"
+        android:pathData="M50,25 L150,25 L150,40 L50,40 Z" />
+    
+    <!-- 顶层文字背景 -->
+    <path
+        android:fillColor="#E3F2FD"
+        android:pathData="M52,27 L148,27 L148,38 L52,38 Z" />
+    
+    <!-- 中间层左 - 业务逻辑 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#4CAF50"
+        android:strokeWidth="2"
+        android:pathData="M30,50 L90,50 L90,65 L30,65 Z" />
+    
+    <!-- 中间层左文字背景 -->
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M32,52 L88,52 L88,63 L32,63 Z" />
+    
+    <!-- 中间层右 - API接口 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#4CAF50"
+        android:strokeWidth="2"
+        android:pathData="M110,50 L170,50 L170,65 L110,65 Z" />
+    
+    <!-- 中间层右文字背景 -->
+    <path
+        android:fillColor="#E8F5E8"
+        android:pathData="M112,52 L168,52 L168,63 L112,63 Z" />
+    
+    <!-- 底层左 - 用户数据 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF9800"
+        android:strokeWidth="2"
+        android:pathData="M20,75 L60,75 L60,90 L20,90 Z" />
+    
+    <!-- 底层左文字背景 -->
+    <path
+        android:fillColor="#FFF3E0"
+        android:pathData="M22,77 L58,77 L58,88 L22,88 Z" />
+    
+    <!-- 底层中 - 业务数据 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF9800"
+        android:strokeWidth="2"
+        android:pathData="M70,75 L110,75 L110,90 L70,90 Z" />
+    
+    <!-- 底层中文字背景 -->
+    <path
+        android:fillColor="#FFF3E0"
+        android:pathData="M72,77 L108,77 L108,88 L72,88 Z" />
+    
+    <!-- 底层右 - 系统数据 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#FF9800"
+        android:strokeWidth="2"
+        android:pathData="M120,75 L160,75 L160,90 L120,90 Z" />
+    
+    <!-- 底层右文字背景 -->
+    <path
+        android:fillColor="#FFF3E0"
+        android:pathData="M122,77 L158,77 L158,88 L122,88 Z" />
+    
+    <!-- 连接线 -->
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#666666"
+        android:strokeWidth="2"
+        android:pathData="M100,40 L60,50" />
+    
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#666666"
+        android:strokeWidth="2"
+        android:pathData="M100,40 L140,50" />
+    
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#666666"
+        android:strokeWidth="2"
+        android:pathData="M60,65 L40,75" />
+    
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#666666"
+        android:strokeWidth="2"
+        android:pathData="M60,65 L90,75" />
+    
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#666666"
+        android:strokeWidth="2"
+        android:pathData="M140,65 L120,75" />
+    
+    <path
+        android:fillColor="@android:color/transparent"
+        android:strokeColor="#666666"
+        android:strokeWidth="2"
+        android:pathData="M140,65 L170,75" />
+    
+    <!-- 箭头 -->
+    <path
+        android:fillColor="#666666"
+        android:pathData="M95,45 L100,40 L105,45 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M95,45 L100,40 L105,45 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M55,65 L60,70 L55,75 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M85,65 L90,70 L85,75 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M125,65 L120,70 L125,75 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M155,65 L150,70 L155,75 Z" />
+    
+    <!-- 底部说明文字背景 -->
+    <path
+        android:fillColor="#F5F5F5"
+        android:pathData="M20,95 L180,95 L180,115 L20,115 Z" />
+    
+    <!-- 底部说明文字 -->
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,100 L175,100 L175,102 L25,102 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,105 L160,105 L160,107 L25,107 Z" />
+    
+    <path
+        android:fillColor="#666666"
+        android:pathData="M25,110 L150,110 L150,112 L25,112 Z" />
+    
+</vector>
