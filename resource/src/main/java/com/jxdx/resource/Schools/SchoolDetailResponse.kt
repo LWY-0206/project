@@ -15,7 +15,5 @@ data class SchoolDetail(
     val schoolProfile: String,
     val is985: Boolean,
     val is211: Boolean,
-    val schoolScoreThisYear: Int,
-    val schoolScoreLastYear: Int,
-    val schoolScoreLastLastYear: Int
+   val url: String,
 )

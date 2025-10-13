@@ -1,9 +1,7 @@
-package com.jxdx.resource.h5.activity
-
+package org.jxxy.debug.h5.activity
 
 import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -13,6 +11,7 @@ import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.jxdx.resource.databinding.ActivityPreviewBinding
+import java.net.URLEncoder
 
 class PreviewActivity : AppCompatActivity() {
 
@@ -44,17 +43,26 @@ class PreviewActivity : AppCompatActivity() {
 
         // 设置WebView的属性
         val webSettings: WebSettings = webView.settings
-        webSettings.javaScriptEnabled = true
-        webSettings.domStorageEnabled = true
-        webSettings.setSupportZoom(true)
-        webSettings.builtInZoomControls = true
-        webSettings.displayZoomControls = false
-        webSettings.useWideViewPort = true
-        webSettings.loadWithOverviewMode = true
-        // 添加额外的WebView设置以支持更多文件类型
-        webSettings.allowContentAccess = true
-        webSettings.allowFileAccess = true
-        webSettings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        webSettings.apply {
+            javaScriptEnabled = true
+            domStorageEnabled = true
+            setSupportZoom(true)
+            builtInZoomControls = true
+            displayZoomControls = false
+            useWideViewPort = true
+            loadWithOverviewMode = true
+            allowContentAccess = true
+            allowFileAccess = true
+            allowFileAccessFromFileURLs = true
+            allowUniversalAccessFromFileURLs = true
+            mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+
+            // 缓存设置
+            cacheMode = WebSettings.LOAD_DEFAULT
+
+            // 加载PDF需要的设置
+            loadsImagesAutomatically = true
+        }
 
         // 设置WebViewClient以在WebView内打开链接并处理错误
         webView.webViewClient = object : WebViewClient() {
@@ -87,11 +95,6 @@ class PreviewActivity : AppCompatActivity() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {
                 super.onProgressChanged(view, newProgress)
                 Log.d(TAG, "加载进度: $newProgress%")
-                
-                // 如果加载时间过长但进度没有变化，尝试切换到备用查看器
-                if (newProgress > 0 && newProgress < 100) {
-                    // 这里可以添加一个计时器来检测加载是否卡住
-                }
             }
 
             override fun onReceivedTitle(view: WebView?, title: String?) {
@@ -100,26 +103,40 @@ class PreviewActivity : AppCompatActivity() {
             }
         }
 
-        // 处理不同类型的文件
-        if (url.endsWith(".pptx", true) || url.endsWith(".ppt", true) ||
-            url.endsWith(".docx", true) || url.endsWith(".doc", true) ||
-            url.endsWith(".xlsx", true) || url.endsWith(".xls", true)) {
-            // 使用Microsoft Office Online Viewer预览Office文档
-            val officeOnlineUrl = "https://view.officeapps.live.com/op/embed.aspx?src=" + url
-            Log.d(TAG, "使用Office Online Viewer加载: $officeOnlineUrl")
-            webView.loadUrl(officeOnlineUrl)
-        } else if (url.endsWith(".pdf", true)) {
-        // 直接加载PDF，依赖WebView的内置支持（特别是X5内核）
-        Log.d(TAG, "直接加载PDF: $url")
-        webView.loadUrl(url)
-    } else {
-        webView.loadUrl(url)
-    }
+        // 处理不同类型的文件 - 使用方案一
+        try {
+            when {
+                url.endsWith(".pdf", true) -> {
+                    // 使用 Google Docs Viewer 预览 PDF
+                    val encodedUrl = URLEncoder.encode(url, "UTF-8")
+                    val googleDocsUrl = "https://docs.google.com/gview?embedded=true&url=$encodedUrl"
+                    Log.d(TAG, "使用 Google Docs Viewer 加载 PDF: $googleDocsUrl")
+                    webView.loadUrl(googleDocsUrl)
+                }
+                url.endsWith(".pptx", true) || url.endsWith(".ppt", true) ||
+                        url.endsWith(".docx", true) || url.endsWith(".doc", true) ||
+                        url.endsWith(".xlsx", true) || url.endsWith(".xls", true) -> {
+                    // 使用 Microsoft Office Online Viewer 预览 Office 文档
+                    val encodedUrl = URLEncoder.encode(url, "UTF-8")
+                    val officeOnlineUrl = "https://view.officeapps.live.com/op/embed.aspx?src=$encodedUrl"
+                    Log.d(TAG, "使用 Office Online Viewer 加载: $officeOnlineUrl")
+                    webView.loadUrl(officeOnlineUrl)
+                }
+                else -> {
+                    // 直接加载其他类型的文件
+                    webView.loadUrl(url)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "处理URL时发生错误", e)
+            Toast.makeText(this, "处理文件时发生错误", Toast.LENGTH_SHORT).show()
+            webView.loadUrl(url) // 回退到直接加载
+        }
     }
 
     // 处理返回键，让WebView可以返回上一页
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
+    override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent?): Boolean {
+        if (keyCode == android.view.KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
             webView.goBack()
             return true
         }

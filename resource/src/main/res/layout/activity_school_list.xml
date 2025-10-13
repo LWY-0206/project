@@ -24,7 +24,8 @@
             android:textColor="@color/text_secondary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"/>
 
         <!-- 搜索框 -->
         <LinearLayout
@@ -56,7 +57,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:background="@null"
-                android:hint="请输入学校名称"
+                android:hint="请输入学校名称或分数进行查询"
                 android:imeOptions="actionSearch"
                 android:inputType="text"
                 android:maxLines="1"

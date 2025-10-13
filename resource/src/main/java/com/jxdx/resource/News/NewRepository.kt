@@ -10,4 +10,7 @@ class NewRepository {
     suspend fun getNewsList(): BaseResp<List<NewsItem>> {
         return service.getNewsList()
     }
+    suspend fun getNewsDetail(id: Int): BaseResp<NewsDetail> {
+        return service.getNewsDetail(id)
+    }
 }

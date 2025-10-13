@@ -29,6 +29,11 @@ class StaggeredAdapter(
         holder.titleTextView.text = item.title
         holder.descTextView.text = item.desc
     }
+    fun updateData(newDataList: MutableList<StaggeredItem>) {
+        dataList?.clear()
+        dataList?.addAll(newDataList)
+        notifyDataSetChanged()
+    }
 
     override fun getItemCount(): Int = dataList?.size ?: 0
 

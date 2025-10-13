@@ -23,13 +23,12 @@
         android:progress="0"
         android:visibility="gone" />
 
-    <!-- WebView - 用于网页和PDF -->
+    <!-- WebView - 用于网页、PDF和微信公众号文章 -->
     <com.tencent.smtt.sdk.WebView
         android:id="@+id/x5WebView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginBottom="56dp" />
+        android:layout_marginTop="?attr/actionBarSize" />
 
     <!-- ImageView - 用于图片显示 -->
     <ImageView
@@ -37,7 +36,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginBottom="56dp"
         android:scaleType="fitCenter"
         android:visibility="gone" />
 
@@ -68,53 +66,5 @@
         android:src="@drawable/ic_arrow_back"
         android:visibility="gone"
         android:contentDescription="退出全屏" />
-
-    <!-- 底部控制栏 -->
-    <LinearLayout
-        android:id="@+id/controlLayout"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom"
-        android:orientation="horizontal"
-        android:background="#f5f5f5"
-        android:padding="8dp">
-
-        <Button
-            android:id="@+id/backButton"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:text="←"
-            android:textSize="18sp"
-            android:background="?attr/selectableItemBackgroundBorderless" />
-
-        <Button
-            android:id="@+id/forwardButton"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:text="→"
-            android:textSize="18sp"
-            android:background="?attr/selectableItemBackgroundBorderless" />
-
-        <Button
-            android:id="@+id/refreshButton"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:text="⟳"
-            android:textSize="18sp"
-            android:background="?attr/selectableItemBackgroundBorderless" />
-
-        <Button
-            android:id="@+id/shareButton"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:text="↗"
-            android:textSize="18sp"
-            android:background="?attr/selectableItemBackgroundBorderless" />
-
-    </LinearLayout>
 
 </FrameLayout>
