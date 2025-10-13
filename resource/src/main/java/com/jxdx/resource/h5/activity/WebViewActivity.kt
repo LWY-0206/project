@@ -31,6 +31,7 @@ import com.tencent.smtt.export.external.interfaces.JsResult
 import com.tencent.smtt.export.external.interfaces.MediaAccessPermissionsCallback
 import com.tencent.smtt.sdk.QbSdk
 import com.tencent.smtt.sdk.QbSdk.PreInitCallback
+import java.net.URLEncoder
 import java.util.HashMap
 
 class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
@@ -178,11 +179,36 @@ class WebViewActivity : BaseActivity<ActivityWebViewBinding>() {
      * 使用Microsoft Office Online Viewer显示PDF
      */
     private fun showPdfWithOfficeOnline() {
-       val intent = Intent(this, PreviewActivity::class.java)
-           .putExtra("url", currentUrl)
-           .putExtra("title", title)
-        Log.d("Intent", "url=${currentUrl}, title=${title}")
-         startActivity(intent)
+        // 显示WebView
+        view.x5WebView.visibility = View.VISIBLE
+        view.videoContainer.visibility = View.GONE
+        view.imageView.visibility = View.GONE
+
+        // 配置WebView设置
+        setupWebViewForPdf()
+
+        try {
+            // 对PDF URL进行编码
+            val encodedPdfUrl = URLEncoder.encode(currentUrl, "UTF-8")
+
+            // 使用Microsoft Office Online Viewer
+            val officeViewerUrl = "https://view.officeapps.live.com/op/embed.aspx?src=$encodedPdfUrl"
+
+            Log.d("PDF_VIEWER", "Loading PDF with Office Online: $officeViewerUrl")
+            view.x5WebView.loadUrl(officeViewerUrl)
+
+        } catch (e: Exception) {
+            Log.e("PDF_VIEWER", "Error loading PDF with Office Online", e)
+            "PDF加载失败，尝试其他方式".toast(false)
+
+            // 备选方案：直接加载PDF URL（依赖X5内核的PDF支持）
+            try {
+                view.x5WebView.loadUrl(currentUrl)
+            } catch (e2: Exception) {
+                Log.e("PDF_VIEWER", "Error loading PDF directly", e2)
+                "PDF加载失败: ${e2.message}".toast(false)
+            }
+        }
     }
 
     /**
