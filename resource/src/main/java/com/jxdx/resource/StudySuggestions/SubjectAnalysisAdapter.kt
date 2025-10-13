@@ -3,8 +3,10 @@ package com.jxdx.resource.StudySuggestions
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.jxdx.resource.R
 
 class SubjectAnalysisAdapter(
@@ -25,6 +27,7 @@ class SubjectAnalysisAdapter(
         val tvRecommendedHours: TextView = itemView.findViewById(R.id.tv_recommended_hours)
         val tvSuggestion: TextView = itemView.findViewById(R.id.tv_suggestion)
         val tvExpand: TextView = itemView.findViewById(R.id.tv_expand)
+        val ivsuggestion: ImageView = itemView.findViewById(R.id.iv_suggestion)
 
         init {
             itemView.setOnClickListener {
@@ -69,6 +72,10 @@ class SubjectAnalysisAdapter(
         holder.tvAssignments.text = "作业数: ${subject.totalAssignments}"
         holder.tvRecommendedHours.text = "建议: ${subject.recommendedHours}小时/周"
         holder.tvSuggestion.text = subject.suggestion
+        Glide.with(holder.itemView.context)
+            .load(subject.staticUrl)
+            .timeout(30000)                            // 设置超时时间(毫秒)
+            .into(holder.ivsuggestion)
 
         // 设置展开状态
         if (expandedItems.contains(position)) {

@@ -1,4 +1,5 @@
-package Schedule.FirstPage
+// ScheduleItem.kt
+package com.jxdx.resource.Schedule
 
 data class ScheduleItem(
     val week: String,           // 第几周

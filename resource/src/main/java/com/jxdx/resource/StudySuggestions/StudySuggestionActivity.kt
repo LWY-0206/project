@@ -6,6 +6,7 @@ import android.view.View
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.corekit.common.BaseActivity
 import com.jxdx.resource.databinding.ActivityStudySuggestionBinding
 
@@ -80,6 +81,10 @@ class StudySuggestionActivity : BaseActivity<ActivityStudySuggestionBinding>() {
 
         // 显示学科分析
         adapter.setData(studyData.subjectAnalyses)
+        Glide.with(this)
+            .load(studyData.leidaPicture)
+            .timeout(30000)                            // 设置超时时间(毫秒)
+            .into(view.ivLeida)
 
         // 更新空状态显示
         updateEmptyView(studyData.subjectAnalyses.isEmpty(), searchQuery)

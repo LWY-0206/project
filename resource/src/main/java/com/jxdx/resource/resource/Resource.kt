@@ -2,28 +2,38 @@ package com.jxdx.resource.resource
 
 import android.content.Intent
 import android.util.Log
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.corekit.common.BaseFragment
 import com.jxdx.resource.Famous.FamousListActivity
 import com.jxdx.resource.Questions.QuestionSelectionActivity
+import com.jxdx.resource.Recommendation.RecommendationItem
+import com.jxdx.resource.Recommendation.RecommendationViewModel
+import com.jxdx.resource.Recommendation.WaterfallAdapter
 import com.jxdx.resource.Schools.SchoolListActivity
 import com.jxdx.resource.databinding.FragmentResourceBinding
+import com.tencent.smtt.utils.e
 import com.youth.banner.Banner
 import org.jxxy.debug.h5.activity.GeoGebraActivity
 import org.jxxy.debug.h5.activity.ToolActivity
+import org.jxxy.debug.h5.activity.WebViewActivity
 
 
 class Resource : BaseFragment<FragmentResourceBinding>() {
+    private lateinit var waterfallRecyclerView: RecyclerView
     private var topBanner: Banner? = null
     private lateinit var rvStaggered: RecyclerView
-    private lateinit var adapter: StaggeredAdapter
-    private val dataList: MutableList<StaggeredItem> = ArrayList() // 去掉可空泛型
+    private lateinit var waterfallAdapter: WaterfallAdapter
+    private val recommendationList = mutableListOf<RecommendationItem>()
+    private lateinit var recommendationViewModel: RecommendationViewModel
     override fun bindLayout(): FragmentResourceBinding {
         return FragmentResourceBinding.inflate(layoutInflater)
     }
 
     override fun initView() {
+        recommendationViewModel = ViewModelProvider(this)[RecommendationViewModel::class.java]
         topBanner = find.topBanner
         val imageUrls: MutableList<String?> = ArrayList<String?>()
         imageUrls.add(
@@ -36,14 +46,6 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
             ?.isAutoPlay(true)           // 开启自动轮播
             ?.setDelayTime(3000)         // 轮播间隔（毫秒）
             ?.start();                   // 启动轮播
-        prepareTestData()
-        adapter = StaggeredAdapter(requireContext(), dataList)
-        rvStaggered = find.rvStaggered
-        rvStaggered.adapter = adapter
-
-        val layoutManager =
-            StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
-        rvStaggered.setLayoutManager(layoutManager)
         val famous = find.tvFamous.setOnClickListener {
             val intent = Intent(requireContext(), FamousListActivity::class.java)
             Log.d("Resource", "跳转名人")
@@ -69,30 +71,68 @@ class Resource : BaseFragment<FragmentResourceBinding>() {
             Log.d("Resource", "跳转工具")
             startActivity(intent)
         }
+        setupWaterfallRecyclerView()
     }
 
     override fun subscribeUi() {
+        recommendationViewModel.recommendationLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    recommendationList.clear()
+                    recommendationList.addAll(data)
+                   waterfallAdapter.updateData(recommendationList)
+                    Log.d("RecommendationViewModel", "Data loaded successfully, size: ${data}")
+                } else {
+                }
+            }
+        }
+        recommendationViewModel.recommendationDetailLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    WebViewActivity.actionStart(requireActivity(), data.fileUrl, data.title)
+                }
+            }
+        }
+
+    }
+    private fun setupWaterfallRecyclerView() {
+        waterfallRecyclerView = find.rvStaggered
+        // 设置瀑布流布局管理器，2列
+        val layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
+        waterfallRecyclerView.layoutManager = layoutManager
+
+        // 创建适配器
+        waterfallAdapter = WaterfallAdapter(recommendationList)
+        waterfallRecyclerView.adapter = waterfallAdapter
+
+        // 设置点击事件
+        waterfallAdapter.onItemClickListener = { item ->
+            handleItemClick( item)
+        }
+        // 添加滚动监听实现加载更多
+        waterfallRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (!recyclerView.canScrollVertically(1)) {
+                    Toast.makeText(requireContext(), "已经到底啦！！！", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+
+        // 加载推荐数据
+        loadRecommendationData()
+    }
+    private fun loadRecommendationData() {
+        Log.d("Recommendation", "开始加载推荐数据")
+        recommendationViewModel.getRecommendationList(2)
+    }
+    private fun handleItemClick(item: RecommendationItem) {
+        // 根据类型处理点击事件
+        if (item.isVideo()) {
+            recommendationViewModel.getRecommendationDetail(item.id.toInt())
+        } else {
+            recommendationViewModel.getRecommendationDetail(item.id.toInt())
+        }
     }
 
-    private fun prepareTestData() {
-        dataList.add(
-            StaggeredItem("https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
-                "高中优质数学资源",
-                "100讲基础必看"
-            )
-        )
-        dataList.add(
-            StaggeredItem(
-                "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
-                "联考试卷",
-                "2025优质模拟"
-            )
-        )
-        dataList.add(
-            StaggeredItem("https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png","数栋优质题库",
-                "分类汇编"
-            )
-        )
-        // 可继续添加更多条目...
-    }
 }

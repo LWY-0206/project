@@ -15,14 +15,16 @@ import com.example.corekit.common.BaseActivity
 import com.example.corekit.http.bean.Resource
 import com.jxdx.resource.R
 import com.jxdx.resource.databinding.ActivitySchoolDetailBinding
+import com.jxdx.resource.databinding.ActivitySchoolDetailNewBinding
+import org.jxxy.debug.h5.activity.WebViewActivity
 
-class SchoolDetailActivity : BaseActivity<ActivitySchoolDetailBinding>() {
+class SchoolDetailActivity : BaseActivity<ActivitySchoolDetailNewBinding>() {
 
     private lateinit var viewModel: SchoolDetailViewModel
     private var schoolId: Int = -1
 
-    override fun bindLayout(): ActivitySchoolDetailBinding {
-        return ActivitySchoolDetailBinding.inflate(layoutInflater)
+    override fun bindLayout(): ActivitySchoolDetailNewBinding {
+        return ActivitySchoolDetailNewBinding.inflate(layoutInflater)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +90,11 @@ class SchoolDetailActivity : BaseActivity<ActivitySchoolDetailBinding>() {
     }
 
     private fun bindSchoolDetail(schoolDetail: SchoolDetail) {
+        view.btnTalk.setOnClickListener {
+            if(schoolDetail.url.isNotEmpty()){
+                WebViewActivity.actionStart(this, schoolDetail.url)
+            }
+        }
         // 显示内容视图
         view.contentView.visibility = View.VISIBLE
         view.errorView.visibility = View.GONE
@@ -111,14 +118,6 @@ class SchoolDetailActivity : BaseActivity<ActivitySchoolDetailBinding>() {
             view.tv211.visibility = View.GONE
         }
 
-        // 设置历年分数线表格
-        view.tvScoreThisYear.text = schoolDetail.schoolScoreThisYear.toString()
-        view.tvScoreLastYear.text = schoolDetail.schoolScoreLastYear.toString()
-        view.tvScoreLastLastYear.text = schoolDetail.schoolScoreLastLastYear.toString()
-        view.btnClose.setOnClickListener {
-            //返回上一个activity
-            finish()
-        }
         // 使用Glide加载校徽
         Glide.with(this)
             .load(schoolDetail.emblemUrl)
