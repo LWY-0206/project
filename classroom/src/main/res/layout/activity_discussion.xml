@@ -104,6 +104,15 @@
                 android:src="@drawable/ic_add"
                 android:layout_marginEnd="8dp"/>
 
+            <ImageView
+                android:id="@+id/ivToolbox"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_math"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"/>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

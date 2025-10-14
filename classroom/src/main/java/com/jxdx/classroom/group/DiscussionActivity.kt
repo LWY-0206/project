@@ -277,6 +277,11 @@ class DiscussionActivity : AppCompatActivity() {
             showAttachmentOptions()
         }
 
+        // 工具箱按钮点击事件
+        binding.ivToolbox.setOnClickListener {
+            showToolboxOptions()
+        }
+
         // 更多选项按钮点击事件
         binding.ivMore.setOnClickListener {
             showMoreOptions()
@@ -305,6 +310,80 @@ class DiscussionActivity : AppCompatActivity() {
     private fun openWhiteboardDraw() {
         val intent = Intent(this, WhiteboardDrawActivity::class.java)
         startActivity(intent)
+    }
+
+    /**
+     * 打开数学工具
+     */
+    private fun openMathTools() {
+        try {
+            Log.d("DiscussionActivity", "开始打开数学工具...")
+            
+            // 使用ComponentName方式启动Activity
+            val intent = Intent().apply {
+                component = android.content.ComponentName(
+                    "com.example.loding", // 主应用的包名
+                    "org.jxxy.debug.h5.activity.GeoGebraActivity"
+                )
+                putExtra("whiteBoardMode", false)
+            }
+            
+            Log.d("DiscussionActivity", "Intent组件: ${intent.component}")
+            
+            // 检查Activity是否存在
+            val resolveInfo = intent.resolveActivity(packageManager)
+            if (resolveInfo != null) {
+                Log.d("DiscussionActivity", "找到数学工具Activity")
+                startActivity(intent)
+                Toast.makeText(this, "正在打开数学工具...", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.w("DiscussionActivity", "数学工具Activity未找到")
+                Toast.makeText(this, "数学工具暂时不可用", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "数学工具启动失败: ${e.message}", Toast.LENGTH_SHORT).show()
+            Log.e("DiscussionActivity", "打开数学工具失败: ${e.message}", e)
+        }
+    }
+
+    /**
+     * 打开化学工具
+     */
+    private fun openChemTools() {
+        try {
+            Log.d("DiscussionActivity", "开始打开化学工具...")
+            
+            // 使用ComponentName方式启动Activity
+            val intent = Intent().apply {
+                component = android.content.ComponentName(
+                    "com.example.loding", // 主应用的包名
+                    "org.jxxy.debug.h5.activity.ToolActivity"
+                )
+            }
+            
+            Log.d("DiscussionActivity", "Intent组件: ${intent.component}")
+            
+            // 检查Activity是否存在
+            val resolveInfo = intent.resolveActivity(packageManager)
+            if (resolveInfo != null) {
+                Log.d("DiscussionActivity", "找到化学工具Activity")
+                startActivity(intent)
+                Toast.makeText(this, "正在打开化学工具...", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.w("DiscussionActivity", "化学工具Activity未找到")
+                Toast.makeText(this, "化学工具暂时不可用", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Toast.makeText(this, "化学工具启动失败: ${e.message}", Toast.LENGTH_SHORT).show()
+            Log.e("DiscussionActivity", "打开化学工具失败: ${e.message}", e)
+        }
+    }
+
+    /**
+     * 打开物理工具
+     */
+    private fun openPhysicsTools() {
+        Toast.makeText(this, "物理工具功能开发中...", Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -528,6 +607,44 @@ class DiscussionActivity : AppCompatActivity() {
     }
 
     /**
+     * 显示工具箱选项
+     * 显示工具箱底部弹窗（数学工具、化学工具、物理工具等）
+     */
+    private fun showToolboxOptions() {
+        // 创建底部弹窗
+        val dialog = BottomSheetDialog(this)
+        val view = layoutInflater.inflate(R.layout.bottom_sheet_toolbox, null)
+
+        // 设置数学工具点击事件
+        view.findViewById<View>(R.id.optionMathTools).setOnClickListener {
+            openMathTools()
+            dialog.dismiss()
+        }
+
+        // 设置化学工具点击事件
+        view.findViewById<View>(R.id.optionChemTools).setOnClickListener {
+            openChemTools()
+            dialog.dismiss()
+        }
+
+        // 设置物理工具点击事件
+        view.findViewById<View>(R.id.optionPhysicsTools).setOnClickListener {
+            openPhysicsTools()
+            dialog.dismiss()
+        }
+
+        // 设置更多工具点击事件
+        view.findViewById<View>(R.id.optionMoreTools).setOnClickListener {
+            Toast.makeText(this, "更多工具功能开发中...", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        // 显示弹窗
+        dialog.setContentView(view)
+        dialog.show()
+    }
+
+    /**
      * 显示附件选项
      * 显示附件选择底部弹窗（图片、文件、拍照）
      */
@@ -732,7 +849,11 @@ class DiscussionActivity : AppCompatActivity() {
                                 if (::messagesAdapter.isInitialized) {
                                     messagesAdapter.notifyDataSetChanged()
                                 }
+
                                 Log.d("DiscussionActivity", "Successfully loaded current user avatar from UserInfo: ${userInfo.avatarUrl}")
+                            }
+                            else {
+                                Log.w("DiscussionActivity", "Failed to load user info: userInfo is null")
                             }
                         } else {
                             Log.w("DiscussionActivity", "Failed to load user info: body is null or code is not 0")
