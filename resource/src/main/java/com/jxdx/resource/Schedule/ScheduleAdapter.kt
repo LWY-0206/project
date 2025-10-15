@@ -1,4 +1,4 @@
-package Schedule.FirstPage
+package com.jxdx.resource.Schedule
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

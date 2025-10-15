@@ -1,7 +1,5 @@
 package com.jxdx.resource.FirstPage
 
-import Schedule.FirstPage.ScheduleAdapter
-import Schedule.FirstPage.ScheduleItem
 import com.jxdx.resource.Schedule.ScheduleViewModel
 import android.content.Intent
 import android.net.Uri
@@ -19,11 +17,14 @@ import com.google.gson.Gson
 import com.jxdx.resource.News.NewsAdapter
 import com.jxdx.resource.News.NewsItem
 import com.jxdx.resource.News.NewVIewModel
+import com.jxdx.resource.News.NewsListActivity
 import com.jxdx.resource.Recommendation.RecommendationItem
 import com.jxdx.resource.Recommendation.RecommendationResponse
 import com.jxdx.resource.Recommendation.RecommendationViewModel
 import com.jxdx.resource.Recommendation.WaterfallAdapter
 import com.jxdx.resource.RescourseDetail.PdfViewerActivity
+import com.jxdx.resource.Schedule.ScheduleAdapter
+import com.jxdx.resource.Schedule.ScheduleItem
 import com.jxdx.resource.StudySuggestions.StudySuggestionActivity
 import com.jxdx.resource.databinding.FragmentFirstBinding
 import com.jxdx.resource.databinding.LayoutNewsSectionBinding
@@ -34,7 +35,7 @@ import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import com.jxdx.resource.h5.activity.WebViewActivity
+import org.jxxy.debug.h5.activity.WebViewActivity
 import java.io.File
 import java.io.IOException
 import java.util.Calendar
@@ -163,13 +164,17 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
                 showMessage("加载新闻失败")
             }
         }
+        newsViewModel.detailLiveData.observe(this) { result ->
+            result.onSuccess { data ->
+                if (data != null) {
+                    WebViewActivity.actionStart(requireActivity(),data.summary, data.title)
+                }
+            }
+        }
     }
 
     private fun initSchedule() {
         // 设置刷新按钮点击事件
-        find.ivRefresh.setOnClickListener {
-            refreshSchedule()
-        }
 
         // 设置课表RecyclerView
         setupScheduleRecyclerView()
@@ -190,7 +195,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         // 设置点击事件
         scheduleAdapter.onItemClickListener = { scheduleItem ->
             // 跳转到课表详情页面
-            showMessage("查看课程: ${scheduleItem.courseName}")
+           // showMessage("查看课程: ${scheduleItem.courseName}")
             // val intent = Intent(requireContext(), ScheduleDetailActivity::class.java)
             // intent.putExtra("schedule_item", scheduleItem)
             // startActivity(intent)
@@ -315,11 +320,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
         }
     }
 
-    private fun refreshSchedule() {
-        showMessage("刷新课表")
-        // 重新加载当前选择的周次和星期的数据
-        scheduleViewModel.getScheduleList(currentWeek, currentWeekday)
-    }
+
 
     // 以下方法保持不变...
     private fun setUpFloatingActionButton() {
@@ -425,13 +426,14 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
 
         // 设置点击事件
         waterfallAdapter.onItemClickListener = { item ->
-          handleItemClick( item)
+            handleItemClick( item)
         }
         // 添加滚动监听实现加载更多
         waterfallRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (!recyclerView.canScrollVertically(1)) {
+                    //showMessage("已经到底啦")
                 }
             }
         })
@@ -441,7 +443,7 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
     }
     private fun loadRecommendationData() {
         Log.d("Recommendation", "开始加载推荐数据")
-        recommendationViewModel.getRecommendationList(2)
+        recommendationViewModel.getRecommendationList(1)
     }
     private fun handleItemClick(item: RecommendationItem) {
         // 根据类型处理点击事件
@@ -451,55 +453,6 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
             recommendationViewModel.getRecommendationDetail(item.id.toInt())
         }
     }
-
-    private fun handleFavoriteClick(item: RecommendationItem) {
-        // 切换收藏状态
-        item.isFavorited = !item.isFavorited
-
-        // 更新UI
-        val position = recommendationList.indexOf(item)
-        if (position != -1) {
-            waterfallAdapter.notifyItemChanged(position)
-        }
-
-        // 显示提示信息
-        if (item.isFavorited) {
-            showMessage("已收藏: ${item.title}")
-        } else {
-            showMessage("取消收藏: ${item.title}")
-        }
-
-        // 这里可以添加实际的收藏/取消收藏API调用
-        // callFavoriteApi(item.id, item.isFavorited)
-    }
-
-    private fun loadMoreData() {
-        // 模拟加载更多数据
-        val newItems = listOf(
-            RecommendationItem(
-                id = "7",
-                title = "新添加的内容1",
-                description = "这是加载更多的测试内容",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
-                type = "video",
-                duration = "10:15",
-                viewCount = 500,
-                likeCount = 23
-            ),
-            RecommendationItem(
-                id = "8",
-                title = "新添加的内容2",
-                description = "这是另一个加载更多的测试内容",
-                coverUrl = "https://classroom-interaction.oss-cn-hangzhou.aliyuncs.com/updateFiles/58765522-815b-4191-aeb5-9b8a552ba891.png",
-                type = "article",
-                viewCount = 300,
-                likeCount = 15
-            )
-        )
-
-        waterfallAdapter.addData(newItems)
-    }
-
     private fun showMessage(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
@@ -560,26 +513,16 @@ class FirstFragment : BaseFragment<FragmentFirstBinding>() {
             Log.d("News", "第一条新闻图片: ${newsItems[0].coverUrl}")
         }
     }
-
-    // 加载更多新闻（如果需要分页）
-    private fun loadMoreNews() {
-        // 如果需要分页加载更多新闻，可以在这里实现
-        // 目前API没有分页参数，暂时不实现
-    }
-
     private fun openNewsList() {
         // 跳转到新闻列表页面
-        showMessage("查看所有新闻")
-        // val intent = Intent(requireContext(), NewsListActivity::class.java)
-        // startActivity(intent)
+       // showMessage("查看所有新闻")
+        val intent: Intent = Intent(requireContext(), NewsListActivity::class.java)
+        startActivity(intent)
     }
 
     private fun openNewsDetail(newsItem: NewsItem) {
         // 跳转到新闻详情页面
-        showMessage("打开新闻: ${newsItem.title}")
-        // val intent = Intent(requireContext(), NewsDetailActivity::class.java)
-        // intent.putExtra("news_id", newsItem.id)
-        // startActivity(intent)
+        newsViewModel.getNewsDetail(newsItem.id)
     }
 
     // 清理资源

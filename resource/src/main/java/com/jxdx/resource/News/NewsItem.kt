@@ -24,3 +24,9 @@ data class NewsItem(
         }
     }
 }
+data class NewsDetail(
+    val title: String,
+    val summary: String,//资源的url
+    val source: String,
+    val publishTime: String,
+)

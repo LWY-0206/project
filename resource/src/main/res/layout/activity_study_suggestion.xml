@@ -139,7 +139,7 @@
             android:layout_width="120dp"
             android:layout_height="120dp"
             android:src="@drawable/ic_empty_study"
-            android:tint="@color/gray_300" />
+            app:tint="@color/gray_300" />
 
         <TextView
             android:id="@+id/emptyText"
@@ -151,5 +151,9 @@
             android:textSize="14sp" />
 
     </LinearLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/iv_leida" />
 
 </LinearLayout>

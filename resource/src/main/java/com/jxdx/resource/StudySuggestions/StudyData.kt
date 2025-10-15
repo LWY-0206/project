@@ -1,8 +1,10 @@
 package com.jxdx.resource.StudySuggestions
 
+
 data class StudyData (
     val subjectAnalyses:List<SubjectAnalyses>,
-    val overallSuggestion:String
+    val overallSuggestion:String,
+    val leidaPicture: String
 
 )
 data class SubjectAnalyses (
@@ -11,4 +13,5 @@ data class SubjectAnalyses (
     val totalAssignments:Int,
     val suggestion:String,
     val recommendedHours:Int,
+    val staticUrl: String
 )
