@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="nested_child_item_container" type="id"/>
+    <declare-styleable name="RoundImageView">
+        <attr name="round_as_circle"/>
+        <attr name="round_corner"/>
+        <attr name="round_corner_top_left"/>
+        <attr name="round_corner_left"/>
+        <attr name="round_corner_top"/>
+        <attr name="round_corner_right"/>
+        <attr name="round_corner_bottom"/>
+        <attr name="round_corner_top_right"/>
+        <attr name="round_corner_bottom_left"/>
+        <attr name="round_corner_bottom_right"/>
+        <attr name="round_stroke_color"/>
+        <attr name="round_stroke_width"/>
+    </declare-styleable>
+
+</resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- 文档隐含逻辑：针对特定域名放宽明文限制，而非全局允许 -->
+    <domain-config cleartextTrafficPermitted="true">
+        <!--        &lt;!&ndash; 允许你的后端域名使用 HTTP 明文通信 &ndash;&gt;121.41.176.238-->
+        <domain includeSubdomains="true">47.99.43.189</domain>
+    </domain-config>
+
+
+    <domain-config cleartextTrafficPermitted="true">
+        <!--        &lt;!&ndash; 允许你的后端域名使用 HTTP 明文通信 &ndash;&gt;121.41.176.238-->
+        <domain includeSubdomains="true">121.41.176.238</domain>
+    </domain-config>
+
+    <!-- 允许阿里云OSS域名的网络访问 -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">classroom-interaction.oss-cn-hangzhou.aliyuncs.com</domain>
+    </domain-config>
+</network-security-config>

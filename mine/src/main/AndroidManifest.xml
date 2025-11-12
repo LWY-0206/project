@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- 对于Android 10及以上版本，如果需要访问所有文件，可以添加 -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" /> <!-- 如果需要访问相机和存储的特殊权限 -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+
+    <application
+        android:allowBackup="true"
+        android:label="@string/app_name">
+        <activity
+            android:name=".course.CreateCourseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".course.CourseActivity"
+            android:exported="false" />
+        <activity
+            android:name=".service.EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".homework.HomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".homework.HomeworkDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".grade.GradeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".course.CourseListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".course.PreviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".course.UploadCoursewareInfoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.CourseListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.HomeworkDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.HomeworkListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.ReviewHomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.CreateHomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.EditHomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.AiCreateHomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.PublishedHomeworkDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.TeacherReviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.UncorrectedHomeworkDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.ReviewHomeworkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".teacherhomework.CorrectedHomeworkDetailActivity"
+            android:exported="false" />
+    </application>
+
+</manifest>

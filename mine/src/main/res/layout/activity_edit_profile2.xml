@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/backgroud2">
+    <!-- 顶部导航栏 - 替换Toolbar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="20dp">
+        
+        <!-- 返回按钮 -->
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="返回按钮" />
+        
+        <!-- 标题文本 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="编辑个人简介"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+        
+        <!-- 占位视图，保持标题居中 -->
+        <View
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="8dp">
+        
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="个人简介"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+        android:id="@+id/profile"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:gravity="top"
+        android:hint="请输入您的个人简介（最多150字）"
+        android:inputType="textMultiLine"
+        android:maxLines="10"
+        android:padding="12dp"
+        android:background="@drawable/edit_text_border"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end">
+
+            <TextView
+                android:id="@+id/tvWordCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0/150"
+                android:textColor="#666666"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="保存"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/purple_500"/>
+
+    </LinearLayout>
+</LinearLayout>

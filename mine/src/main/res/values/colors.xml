@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="gray_200">#FFEEEEEE</color>
+    <color name="gray_400">#FFBDBDBD</color>
+    <color name="gray_600">#FF757575</color>
+    <color name="red_600">#FFE53935</color>
+    <!-- 选项背景相关颜色 -->
+    <color name="gray_100">#F5F5F5</color> <!-- 选项容器背景 -->
+
+    <!-- 选项标识颜色 -->
+    <color name="blue">#2196F3</color> <!-- A选项 -->
+    <color name="blue_dark">#1976D2</color> <!-- A选项边框 -->
+
+    <color name="green">#4CAF50</color> <!-- B选项 -->
+    <color name="green_dark">#388E3C</color> <!-- B选项边框 -->
+
+    <color name="orange">#FF9800</color> <!-- C选项 -->
+    <color name="orange_dark">#F57C00</color> <!-- C选项边框 -->
+
+    <color name="red">#F44336</color> <!-- D选项 -->
+    <color name="red_dark">#D32F2F</color> <!-- D选项边框 -->
+    <color name="gray_300">#E0E0E0</color>
+    <color name="gray_500">#9E9E9E</color>
+    <color name="gray_700">#616161</color>
+    <color name="gray_900">#212121</color>
+    <color name="gray_800">#424242</color>
+    <!-- 在colors.xml中添加 -->
+    <color name="blue_light">#E3F2FD</color> <!-- 浅蓝色背景（选中状态） -->
+    <!-- 选项背景相关颜色 -->
+    <color name="text_primary">#DE000000</color>
+    <!-- 选项标识颜色 -->
+    <color name="text_secondary">#8A000000</color>
+    <color name="error_color">#FF0000</color>
+    <color name="success_color">#4CAF50</color>
+    <color name="divider">#FFDDDDDD</color>
+    <!-- 表格颜色 -->
+    <color name="table_header_bg">#3F51B5</color>
+    <color name="table_header_text">#FFFFFF</color>
+    <color name="table_row_bg">#FFFFFF</color>
+    <color name="table_row_bg_pressed">#EEEEEE</color>
+    <color name="table_border">#1F000000</color>
+    <!-- 新增颜色 -->
+    <color name="primary_color">#2196F3</color>
+    <color name="background_gray">#F5F5F5</color>
+    <color name="common_text_main_black">#212121</color>
+    
+    <!-- 蓝色系列颜色 -->
+    <color name="blue_50">#E3F2FD</color>
+    <color name="blue_100">#BBDEFB</color>
+    <color name="blue_200">#90CAF9</color>
+    <color name="blue_300">#64B5F6</color>
+    <color name="blue_400">#42A5F5</color>
+    <color name="blue_500">#2196F3</color>
+    <color name="blue_600">#1E88E5</color>
+    <color name="blue_700">#1976D2</color>
+    <color name="blue_800">#1565C0</color>
+    <color name="blue_900">#0D47A1</color>
+</resources>

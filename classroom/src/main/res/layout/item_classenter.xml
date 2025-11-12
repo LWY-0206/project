@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?android:attr/selectableItemBackground">
+
+        <!-- 顶部状态条 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:background="@drawable/status_gradient"
+            android:layout_marginTop="0dp" />
+
+        <!-- 主要内容区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:gravity="center_vertical">
+
+            <!-- 课程信息 -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginEnd="12dp">
+
+                <!-- 课程名 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvCourseNameLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="课程名："
+                        android:textSize="16sp"
+                        android:textColor="#666666" />
+
+                    <TextView
+                        android:id="@+id/tvCourseNameValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="JAVA"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="#1A1A1A"
+                        android:layout_marginStart="8dp"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+                </LinearLayout>
+
+                <!-- 科目信息 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="6dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvSubjectLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="科目："
+                        android:textSize="14sp"
+                        android:textColor="#888888" />
+
+                    <TextView
+                        android:id="@+id/tvSubjectValue"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="JAVA设计"
+                        android:textSize="16sp"
+                        android:textColor="#333333"
+                        android:layout_marginStart="8dp"
+                        android:maxLines="1"
+                        android:ellipsize="end" />
+                </LinearLayout>
+
+                <!-- 班级和老师信息 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical">
+
+                    <!-- 班级信息 -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_group"
+                            android:alpha="0.6"
+                            android:scaleType="centerInside" />
+
+                        <TextView
+                            android:id="@+id/tvClassNameLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="班级："
+                            android:textSize="12sp"
+                            android:textColor="#888888"
+                            android:layout_marginStart="4dp" />
+
+                        <TextView
+                            android:id="@+id/tvClassNameValue"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="软件231"
+                            android:textSize="14sp"
+                            android:textColor="#555555"
+                            android:layout_marginStart="4dp"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+                    </LinearLayout>
+
+                    <!-- 分隔线 -->
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="20dp"
+                        android:background="#E0E0E0"
+                        android:layout_marginHorizontal="8dp" />
+
+                    <!-- 老师信息 -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:src="@drawable/ic_teacher"
+                            android:alpha="0.6"
+                            android:scaleType="centerInside" />
+
+                        <TextView
+                            android:id="@+id/tvTeacherLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="老师："
+                            android:textSize="12sp"
+                            android:textColor="#888888"
+                            android:layout_marginStart="4dp" />
+
+                        <TextView
+                            android:id="@+id/tvTeacherValue"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="李老师"
+                            android:textSize="14sp"
+                            android:textColor="#555555"
+                            android:layout_marginStart="4dp"
+                            android:maxLines="1"
+                            android:ellipsize="end" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- 状态信息 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="8dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/tvStatusLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="状态："
+                        android:textSize="12sp"
+                        android:textColor="#888888" />
+
+                    <TextView
+                        android:id="@+id/tvStatusValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="正在直播"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="#4CAF50"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/status_badge"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="2dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- 右侧进入按钮 -->
+            <Button
+                android:id="@+id/btnEnterClass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="进入课堂"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/enter_button_bg"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="12dp"
+                android:elevation="2dp"
+                android:stateListAnimator="@null" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

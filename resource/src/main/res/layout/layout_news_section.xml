@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@drawable/rounded_corner_bg"
+    android:layout_margin="8dp">
+
+    <!-- 新闻模块标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_news" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="校园新闻"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- 查看更多 -->
+        <TextView
+            android:id="@+id/tv_view_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="查看更多"
+            android:textSize="12sp"
+            android:textColor="@color/blue_500"
+            android:drawableEnd="@drawable/ic_arrow_right_small"
+            android:drawablePadding="4dp"
+            android:paddingVertical="4dp"
+            android:paddingHorizontal="8dp"
+            android:background="?attr/selectableItemBackground" />
+
+    </LinearLayout>
+
+    <!-- 使用RecyclerView替代原来的LinearLayout -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_news"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:nestedScrollingEnabled="false" />
+
+    <!-- 加载状态 -->
+    <ProgressBar
+        android:id="@+id/pb_news_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"
+        android:visibility="gone" />
+
+    <!-- 空状态 -->
+    <TextView
+        android:id="@+id/tv_empty_news"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="暂无新闻"
+        android:textSize="14sp"
+        android:textColor="@color/gray_500"
+        android:gravity="center"
+        android:padding="20dp"
+        android:visibility="gone" />
+
+</LinearLayout>

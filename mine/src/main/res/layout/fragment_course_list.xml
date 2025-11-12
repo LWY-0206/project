@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+    
+    <!-- 顶部标题栏 -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/white"
+        android:elevation="4dp">
+
+        <!-- 返回按钮 -->
+        <ImageView
+            android:id="@+id/back_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="返回按钮"
+            android:src="@drawable/ic_back"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            app:tint="@color/black" />
+
+        <!-- 标题文本 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="我的课程"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:layout_centerInParent="true" />
+            
+        <!--创建课程-->
+        <TextView
+            android:id="@+id/create_course"
+            android:layout_width="100dp"
+            android:layout_height="36dp"
+            android:gravity="center"
+            android:text="创建课程"
+            android:textColor="@color/blue"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="visible"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="16dp"
+            android:background="@drawable/rounded_corner_blue_bg" />
+
+    </RelativeLayout>
+
+    <!-- 搜索栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+        
+        <LinearLayout
+            android:id="@+id/searchBarContainer"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/search_bg"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="12dp">
+            
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_search"
+                android:contentDescription="搜索图标"
+                app:tint="@color/gray_400" />
+                
+            <EditText
+                android:id="@+id/searchEditText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="搜索课程"
+                android:textSize="14sp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/gray_400"
+                android:layout_marginLeft="8dp"
+                android:background="@null"
+                android:imeOptions="actionSearch"
+                android:singleLine="true" />
+                
+            <ImageView
+                android:id="@+id/clearButton"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_close"
+                android:contentDescription="清除按钮"
+                android:visibility="gone"
+                app:tint="@color/gray_400" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!--课程列表页-->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="12dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"/>
+</LinearLayout>

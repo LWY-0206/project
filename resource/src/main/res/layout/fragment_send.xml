@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:id="@+id/ll_nav_bar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="@android:color/white"
+        android:elevation="4dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="取消"
+            android:textSize="16sp"
+            android:textColor="@android:color/holo_blue_light" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="发布动态"
+            android:textSize="18sp"
+            android:textColor="@android:color/black"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tv_publish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="发布"
+            android:textSize="16sp"
+            android:textColor="@android:color/holo_blue_light" />
+    </LinearLayout>
+
+    <!-- 内容区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/ll_nav_bar"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- 用户信息和输入框 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <EditText
+                android:id="@+id/et_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="分享你的想法..."
+                android:textSize="16sp"
+                android:background="@null"
+                android:minLines="3"
+                android:maxLines="10"
+                android:gravity="top"
+                android:drawableLeft="@null"
+                android:drawableStart="@null"
+                android:drawableRight="@null"
+                android:drawableEnd="@null" />
+        </LinearLayout>
+
+        <!-- 图片预览区域 -->
+        <LinearLayout
+            android:id="@+id/ll_image_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="16dp"
+            android:visibility="gone">
+        </LinearLayout>
+
+        <!-- 功能按钮区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:gravity="center_vertical"
+            android:background="#f5f5f5">
+
+            <ImageView
+                android:id="@+id/iv_add_image"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_image" />
+
+            <View
+                android:layout_width="1px"
+                android:layout_height="24dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginHorizontal="16dp" />
+
+            <ImageView
+                android:id="@+id/iv_location"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_location" />
+        </LinearLayout>
+
+        <!-- 底部提示文本 -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="支持文字、图片发布，最多9张图片"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:gravity="center"
+            android:padding="12dp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

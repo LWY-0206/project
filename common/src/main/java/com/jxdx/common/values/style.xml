@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppBottomSheet" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppBottomSheetStyle</item>
+    </style>
+
+    <style name="AppBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="backgroundTint">@color/transparent</item>
+    </style>
+
+    <style name="CustomProgressBar" parent="Widget.AppCompat.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/custom_progress_drawable</item>
+    </style>
+
+    <style name="dialogAnim" mce_bogus="1" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_push_in</item>
+        <item name="android:windowExitAnimation">@anim/dialog_push_out</item>
+    </style>
+</resources>

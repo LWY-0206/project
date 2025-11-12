@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- 顶部导航栏 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="56dp"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:paddingTop="32dp"
+            android:gravity="center_vertical"
+            android:background="@android:color/white">
+
+            <!-- 返回按钮 -->
+            <ImageView
+                android:id="@+id/btn_back"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="4dp"
+                android:contentDescription="返回"
+                android:tint="@color/text_primary" />
+
+            <!-- 标题 -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="批改作业"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary"
+                android:gravity="center" />
+
+            <!-- 占位空间 -->
+            <View
+                android:layout_width="28dp"
+                android:layout_height="28dp" />
+
+        </LinearLayout>
+
+        <!-- 分界线 -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider" />
+
+        <!-- 内容区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- 学生信息卡片 -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- 学生姓名 -->
+                    <TextView
+                        android:id="@+id/tv_student_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="张三"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- 提交时间 -->
+                    <TextView
+                        android:id="@+id/tv_submit_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="提交时间: 2023-12-01 14:30"
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- 提交内容 -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="提交内容:"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/tv_submit_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="这里是学生的作业提交内容..."
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"
+                        android:lineSpacingExtra="4dp"
+                        android:background="@drawable/bg_content_area"
+                        android:padding="12dp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- 批改区域 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- 分数输入 -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_score"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:hint="分数"
+                    app:boxStrokeColor="@color/orange"
+                    app:hintTextColor="@color/orange">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_score"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:textSize="16sp"
+                        android:textColor="@color/text_primary" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- 评语输入 -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_comment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:hint="评语"
+                    app:boxStrokeColor="@color/orange"
+                    app:hintTextColor="@color/orange">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_comment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textMultiLine"
+                        android:lines="4"
+                        android:gravity="top"
+                        android:textSize="16sp"
+                        android:textColor="@color/text_primary" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- 底部按钮区域 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:background="@android:color/white"
+            android:elevation="8dp">
+
+            <!-- AI批改按钮 -->
+            <TextView
+                android:id="@+id/btn_ai_review"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="AI批改"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:background="@drawable/bg_ai_review_button"
+                android:padding="16dp"
+                android:gravity="center"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="AI批改" />
+
+            <!-- 提交批改按钮 -->
+            <TextView
+                android:id="@+id/btn_submit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="提交批改"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:background="@drawable/bg_submit_button"
+                android:padding="16dp"
+                android:gravity="center"
+                android:layout_marginStart="8dp"
+                android:contentDescription="提交批改" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

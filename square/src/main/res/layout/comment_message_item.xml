@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="64dp"
+    android:padding="12dp">
+
+    <!-- 用户头像 -->
+    <ImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_default_avatar"
+        android:layout_alignParentTop="true" />
+
+    <!-- 评论内容区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/iv_avatar"
+        android:layout_marginLeft="12dp"
+        android:orientation="vertical">
+
+        <!-- 评论者和评论内容 -->
+        <TextView
+            android:id="@+id/tv_comment_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="张三评论：\n这个可以，今天很好"
+            android:textSize="15sp"
+            android:textColor="@color/black"
+            android:lineSpacingMultiplier="1.2" />
+
+        <!-- 评论时间 -->
+        <TextView
+            android:id="@+id/tv_comment_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="25分钟前"
+            android:textSize="12sp"
+            android:textColor="@color/gray_400"
+            android:layout_marginTop="4dp" />
+
+    </LinearLayout>
+
+</RelativeLayout>

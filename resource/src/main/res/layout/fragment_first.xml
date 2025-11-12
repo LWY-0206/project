@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 原来的 NestedScrollView 内容 -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:background="@drawable/gradient_background">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 顶部Banner -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.youth.banner.Banner
+                    android:id="@+id/top_banner"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp" />
+            </LinearLayout>
+
+            <!-- 课表模块 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:background="@drawable/rounded_corner_bg"
+                android:layout_margin="8dp">
+
+                <!-- 课表标题栏 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_quiz" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="今日课表"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"
+                        android:textStyle="bold"
+                        android:layout_marginStart="8dp" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <!-- 刷新按钮 -->
+                    <ImageView
+                        android:id="@+id/iv_refresh"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_refresh"
+                        app:tint="@color/blue_500"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
+
+                </LinearLayout>
+
+                <!-- 课表内容区域 - 改为 RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/schedule_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    />
+
+                <!-- 没有课程时的提示 -->
+                <TextView
+                    android:id="@+id/tv_empty_schedule"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="今天没有课程，好好休息吧~"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_500"
+                    android:gravity="center"
+                    android:padding="20dp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <include
+                android:id="@+id/news_section"
+                layout="@layout/layout_news_section" />
+            <LinearLayout
+                android:id="@+id/ll_recommendation_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/gradient_recommendation_title"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <!-- 标题 -->
+                <TextView
+                    android:id="@+id/tv_recommendation_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="猜你喜欢"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:shadowColor="@color/black"
+                    android:shadowDx="1"
+                    android:shadowDy="1"
+                    android:shadowRadius="2" />
+
+                <!-- 刷新按钮 -->
+                <ImageView
+                    android:id="@+id/iv_refresh_recommendation"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_refresh"
+                    app:tint="@color/white"
+                    android:contentDescription="刷新推荐"
+                    android:padding="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless" />
+
+            </LinearLayout>
+
+            <!-- 瀑布流区域 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/waterfall_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:padding="4dp"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- 可拖动的 FAB -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_draggable"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:layout_marginBottom="20dp"
+        android:background="@color/gray_400"
+        android:scaleType="fitXY"/>
+
+</RelativeLayout>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 根布局：垂直排列题干和选项 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 1. 题干内容 -->
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            tools:text="1. 下列关于Android的说法，正确的是？" />
+
+        <LinearLayout
+            android:id="@+id/ll_chooses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:spacing="8dp">
+
+            <!-- 选项A -->
+            <LinearLayout
+                android:id="@+id/ll_option_a"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="10dp"
+                android:background="@drawable/option_bg_normal">
+
+                <TextView
+                    android:id="@+id/tv_label_a"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/option_circle_a"
+                    android:text="A" />
+
+                <TextView
+                    android:id="@+id/tv_content_a"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_800"
+                    tools:text="ViewBinding需要手动 findViewById" />
+            </LinearLayout>
+
+            <!-- 选项B -->
+            <LinearLayout
+                android:id="@+id/ll_option_b"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="10dp"
+                android:background="@drawable/option_bg_normal">
+
+                <TextView
+                    android:id="@+id/tv_label_b"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/option_circle_b"
+                    android:text="B" />
+
+                <TextView
+                    android:id="@+id/tv_content_b"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_800"
+                    tools:text="ViewBinding会自动生成绑定类" />
+            </LinearLayout>
+
+            <!-- 选项C -->
+            <LinearLayout
+                android:id="@+id/ll_option_c"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="10dp"
+                android:background="@drawable/option_bg_normal">
+
+                <TextView
+                    android:id="@+id/tv_label_c"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/option_circle_c"
+                    android:text="C" />
+
+                <TextView
+                    android:id="@+id/tv_content_c"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_800"
+                    tools:text="ViewBinding不支持空安全" />
+            </LinearLayout>
+
+            <!-- 选项D -->
+            <LinearLayout
+                android:id="@+id/ll_option_d"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="10dp"
+                android:background="@drawable/option_bg_normal">
+
+                <TextView
+                    android:id="@+id/tv_label_d"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/option_circle_d"
+                    android:text="D" />
+
+                <TextView
+                    android:id="@+id/tv_content_d"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_800"
+                    tools:text="ViewBinding需要手动开启" />
+            </LinearLayout>
+
+        </LinearLayout>
+        <!-- 判断题选项容器（正确/错误）- 默认隐藏，通过代码控制显示 -->
+        <LinearLayout
+            android:id="@+id/ll_judgment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:spacing="16dp"
+            android:visibility="gone"> <!-- 默认隐藏，判断题时设置为visible -->
+
+            <!-- 正确选项（√） -->
+            <LinearLayout
+                android:id="@+id/ll_true"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="10dp"
+                android:background="@drawable/option_bg_normal">
+
+                <TextView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/option_circle_a"
+                    android:text="√" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textSize="14sp"
+                    android:text="正确"
+                    android:textColor="@color/gray_800" />
+            </LinearLayout>
+
+            <!-- 错误选项（×） -->
+            <LinearLayout
+                android:id="@+id/ll_false"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="10dp"
+                android:background="@drawable/option_bg_normal">
+
+                <TextView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/option_circle_d"
+                    android:text="×" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:textSize="14sp"
+                    android:text="错误"
+                    android:textColor="@color/gray_800" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>

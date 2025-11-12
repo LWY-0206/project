@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FAFAFA">
+
+    <!-- 顶部导航栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:background="#FFFFFF"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="16dp"
+        android:elevation="4dp"
+        android:shadowColor="#1A000000"
+        android:shadowDx="0"
+        android:shadowDy="2"
+        android:shadowRadius="4">
+
+        <!-- 返回按钮 -->
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_back"
+            android:contentDescription="返回"
+            android:padding="12dp"
+            android:scaleType="centerInside"
+            android:tint="#333333" />
+
+        <!-- 标题 -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="新的朋友"
+            android:textSize="20sp"
+            android:textColor="#212121"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:letterSpacing="0.02" />
+
+        <!-- 占位，保持标题居中 -->
+        <View
+            android:layout_width="48dp"
+            android:layout_height="48dp" />
+    </LinearLayout>
+
+    <!-- 好友申请标题卡片 -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="#FFFFFF">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            android:gravity="center_vertical">
+
+            <!-- 图标 -->
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/friend"
+                android:tint="#2196F3"
+                android:contentDescription="好友申请" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="好友申请" 
+                android:textSize="18sp"
+                android:textColor="#212121"
+                android:textStyle="bold"
+                android:layout_marginStart="12dp"
+                android:letterSpacing="0.01" />
+
+            <!-- 申请数量徽章 -->
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:background="@drawable/circle_red"
+                android:layout_marginStart="8dp" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- RecyclerView来显示好友申请列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/friend_request_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@null"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="8dp"
+        android:clipToPadding="false" />
+
+</LinearLayout>

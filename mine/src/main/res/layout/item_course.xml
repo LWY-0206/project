@@ -1,0 +1,116 @@
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:layout_margin="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="@color/white">
+    <!--课程卡片-->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp">
+
+        <!-- 左侧课程信息 -->
+        <LinearLayout
+            android:id="@+id/course_info_layout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/avatar_container"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/tv_course_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="课程名"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:ellipsize="end"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/tv_teacher_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="任课老师"
+                android:textSize="14sp"
+                android:textColor="@color/gray_500"
+                android:layout_marginTop="4dp" />
+
+            <!-- 装饰性标签 -->
+            <TextView
+                android:id="@+id/tv_course_tag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="必修课程"
+                android:textSize="12sp"
+                android:textColor="@color/blue_500"
+                android:background="@drawable/course_tag_bg"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:layout_marginTop="8dp"
+                android:visibility="visible" />
+        </LinearLayout>
+
+        <!-- 右侧头像和装饰元素 -->
+        <RelativeLayout
+            android:id="@+id/avatar_container"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- 装饰背景 -->
+            <View
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/course_avatar_bg"
+                android:layout_centerInParent="true" />
+
+            <!-- 课程头像 -->
+            <ImageView
+                android:id="@+id/tv_teacher_avatar"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:contentDescription="任课老师头像"
+                android:src="@drawable/ic_default_avatar"
+                android:layout_centerInParent="true"
+                android:scaleType="centerCrop" />
+
+            <!-- 右侧装饰元素 -->
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_course_decoration"
+                android:contentDescription="装饰元素"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                app:tint="@color/blue_500" />
+        </RelativeLayout>
+
+        <!-- 顶部装饰线 -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:background="@color/blue_500"
+            android:scaleX="1.2"
+            app:layout_constraintStart_toStartOf="@id/course_info_layout"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginBottom="4dp"
+            android:alpha="0.8" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

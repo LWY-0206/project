@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white">
+
+    <!-- 顶部导航栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- 返回按钮 -->
+        <ImageView
+            android:id="@+id/btn_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_arrow_back"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:contentDescription="返回" />
+
+        <!-- 分段控制器 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="16dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_segmented_control"
+            android:padding="4dp">
+
+            <TextView
+                android:id="@+id/tab_issued"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="已发放"
+                android:textSize="14sp"
+                android:textColor="@color/white"
+                android:background="@drawable/bg_tab_selected"
+                android:gravity="center"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp" />
+
+            <TextView
+                android:id="@+id/tab_library"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="作业库"
+                android:textSize="14sp"
+                android:textColor="@color/primary_color"
+                android:background="@drawable/bg_tab_unselected"
+                android:gravity="center"
+                android:paddingVertical="8dp"
+                android:paddingHorizontal="16dp" />
+
+        </LinearLayout>
+
+        <!-- 删除按钮 -->
+        <ImageView
+            android:id="@+id/btn_delete"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="4dp"
+            android:contentDescription="删除"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- 作业列表 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewHomework"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp"
+        android:clipToPadding="false" />
+
+    <!-- 浮动操作按钮 -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabCreateHomework"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add"
+        android:backgroundTint="@color/primary_color"
+        android:contentDescription="创建作业" />
+
+</LinearLayout>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:id="@+id/activity_create_course_back"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/ic_back" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:text="返回"
+                android:textSize="30dp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnSelectClasses"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="选择班级"
+            app:layout_constraintBottom_toTopOf="@+id/tvSelectedClasses"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activity_create_course_back" />
+
+        <TextView
+            android:id="@+id/tvSelectedClasses"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="未选择班级"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/btnSelectClasses"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+        <!-- 课程名称 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutCourseName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="课程名称"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tvSelectedClasses"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etCourseName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 授课老师 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutTeacherName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="授课老师姓名"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/layoutCourseName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etTeacherName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 课程 -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/layoutDescription"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="这里可以直接放入课件地址"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@id/layoutTeacherName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etDescription"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:gravity="top"
+                android:lines="4"
+                android:inputType="textMultiLine"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- 保存按钮 -->
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="保存课程"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/layoutDescription"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

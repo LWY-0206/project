@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:id="@+id/tv_dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="添加题型"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <!-- 标题输入框 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="题型标题:" />
+
+        <EditText
+            android:id="@+id/et_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="请输入题型标题"
+            android:inputType="text"
+            android:padding="12dp" />
+
+    </LinearLayout>
+
+    <!-- 内容输入框 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="题型内容:" />
+
+        <EditText
+            android:id="@+id/et_content"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginTop="8dp"
+            android:gravity="top"
+            android:hint="请输入题型详细内容"
+            android:inputType="textMultiLine"
+            android:padding="12dp" />
+
+    </LinearLayout>
+
+    <!-- 附件操作 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_add_image"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginRight="8dp"
+            android:background="@drawable/btn_outline"
+            android:text="添加图片" />
+
+        <Button
+            android:id="@+id/btn_add_file"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="8dp"
+            android:background="@drawable/btn_outline"
+            android:text="添加文件" />
+
+    </LinearLayout>
+
+    <!-- 已选附件显示 -->
+    <LinearLayout
+        android:id="@+id/ll_selected_attachments"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!-- 这里会动态显示已选择的图片和文件 -->
+
+    </LinearLayout>
+
+    <!-- 操作按钮 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="end"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:layout_marginRight="12dp"
+            android:background="@drawable/btn_outline"
+            android:text="取消" />
+
+        <Button
+            android:id="@+id/btn_confirm"
+            android:layout_width="80dp"
+            android:layout_height="40dp"
+            android:background="@drawable/btn_primary"
+            android:text="确定" 
+            android:textColor="@color/white"/>
+
+    </LinearLayout>
+
+</LinearLayout>

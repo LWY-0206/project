@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 应用基本字符串 -->
+    <string name="app_name">Loding</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- 通用字符串 -->
+    <string name="back">返回</string>
+    <string name="cancel">取消</string>
+    <string name="confirm">确认</string>
+    <string name="geogebra_menu">geogebra菜单</string>
+    <!-- 聊天界面字符串 -->
+    <string name="more">更多</string>
+    <string name="ai_assistant">AI助手</string>
+    <string name="emoji">表情</string>
+    <string name="send">发送</string>
+    <string name="message_hint">输入消息...</string>
+    <string name="empty_message">消息不能为空</string>
+    <string name="friend_name">好友名称</string>
+    <string name="more_options">更多选项</string>
+    <string name="open_emoji_panel">打开表情面板</string>
+    <string name="open_ai_assistant">打开AI助手</string>
+    <string name="send_message_prefix">发送消息: </string>
+    <string name="school_logo">校徽</string>
+    <string name="arrow">箭头</string>
+</resources>

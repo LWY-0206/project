@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white">
+
+    <!-- 使用AppBarLayout包装CommonToolbar -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        
+        <!-- 使用CommonToolbar -->
+        <com.example.corekit.widget.CommonToolbar
+            android:id="@+id/commonToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:titleText="作业管理"
+            app:if_back="true"
+            app:backText="返回"
+            app:dark_theme="false"
+            app:background_color="@color/primary_color" />
+
+        <!-- 美化的TabLayout -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabBackground="@color/primary_color"
+            app:tabIndicatorColor="@android:color/white"
+            app:tabIndicatorHeight="3dp"
+            app:tabSelectedTextColor="@android:color/white"
+            app:tabTextColor="@android:color/white"
+            app:tabTextAppearance="@style/TabTextStyle"
+            app:tabMode="fixed" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- ViewPager2 -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+
+
+  </LinearLayout>

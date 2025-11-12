@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/menu_background"
+    android:padding="8dp">
+
+    <!-- 白板管理 -->
+    <LinearLayout
+        android:id="@+id/menu_whiteboard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_whiteboard"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="白板管理" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="白板管理"
+            android:textSize="14sp"
+            android:textColor="@android:color/black" />
+
+    </LinearLayout>
+
+    <!-- 小组列表 -->
+    <LinearLayout
+        android:id="@+id/menu_view_students"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_people_group"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="小组列表" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="小组列表"
+            android:textSize="14sp"
+            android:textColor="@android:color/black" />
+
+    </LinearLayout>
+
+    <!-- 工具 -->
+    <LinearLayout
+        android:id="@+id/menu_quiz"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_quiz"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="工具" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="工具"
+            android:textSize="14sp"
+            android:textColor="@android:color/black" />
+
+    </LinearLayout>
+
+    <!-- 资料 -->
+    <LinearLayout
+        android:id="@+id/menu_attendance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_attendance"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="资料" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="资料"
+            android:textSize="14sp"
+            android:textColor="@android:color/black" />
+
+    </LinearLayout>
+
+    <!-- 关闭 -->
+    <LinearLayout
+        android:id="@+id/menu_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_close"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="关闭" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="关闭"
+            android:textSize="14sp"
+            android:textColor="@android:color/black" />
+
+    </LinearLayout>
+
+</LinearLayout>

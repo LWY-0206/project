@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:paddingTop="24dp">
+
+    <!-- 标题栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="#FFFFFF"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:elevation="2dp">
+
+        <!-- 返回按钮 -->
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@null"
+            android:src="@drawable/ic_back_arrow"
+            android:scaleType="centerInside"
+            android:padding="12dp"/>
+
+        <!-- 标题文本 -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="资源上传"
+            android:textSize="18sp"
+            android:textColor="#333333"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
+        <!-- 添加按钮 -->
+        <ImageButton
+            android:id="@+id/btn_add"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@null"
+            android:src="@drawable/ic_add"
+            android:scaleType="centerInside"
+            android:padding="12dp"/>
+    </LinearLayout>
+
+    <!-- 习题网格布局 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="16dp"
+        android:orientation="vertical">
+
+        <!-- 2x4网格布局 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- 第一行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:layout_marginBottom="12dp">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#F0F0F0"
+                    android:layout_marginEnd="8dp"
+                    android:id="@+id/exercise_1"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#F0F0F0"
+                    android:layout_marginStart="8dp"
+                    android:id="@+id/exercise_2"/>
+            </LinearLayout>
+
+            <!-- 第二行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:layout_marginVertical="12dp">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#F0F0F0"
+                    android:layout_marginEnd="8dp"
+                    android:id="@+id/exercise_3"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#F0F0F0"
+                    android:layout_marginStart="8dp"
+                    android:id="@+id/exercise_4"/>
+            </LinearLayout>
+
+            <!-- 第三行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:layout_marginVertical="12dp">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#F0F0F0"
+                    android:layout_marginEnd="8dp"
+                    android:id="@+id/exercise_5"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#F0F0F0"
+                    android:layout_marginStart="8dp"
+                    android:id="@+id/exercise_6"/>
+            </LinearLayout>
+
+            <!-- 第四行 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#F0F0F0"
+                    android:layout_marginEnd="8dp"
+                    android:id="@+id/exercise_7"/>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#F0F0F0"
+                    android:layout_marginStart="8dp"
+                    android:id="@+id/exercise_8"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

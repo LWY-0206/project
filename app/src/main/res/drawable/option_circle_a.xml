@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval"> <!-- 圆形 -->
+    <!-- 填充色：蓝色 -->
+    <solid android:color="@color/blue" />
+    <!-- 边框：1dp深蓝色，增强轮廓 -->
+    <stroke
+        android:width="1dp"
+        android:color="@color/blue_dark" />
+</shape>

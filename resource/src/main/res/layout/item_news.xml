@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="@color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <!-- 新闻图片 -->
+        <ImageView
+            android:id="@+id/iv_news_cover"
+            android:layout_width="80dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/placeholder_image"
+            android:background="@drawable/news_image_bg" />
+
+        <!-- 新闻内容 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp">
+
+            <!-- 新闻标题 -->
+            <TextView
+                android:id="@+id/tv_news_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="校园新闻标题"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:maxLines="3"
+            android:ellipsize="end"
+            android:lineSpacingExtra="2dp" />
+
+            <!-- 底部信息 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <!-- 新闻来源 -->
+                <TextView
+                    android:id="@+id/tv_news_source"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="来源"
+                    android:textSize="10sp"
+                    android:textColor="@color/gray_500" />
+
+                <!-- 分隔点 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textSize="10sp"
+                    android:textColor="@color/gray_500"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp" />
+
+                <!-- 发布时间 -->
+                <TextView
+                    android:id="@+id/tv_news_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2小时前"
+                    android:textSize="10sp"
+                    android:textColor="@color/gray_500" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <!-- 阅读量 -->
+                <TextView
+                    android:id="@+id/tv_news_views"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1.2k阅读"
+                    android:textSize="10sp"
+                    android:textColor="@color/gray_500" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

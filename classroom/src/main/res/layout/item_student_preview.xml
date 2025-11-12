@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- 学生头像 -->
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_student_avatar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_person"
+            app:civ_border_width="2dp"
+            app:civ_border_color="#E0E0E0"
+            android:layout_marginEnd="12dp" />
+
+        <!-- 学生信息 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- 学生姓名和学号 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <TextView
+                    android:id="@+id/tv_student_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="张三"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_student_id"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2024001"
+                    android:textSize="12sp"
+                    android:textColor="#999999"
+                    android:background="@drawable/student_id_background"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp" />
+            </LinearLayout>
+
+            <!-- 完成率 -->
+            <TextView
+                android:id="@+id/tv_completion_rate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="完成率: 85%"
+                android:textSize="14sp"
+                android:textColor="#4CAF50"
+                android:textStyle="bold" />
+
+            <!-- 最后更新时间 -->
+            <TextView
+                android:id="@+id/tv_last_update"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="最后更新: 2024-01-18 14:30"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:layout_marginTop="2dp" />
+        </LinearLayout>
+
+        <!-- 状态指示器 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- 完成状态图标 -->
+            <ImageView
+                android:id="@+id/iv_status_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_check_circle"
+                app:tint="#4CAF50"
+                android:layout_marginBottom="4dp" />
+
+            <!-- 状态文字 -->
+            <TextView
+                android:id="@+id/tv_status_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="良好"
+                android:textSize="10sp"
+                android:textColor="#4CAF50"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" /> <!-- 1. 声明前台服务基础权限（Android 8.0+ 必需） -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 2. 声明媒体投影专属前台服务权限（Android 10+ 必需，关键！） -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <application>
+        <activity
+            android:name=".activity.ActivityToTeacherClassRoomFragment"
+            android:exported="false" />
+        <activity
+            android:name=".activity.ActivityToClassRoomFragment"
+            android:exported="false" />
+        <activity
+            android:name=".entrance.EntranceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.ClassActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <activity
+            android:name=".activity.WhiteboardActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+        <activity
+            android:name=".activity.MainActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|keyboardHidden" /> <!-- 注册媒体投影前台服务 -->
+        <activity android:name=".activity.ActivityClassDynamic"
+            android:exported="false"/>
+        <activity
+            android:name=".activity.PdfPreviewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <service
+            android:name=".service.MediaProjectionService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
+        <activity
+            android:name=".group.DiscussionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".group.GroupSeatActivity"
+            android:exported="false" />
+        <activity
+            android:name=".group.TeacherViewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".group.QuestionTypeListActivity"
+            android:exported="false" />
+        <activity android:name=".activity.ActivityUpdateQuestion"
+            android:exported="false"/>
+        <activity
+            android:name=".activity.ResourceSelectionActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".activity.GeoGebraActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.PreviewCheckActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.ToolSelectionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.ClassroomSettingsActivity"
+            android:exported="false" />
+
+    </application>
+
+</manifest>
